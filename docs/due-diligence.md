@@ -187,7 +187,7 @@ offline delivery. Its authorisation is OAuth for a client acting against one ser
 | Technology | Solves | Gaps for us |
 |---|---|---|
 | **JSON-RPC 2.0** ([spec][jsonrpc]) | Minimal request/response/notification envelope. Used by A2A and MCP. | No streaming, auth or versioning of its own. Fine as an envelope. |
-| **gRPC / Protobuf** ([gRPC][grpc]) | Typed schemas, bidi streaming, codegen. `a2a.proto` is normative in A2A 1.0. | HTTP/2 client to server, so it does not cross NAT on its own. We **reuse `a2a.proto` messages** as our wire schema. |
+| **gRPC / Protobuf** ([gRPC][grpc]) | Typed schemas, bidi streaming, codegen. `a2a.proto` is normative in A2A 1.0. | HTTP/2 client to server, so it does not cross NAT on its own. We use **`a2a.proto` as the schema source of truth**. The v0 *wire encoding* is its canonical JSON mapping, signed via JCS ([Q5](#q5-wire-encoding)). |
 | **NATS** (+ JetStream, leaf nodes) ([docs][nats]) | Subject-based pub/sub, request/reply, durable streams. Decentralised JWT/NKey (Ed25519) accounts give multi-tenant isolation ([NATS auth][nats-jwt]). Leaf nodes let edge nodes dial *out* through NAT. | Needs operating a broker cluster. Trust is rooted in the operator, which does not fit independent owners. Messages are not signed end to end. Good to *bridge* to, or as a deployment option for fleets. |
 | **MQTT 5** ([OASIS][mqtt5]) | Lightweight pub/sub for intermittent clients (sessions, QoS 1/2, retained messages). | Same broker-centric trust. Authz is topic ACLs, not capabilities. Weak fit beyond IoT-style fleets. |
 | **ActivityPub** (+ HTTP Signatures) ([W3C][activitypub], [RFC 9421][rfc9421]) | Server-to-server federation across owners with inbox/outbox and signed HTTP requests. Proven at scale on the fediverse. | Needs public servers. Signatures are per hop and per request, not over content. Delivery is best effort. The inbox/outbox and per-request-signature patterns are worth borrowing. |
@@ -231,8 +231,8 @@ from instruction channels**. This is covered in [§4.7.4](#474-prompt-injection-
 - **Core semantics = A2A 1.0.** Agent Card, Task, Message, Part, Artifact, task states, error codes, and the
   `a2a.proto` message definitions, reused as is.
 - **argent-webway Profile v0** (a document plus conformance tests) makes some optional A2A features mandatory
-  (signed Agent Cards, streaming, `SubscribeToTask`) and adds rules (e.g. receivers MUST reject unsigned envelopes
-  from remote owners).
+  (signed Agent Cards, streaming, `SubscribeToTask`) and adds rules (e.g. every envelope that leaves a node is
+  signed, and receivers MUST reject unsigned envelopes from any peer, same owner or not).
 - **Extensions** (each with its own URI, version and spec section), all prefixed
   `https://github.com/BVMrs/argent-webway/spec/ext/` (shortened to `…/ext/` below, see [Q6](#q6-namespace-and-governance)):
   - `envelope/v0`: signed message envelopes and end-to-end integrity (R7)
@@ -351,10 +351,14 @@ NKeys and `did:key`):
 The profile adds rules:
 
 - **Idempotency**: every `Message` has a sender-chosen `messageId` (a UUIDv7). Receivers dedupe on
-  `(sender agent, messageId)` within a window. That is what makes at-least-once delivery safe.
+  `(sender agent, messageId)`. That is what makes at-least-once delivery safe. **Invariant**: a receiver MUST keep
+  each dedupe entry until at least `exp + skew` of the envelope that created it, so no retry or mailbox delivery that
+  is still acceptable can be processed twice ([§4.7.3](#473-integrity-confidentiality-replay)).
 - **Durable task store**: the receiving node persists tasks and their event log before acknowledging. Each task
   event gets a per-task monotonic **sequence number** (`seq`).
-- **Signed envelope** (`envelope/v0`) around every A2A request, response and event that crosses owners:
+- **Signed envelope** (`envelope/v0`) around every A2A request, response and event that **leaves a node**, whether
+  it goes to the same owner or another one. Only traffic between an agent and its own node (MCP or local A2A) is
+  unsigned, and the node signs it on the agent's behalf:
 
 ```text
 Envelope {
@@ -362,22 +366,32 @@ Envelope {
   from:      wwa:…            // sender agent key
   to:        wwa:…            // intended recipient (prevents redirection)
   id:        uuidv7           // = A2A messageId for messages; event id otherwise
-  ts:        RFC 3339         // freshness check (skew window)
+  ts:        RFC 3339         // creation time: sanity check (not in the future beyond skew) and ordering hint only
+  exp:       RFC 3339         // sender-set expiry = delivery TTL; accept while now ≤ exp + skew
   ctx:       { taskId?, contextId?, seq?, inReplyTo? }
-  cap:       [ capability token(s) authorising this call ]          // §4.7.2
-  prov:      provenance labels for each Part                         // §4.7.4
+  cap:       { access: token, mandate?: token }   // §4.7.2 (mandate only for on-behalf-of, S4)
+  prov:      advisory claims per Part: origin-chain, derived-from, content-kind   // §4.7.4; never `trust`
   body_hash: BLAKE3(canonical(body))
   body:      the A2A operation payload (SendMessageRequest, TaskStatusUpdateEvent, …)
   sig:       Ed25519 over canonical(envelope minus sig)
 }
 ```
 
-  Canonicalisation follows [Q5](#q5-wire-encoding): JCS ([RFC 8785][rfc8785]) for JSON, deterministic Protobuf or
-  CBOR ([RFC 8949][rfc8949]) otherwise. Signatures cover `to` and `ts`, so a captured message cannot be replayed
-  to another recipient or later. Relays and gateways cannot alter what they forward.
+  **One canonicalisation rule for v0** ([Q5](#q5-wire-encoding)): the envelope is JSON (the proto3 JSON mapping of
+  `a2a.proto` for `body`). `canonical(x)` is JCS ([RFC 8785][rfc8785]). The signer signs JCS(envelope minus `sig`).
+  The verifier **parses, keeps unknown fields in the parsed value, re-canonicalises with JCS, and verifies**. The
+  received bytes are never used directly, so an intermediary that re-serialises (whitespace, key order) does not
+  break signatures, and different serialisations of one value cannot verify differently. Inputs MUST be I-JSON
+  ([RFC 7493][rfc7493]): no duplicate keys, valid UTF-8, and numbers within IEEE-754 double range and precision.
+  Integers outside ±2^53 (including proto `int64`/`uint64`, which the proto3 JSON mapping already writes as
+  strings) MUST be strings, and envelopes violating this are rejected as `EnvelopeInvalid`. Deterministic
+  Protobuf is **not** canonical across implementations and is never signed. If a binary encoding is adopted later,
+  the signature still covers the JCS projection. Signatures cover `to`, `ts` and `exp`, so a captured message
+  cannot be redirected to another recipient or replayed after it expires. Relays and gateways cannot alter what
+  they forward.
 - **Error model**: A2A's error codes are reused (`TaskNotFoundError` −32001 … `VersionNotSupportedError` −32009)
   ([spec §9][a2a-spec]). The profile adds a range for its own errors, to be registered in the spec:
-  `EnvelopeInvalid`, `SignatureInvalid`, `StaleOrReplayed`, `CapabilityMissing`, `CapabilityDenied`,
+  `EnvelopeInvalid`, `SignatureInvalid`, `EnvelopeExpired` (past `exp + skew`), `Replayed`, `CapabilityMissing`, `CapabilityDenied`,
   `CapabilityRevoked`, `PeerUnreachable` (transient, retryable), `MailboxFull`, `BlobNotFound`,
   `ProvenancePolicyViolation`. Every error carries `retryable: bool` and an optional `retryAfter`, so offline handling
   is mechanical.
@@ -388,15 +402,20 @@ Envelope {
 
 - Each node has an **outbox**: a durable queue per destination, retried with exponential backoff and jitter.
 - Each owner may designate a **mailbox host** (usually their relay) that accepts envelopes for their offline nodes
-  and holds them until they reconnect. Envelopes are signed, and can be sealed (encrypted to the recipient's key),
-  so the mailbox host is trusted for *availability only*: it can drop messages but cannot forge or read them.
-  This is the Matrix homeserver and ActivityPub inbox pattern without trusting the host's content.
-- Delivery semantics: **at-least-once plus idempotent receivers = effectively once** per `messageId`. Ordering is
-  guaranteed per task by `seq`, not globally.
+  and holds them until they reconnect. Envelopes are signed, so the mailbox host **cannot forge or alter** them.
+  It can still drop or delay them, up to `exp`. **Confidentiality from the mailbox host requires sealed envelopes**
+  (encrypted to the recipient's key, T15), which are not in M1. Until T15, the mailbox host can read bodies and
+  metadata, so M1 deployments must use a mailbox host the sender's owner trusts with that content (their own relay).
+  With sealing, the host is trusted for *availability only*. This is the Matrix homeserver and ActivityPub inbox
+  pattern without trusting the host's content.
+- Delivery semantics: **at-least-once plus idempotent receivers = effectively once** per `messageId`. This holds
+  because senders stop retrying at `exp`, receivers reject after `exp + skew`, and dedupe entries live until
+  `exp + skew` ([§4.4](#44-message-and-task-model)). Ordering is guaranteed per task by `seq`, not globally.
 - **Push replacement**: A2A push webhooks are replaced, inside the overlay, by delivering
   `TaskStatusUpdateEvent` envelopes to the requester's mailbox. Push webhooks remain at the HTTP edge.
 - **Peer offline UX**: `SendMessage` to an offline peer returns a local `Task` in `submitted` with a profile
-  annotation `delivery: queued`. Callers are told when it becomes `delivered` or `expired` (TTL set by sender).
+  annotation `delivery: queued`. Callers are told when it becomes `delivered` or `expired` (the TTL is the envelope's
+  signed `exp`, so the sender, mailbox and receiver all agree when the message dies).
   Nothing blocks.
 
 **Streaming**, R3: A2A streaming over a QUIC stream. Each event carries `seq`. After a disconnect, the client calls
@@ -447,13 +466,29 @@ least privilege per capability, end-to-end verifiability, deny by default.
 
 - Each **skill** in an Agent Card maps to one or more **capabilities** (`skill:run-tests`,
   `blob:<hash>#read`, `doc:<id>#append`, `task:<id>#cancel`).
-- A request must carry a **capability token** chain rooted in the *resource owner's* key, granting the caller
-  that capability. Format: Biscuit ([Q4](#q4-capability-token-format)). Tokens are:
-  - **attenuable**: the holder can narrow scope, add caveats (TTL, task ID, max calls, argument constraints) and
-    delegate (S4: A → B → C, where C verifies the whole chain offline),
-  - **bound** to the presenter's key (proof of possession: the envelope signature proves the presenter holds it),
-    so stolen tokens are useless,
+- A request must carry a **capability token** rooted in the *resource owner's* key, granting the caller that
+  capability. Format: Biscuit ([Q4](#q4-capability-token-format)). Tokens are:
+  - **attenuable**: the holder can narrow scope and add caveats (TTL, task ID, max calls, argument constraints),
+  - **bound** to the presenter's key: the token carries a `check if presenter($k), $k == <agent key>` that the
+    verifier satisfies by adding the fact `presenter(<envelope from key>)` after checking the envelope signature.
+    So proof of possession is the envelope signature, and stolen tokens are useless. Biscuit's ordinary attenuation
+    blocks are signed with ephemeral keys and do not identify who attenuated. Where a hop's identity matters, the
+    hop adds a **third-party block** signed with its agent key,
   - **short-lived** by default, with **revocation** by revocation ID lists published by the owner and checked on use.
+- **Acting on behalf of someone (S4: A → B → C).** A token rooted in C's owner says what *B* may do at C. It does not
+  say that B is acting for A, or within what A allowed. So a delegated request carries **two proofs**, and C's
+  policy can require both:
+  1. **access**: B's C-rooted token for the capability (with presenter binding to B), and
+  2. **mandate**: A's grant to B, rooted in A's key, attenuated by A to the sub-task (capability, task ID, argument
+     constraints, TTL), bound to B. If B re-delegates, B appends a third-party block signed by its own key, so each
+     hop is identified.
+
+  C checks that the mandate's scope covers the request, that every hop is identified and narrower than the one
+  before, and that the mandate is rooted in an owner C recognises as the principal. C records both proof chains in
+  its audit log. The exact Biscuit encoding (block schema, presenter facts, mandate-to-request matching, revocation)
+  is specified in T3 with S4 vectors (valid chain; missing mandate; mandate broader than A's grant; hop without an
+  identity block; stolen token presented by another key). If Biscuit third-party blocks turn out too awkward, the
+  fallback for the mandate is UCAN-style chained delegation ([Q4](#q4-capability-token-format)).
 - **Policy engine** in the node: the token's Datalog checks *plus* local owner policy (rate limits, quotas,
   "never from owner X", "foreign content may not trigger `skill:deploy`").
 - **No in-band credentials**: tokens are never placed in message text for an LLM to read or forward. They live in
@@ -465,17 +500,35 @@ least privilege per capability, end-to-end verifiability, deny by default.
 - Confidentiality: QUIC TLS per hop. Optional **sealed envelopes** (encrypted to the recipient's key, HPKE
   [RFC 9180][rfc9180]) when going through mailboxes or relays operated by third parties. MLS for groups is deferred
   (track SLIM).
-- Replay: `(from, id)` dedupe window, plus `ts` skew window, plus `to` binding.
+- Replay and freshness: receivers accept an envelope only while `now ≤ exp + skew` (`skew` is a small spec constant,
+  e.g. 5 minutes) and reject `ts > now + skew`. They dedupe on `(from, id)` and keep each entry until `exp + skew`,
+  so the dedupe horizon always covers the acceptance horizon. `to` binding prevents redirection. Freshness is *not*
+  derived from `ts`, so an envelope that waits in a mailbox for hours is still valid as long as its `exp` has not
+  passed, and the replay window is bounded by the sender's own `exp`, not by a global skew setting. The profile caps
+  `exp − ts` (e.g. 7 days) so receivers can bound dedupe storage.
 
 #### 4.7.4 Prompt-injection boundaries
 
 The protocol cannot make LLMs immune to injection. It can make the boundary **explicit and enforceable**:
 
-1. **Provenance labels** (`provenance/v0`) on every Part and Artifact: `origin` (agent/owner key), `trust`
-   (`self` | `same-owner` | `foreign` | `unverified-origin`), `derived-from` (hashes of inputs), and
-   `content-kind` (`data` | `instruction-request`). Labels are inside the signed envelope. Receivers MUST keep
-   them attached when storing, forwarding or deriving content. A derived output's trust is at most the minimum of
-   its inputs' trust (taint propagation, as in CaMeL ([arXiv][camel])).
+1. **Provenance labels** (`provenance/v0`). The envelope signature proves *who* sent a label, not that the label is
+   true, so the rules separate what the receiver computes from what the sender claims:
+   - **`trust` is computed by the receiver and never accepted from the wire.** The receiving node derives it from
+     the *verified* envelope sender (`from` key → owner binding) compared with its own owner: `self` (one of its
+     own agents), `same-owner`, `foreign` (verified key of another owner), or `unverified-origin` (HTTP edge, no
+     webway signature). It is stored as node-local metadata next to the content. A `trust` field received from a
+     peer MUST be ignored (and is logged as an anomaly).
+   - **Clamping**: the trust of anything received from a sender is at most the trust of that verified sender,
+     whatever upstream origins or labels the sender claims. A `foreign` peer cannot make content `self` or
+     `same-owner`, not even content it says it relayed from the receiver's own agents.
+   - **Sender claims are advisory and only lower trust**: `origin-chain` (the upstream origins the sender
+     reports) and `derived-from` (hashes of inputs) are kept for audit and display. A receiver MAY use them to
+     *lower* trust (e.g. a peer reports that it derived the content from a third party's content), never to raise
+     it. Sender-declared `content-kind: data` does not relax any policy.
+   - **Taint propagation is enforced inside each node**: content a node derives (e.g. an agent's output after reading
+     `foreign` input) gets the minimum trust of its inputs, as in CaMeL ([arXiv][camel]). The node tracks this from
+     what it actually gave the agent, not from labels. Across hops, the clamping rule applies again.
+   - Receivers MUST keep the computed labels attached when storing, forwarding or deriving content.
 2. **Channel separation**: what the remote agent *may do* is fixed by the capability token and the requested
    skill, never by message text. The node gives the local agent remote text as **data in a delimited, labelled
    container**, and the MCP facade returns it as tool *results*, never as system or user instructions.
@@ -485,8 +538,9 @@ The protocol cannot make LLMs immune to injection. It can make the boundary **ex
    trifecta" ([Willison][trifecta])).
 4. **Delegation narrows**: an agent re-delegating can only attenuate tokens. Foreign text cannot make it
    request a broader capability, because only node code mints and attenuates tokens.
-5. **Conformance tests** check that labels survive round trips, relays, storage and bridges, and that the MCP
-   facade never puts foreign content outside a labelled result.
+5. **Conformance tests** check that labels survive round trips, relays, storage and bridges, that sender-declared
+   `trust` never raises the computed trust, and that the MCP facade never puts foreign content outside a labelled
+   result.
 
 #### 4.7.5 Audit log
 
@@ -511,8 +565,8 @@ The protocol cannot make LLMs immune to injection. It can make the boundary **ex
 - **Extensions**: each URI includes its major (`…/ext/envelope/v0`). The card lists supported versions. A required
   extension the peer lacks fails with `ExtensionSupportRequiredError`, with no silent downgrade (as in A2A §4.6).
 - **Binding**: ALPN `webway/<major>`, so incompatible transports fail at the handshake.
-- **Unknown fields** are ignored but preserved for signature verification (signatures cover canonical bytes as
-  received).
+- **Unknown fields** are ignored by application logic but kept in the parsed value, so re-canonicalisation with
+  JCS reproduces what the signer signed ([§4.4](#44-message-and-task-model)). Forwarders MUST NOT drop them.
 - **Spec process**: numbered change proposals in `spec/` (like MCP's SEPs). Every normative change comes with
   conformance test vectors.
 
@@ -574,11 +628,14 @@ exercised from day one.
    another key, replayed envelope, wrong `to`).
 5. `beta` streams `working`, two status updates, an Artifact > 64 KiB **by blob reference**, then `completed`.
    `alpha` fetches the blob with verified streaming.
-6. **Offline**: stop `beta`, send a second task, which queues at the relay mailbox. Restart `beta`. The task is
-   delivered exactly once (dedupe) and completes. Kill `alpha` mid-stream, restart, `SubscribeToTask fromSeq=k`,
+6. **Offline**: stop `beta`, send a second task, which queues at the relay mailbox. Keep `beta` down for **longer
+   than the skew window** (fake clock), then restart it. The task is accepted (its `exp` has not passed), delivered
+   exactly once even though the outbox also retries it (dedupe), and completes. A third task whose `exp` passes while
+   `beta` is down is reported `expired` to `planner` and rejected by `beta` if the mailbox delivers it anyway. Kill `alpha` mid-stream, restart, `SubscribeToTask fromSeq=k`,
    and no events are lost or duplicated.
 7. **Provenance**: the artefact and messages from `beta` arrive at `planner` labelled `foreign`, origin
-   `beta/tester`.
+   `beta/tester`. **Negative case**: a modified `beta` signs envelopes with `trust: self` and an `origin-chain`
+   naming `alpha/planner`. `alpha` MUST still label the Parts `foreign` and record the anomaly in its audit log.
 8. **Audit**: both nodes' logs verify as hash chains. `alpha` holds a signed receipt from `beta` for each
    envelope. Exchanged checkpoints are consistent.
 9. **Interop smoke test**: a vanilla A2A JSON-RPC client (official SDK) calls `beta` through its HTTP edge and
@@ -586,8 +643,11 @@ exercised from day one.
 
 **Conformance suite design**:
 
-- `conformance/vectors/`: **language-neutral test vectors** (JSON): canonicalisation inputs and outputs,
-  envelope signatures (valid and invalid), capability chains (allow and deny), task state transition tables
+- `conformance/vectors/`: **language-neutral test vectors** (JSON): canonicalisation inputs and outputs
+  (including I-JSON number limits), envelope signatures (valid and invalid), freshness cases with an explicit clock
+  (fresh; mailbox dwell longer than `skew` but before `exp`, accepted; after `exp + skew`, rejected; `ts` in the
+  future, rejected; duplicate `id` just before `exp + skew`, deduplicated), provenance cases (sender-declared `trust`
+  ignored), capability chains (allow and deny), task state transition tables
   (legal and illegal), error mapping. Any implementation, in any language, must pass them.
 - `conformance/harness/`: a Rust black-box harness that drives nodes **only through their wire interfaces and a
   small control API** (start, stop, partition), runs scenarios like the one above, and reports per-requirement
@@ -607,10 +667,10 @@ Sizes: S ≈ days, M ≈ 1–3 weeks, L ≈ 1–2 months, for one agent-engineer
 
 | ID | Track | Size | Depends on |
 |---|---|---|---|
-| T0 | **Decisions**: owner answers Q1–Q6 | S | none |
+| T0 | **Decisions**: owner answers Q1–Q7 | S | none |
 | T1 | **Spec: profile + binding `webway-quic/v0`** (framing, stream mapping, ALPN, version negotiation, error model) | M | T0 |
 | T2 | **Spec: `envelope/v0`** (canonicalisation, signatures, replay, test vectors) | M | T0 |
-| T3 | **Spec: identity and `capability/v0`** (keys, owner bindings, invites, Biscuit schema, revocation) | M | T0, T2 |
+| T3 | **Spec: identity and `capability/v0`** (keys, owner bindings, invites, Biscuit schema, presenter binding, on-behalf-of mandates and third-party blocks for S4, revocation, S4 vectors) | M | T0, T2 |
 | T4 | **Conformance framework**: vector format, harness, requirement-ID tracking, CI | M | T1 (vectors can start with T2) |
 | T5 | **Reference node core** (Rust): overlay (iroh), router, task engine, durable store, envelope layer | L | T1, T2 |
 | T6 | **Capability and policy engine** | M | T3, T5 |
@@ -623,7 +683,7 @@ Sizes: S ≈ days, M ≈ 1–3 weeks, L ≈ 1–2 months, for one agent-engineer
 | T12 | **MCP facade** (node as MCP server for local agents) + MCP tool exposure of remote skills | M | T5, T6 |
 | T13 | **Spec + impl: `provenance/v0`** incl. MCP facade rules and taint propagation | M | T2, T12 |
 | T14 | **Spec + impl: `shared-doc/v0`** (Automerge, signed changes, capability-filtered sync) | L | T6, T5 |
-| T15 | **Sealed envelopes** (HPKE) for third-party mailboxes and relays | S | T7 |
+| T15 | **Sealed envelopes** (HPKE): required before using a mailbox host the sender’s owner does not trust with content | S | T7 |
 | T16 | **Inspector UI** (React + TS): peers, tasks, streams, audit browser, capability viewer | M | T5, T9 |
 | T17 | **Discovery**: owner directories, `did:web` / DNS binding, mDNS, then registry | M | T3 |
 | T18 | **Bridges**: SLIM, NATS (optional, demand-driven) | M | T11 |
@@ -657,16 +717,19 @@ Critical path: T0 → T1/T2 → T5 → T7/T8/T9 + T10 → M1.
 - Options: (a) **Biscuit**; (b) UCAN; (c) Macaroons; (d) OAuth 2.0 tokens with Token Exchange ([RFC 8693][rfc8693])
   and DPoP ([RFC 9449][rfc9449]).
 - **Recommendation: (a) Biscuit**: public-key, offline-attenuable, Datalog policies, Rust reference implementation.
-  (b) is close (DID-native) and the strongest alternative. (c) needs shared secrets, so it is weak across owners.
+  Plain attenuation does not identify who attenuated, so S4 needs Biscuit third-party blocks plus an access token and
+  a mandate ([§4.7.2](#472-authorisation-per-capability)). (b) is close (identity-signed chained delegation, DID-native)
+  and the strongest alternative, especially for the mandate. (c) needs shared secrets, so it is weak across owners.
   (d) stays supported **at the HTTP edge** for A2A interop, mapped to internal capabilities by the gateway.
 
 ### Q5. Wire encoding
-- Options: (a) **Protobuf (`a2a.proto`) on the overlay, JSON at the HTTP edge**, with signatures over a
-  deterministic encoding; (b) JSON (JCS) everywhere; (c) CBOR/COSE everywhere.
+- Options: (a) Protobuf (`a2a.proto`) bytes on the overlay, JSON at the HTTP edge, with signatures over the JCS
+  projection of the JSON mapping (never over Protobuf bytes, whose deterministic mode is not canonical across
+  implementations); (b) **JSON (proto3 JSON mapping of `a2a.proto`) + JCS everywhere**; (c) CBOR/COSE everywhere.
 - **Recommendation: (b) JSON + JCS + Ed25519 for v0.** It matches A2A card signing (JWS/JCS), so the gateway can
   pass signed bodies through unchanged and signatures stay verifiable across bindings. It is also easier to debug
-  and fixture. Revisit (a) for performance after M1. Signatures must then cover a binding-independent
-  canonical form, which JCS gives us.
+  and fixture. `a2a.proto` remains the schema source of truth either way. Revisit (a) for performance after M1,
+  keeping JCS as the only signed form.
 
 ### Q6. Namespace and governance
 - Options: (a) register a domain for extension URIs (e.g. `argent-webway.dev`) and keep extensions in this repo;
@@ -691,7 +754,7 @@ Critical path: T0 → T1/T2 → T5 → T7/T8/T9 + T10 → M1.
 | Hole punching fails often (about 30% in measurements) | Latency and relay cost | Relays are first-class. Self-hosted relays. Metrics in the inspector. |
 | Capability UX too complex for owners | Owners grant broad tokens, defeating least privilege | Invite flow with sensible defaults. Inspector shows effective permissions. Skills map to capabilities automatically. |
 | Prompt injection still succeeds inside the receiving agent | Data exfiltration or unwanted actions | We make no claim of immunity. Labels and policy limit *impact*: side-effecting capabilities require human confirmation for foreign-tainted tasks. |
-| Clock skew across owners | Spurious `StaleOrReplayed` | Generous skew window plus id dedupe. `ts` is used for freshness, not ordering. |
+| Clock skew across owners | Spurious `EnvelopeExpired` | Freshness comes from the sender-set `exp`, with only a small `skew` tolerance. A long mailbox dwell does not need a large skew window. Dedupe entries are kept until `exp + skew`. |
 | CRDT history growth | Storage and sync cost | Signed snapshots and compaction (T14). |
 | iroh project risk | Transport rework | Transport trait. libp2p backend as fallback. |
 | Scope creep (registries, payments, reputation) | Delay | Out of scope until after M1 and T11–T14. |
@@ -752,6 +815,7 @@ Critical path: T0 → T1/T2 → T5 → T7/T8/T9 + T10 → M1.
 [owasp-llm01]: https://genai.owasp.org/llmrisk/llm01-prompt-injection/
 [rfc7515]: https://www.rfc-editor.org/rfc/rfc7515
 [rfc8785]: https://www.rfc-editor.org/rfc/rfc8785
+[rfc7493]: https://www.rfc-editor.org/rfc/rfc7493
 [rfc8949]: https://www.rfc-editor.org/rfc/rfc8949
 [rfc9420]: https://www.rfc-editor.org/rfc/rfc9420
 [rfc9421]: https://www.rfc-editor.org/rfc/rfc9421
@@ -773,5 +837,5 @@ Protocols and specifications:
 - Shared state: [Automerge][automerge], [Automerge repo][automerge-repo], [Yjs][yjs], [Shapiro et al. CRDTs][crdt], [Local-first software][localfirst]
 - Authorisation and identity: [Biscuit][biscuit], [biscuit-rust][biscuit-rust], [UCAN][ucan], [Macaroons][macaroons], [SPIFFE][spiffe], [DID Core][did-core], [VC Data Model 2.0][vc2]
 - Prompt injection: [The lethal trifecta][trifecta], [CaMeL][camel], [Design patterns for securing LLM agents][patterns], [OWASP LLM01][owasp-llm01]
-- IETF: [RFC 7515 JWS][rfc7515], [RFC 8785 JCS][rfc8785], [RFC 8949 CBOR][rfc8949], [RFC 9420 MLS][rfc9420], [RFC 9421 HTTP Message Signatures][rfc9421], [RFC 9180 HPKE][rfc9180], [RFC 9162 CT v2][rfc9162], [RFC 8445 ICE][rfc8445], [RFC 8489 STUN][rfc8489], [RFC 8656 TURN][rfc8656], [RFC 8693 Token Exchange][rfc8693], [RFC 9449 DPoP][rfc9449]
+- IETF: [RFC 7515 JWS][rfc7515], [RFC 8785 JCS][rfc8785], [RFC 7493 I-JSON][rfc7493], [RFC 8949 CBOR][rfc8949], [RFC 9420 MLS][rfc9420], [RFC 9421 HTTP Message Signatures][rfc9421], [RFC 9180 HPKE][rfc9180], [RFC 9162 CT v2][rfc9162], [RFC 8445 ICE][rfc8445], [RFC 8489 STUN][rfc8489], [RFC 8656 TURN][rfc8656], [RFC 8693 Token Exchange][rfc8693], [RFC 9449 DPoP][rfc9449]
 - Other: [agentgateway (LF)][agentgateway], [a2a-rust crate][a2a-rust-crate]
