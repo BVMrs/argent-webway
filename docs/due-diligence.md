@@ -482,6 +482,8 @@ R10, `shared-doc/v0`:
 
 ### 4.7 Security model
 
+The threats this model addresses, and the gaps it still has, are in [`threat-model.md`](threat-model.md).
+
 **Principles**: no ambient trust (being on the overlay, on the same LAN or behind the same relay grants nothing),
 least privilege per capability, end-to-end verifiability, deny by default.
 
