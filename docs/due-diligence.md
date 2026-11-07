@@ -233,8 +233,8 @@ from instruction channels**. This is covered in [§4.7.4](#474-prompt-injection-
 - **argent-webway Profile v0** (a document plus conformance tests) makes some optional A2A features mandatory
   (signed Agent Cards, streaming, `SubscribeToTask`) and adds rules (e.g. receivers MUST reject unsigned envelopes
   from remote owners).
-- **Extensions** (each with its own URI, version and spec section), all prefixed `https://argent-webway.dev/ext/`
-  (the domain is a placeholder, see [Q6](#q6-namespace-and-governance)):
+- **Extensions** (each with its own URI, version and spec section), all prefixed
+  `https://github.com/BVMrs/argent-webway/spec/ext/` (shortened to `…/ext/` below, see [Q6](#q6-namespace-and-governance)):
   - `envelope/v0`: signed message envelopes and end-to-end integrity (R7)
   - `capability/v0`: capability tokens for authz and delegation chains (R6)
   - `mailbox/v0`: store-and-forward, durable delivery, resumable streams (R2, R3)
