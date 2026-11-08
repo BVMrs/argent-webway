@@ -256,8 +256,8 @@ with the reason given, input that:
 - contains a number that, parsed as an IEEE 754 double, overflows to infinity (`number-out-of-range`),
 - contains a number with no fractional part and no exponent whose magnitude exceeds 2^53 − 1 (`unsafe-integer`).
 
-Values that must carry larger integers (proto `int64` and `uint64`, `ctx.seq` never does) use JSON strings, as the
-proto3 JSON mapping already requires.
+Values that can carry larger integers (proto `int64`, `uint64` and the fixed variants) are JSON strings, as the
+proto3 JSON mapping already requires. `ctx.seq` is capped at 2^53 − 1, so it stays a number.
 
 **ENV-101** (MUST) A receiver MUST reject an envelope whose JCS serialisation is longer than `MAX_ENVELOPE_BYTES`
 (`too-large`) or whose JSON nesting depth exceeds `MAX_DEPTH` (`too-deep`). It MAY reject received input longer
@@ -421,7 +421,7 @@ same `from` key. A retry MUST resend the identical envelope (same signed header 
 JSON is acceptable).
 
 **ENV-501** (MUST) A receiver MUST create a dedupe entry for every `request` envelope it accepts for processing,
-and MUST NOT create one for an envelope that failed any of verification steps 1–7 ([§9](#9-verification-procedure)).
+unless processing ends in a retryable error (ENV-521), and MUST NOT create one for an envelope that failed any of verification steps 1–7 ([§9](#9-verification-procedure)).
 
 **ENV-502** (MUST) A receiver MUST keep each dedupe entry at least until `now > exp + SKEW` for that entry.
 
