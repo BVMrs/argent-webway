@@ -84,8 +84,7 @@ pub fn parse(stmt: &Value) -> R<Parsed> {
     }
     let sig: [u8; 64] = B64.decode(s.as_bytes()).map_err(|_| bad)?.try_into().map_err(|_| bad)?;
     let vk = VerifyingKey::from_bytes(&key).map_err(|_| bad)?;
-    vk.verify_strict(format!("{p}.{q}").as_bytes(), &Signature::from_bytes(&sig))
-        .map_err(|_| bad)?;
+    vk.verify_strict(format!("{p}.{q}").as_bytes(), &Signature::from_bytes(&sig)).map_err(|_| bad)?;
     Ok(Parsed { typ, kid, claims, id: statement_id(stmt).unwrap() })
 }
 
@@ -156,10 +155,7 @@ pub fn owner_keys(owner: &str, events: &[Value]) -> R<Pin> {
             }
             Some(mut old) => {
                 let committed = old.next.clone().ok_or(untrusted)?;
-                if seq != old.seq + 1
-                    || str_claim(c, "prev")? != prev_id
-                    || committed != commitment(&key_bytes)
-                {
+                if seq != old.seq + 1 || str_claim(c, "prev")? != prev_id || committed != commitment(&key_bytes) {
                     return Err(untrusted);
                 }
                 let compromised = c.get("compromised").and_then(Value::as_bool).unwrap_or(false);
@@ -230,11 +226,8 @@ impl Ctx {
                     .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
                     .unwrap_or_default();
                 let key = (owner.to_string(), v.kid.clone());
-                if self.lists.get(&key).map_or(true, |h| seq > h.seq) {
-                    self.lists.insert(
-                        key,
-                        List { owner: owner.into(), iss: v.kid, seq, valid_until: vu, revoked },
-                    );
+                if self.lists.get(&key).is_none_or(|h| seq > h.seq) {
+                    self.lists.insert(key, List { owner: owner.into(), iss: v.kid, seq, valid_until: vu, revoked });
                 }
             }
         }
@@ -245,7 +238,7 @@ impl Ctx {
     pub fn is_revoked(&self, owner: &str, signer: &str, entry: &str) -> bool {
         self.lists.values().any(|l| {
             l.owner == owner
-                && (l.iss == signer || self.pin(owner).map_or(false, |p| p.may_sign(&l.iss)))
+                && (l.iss == signer || self.pin(owner).is_some_and(|p| p.may_sign(&l.iss)))
                 && l.revoked.iter().any(|r| r == entry)
         })
     }
@@ -291,9 +284,9 @@ impl Ctx {
                     .issuer_certs
                     .iter()
                     .find(|ic| {
-                        parse(ic).ok().map_or(false, |pp| {
-                            pp.claims.get("issuer").and_then(Value::as_str) == Some(p.kid.as_str())
-                        })
+                        parse(ic)
+                            .ok()
+                            .is_some_and(|pp| pp.claims.get("issuer").and_then(Value::as_str) == Some(p.kid.as_str()))
                     })
                     .ok_or(E::StatementUntrusted)?;
                 let ic = self.verify_inner(ISSUER_CERT, cert, check_revoked).map_err(|e| match e {
@@ -316,7 +309,6 @@ impl Ctx {
                     return Err(E::StatementUntrusted);
                 }
                 issuer_exp = time_claim(&ic.claims, "exp")?;
-
             }
             _ => return Err(E::StatementUntrusted),
         }

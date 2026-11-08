@@ -9,7 +9,6 @@ use biscuit_auth::Biscuit;
 use data_encoding::BASE64URL_NOPAD as B64;
 use serde_json::{json, Value};
 
-
 pub fn run(kind: &str, input: &Value) -> Option<R<Value>> {
     Some(match kind {
         "identity/id" => id(input),
@@ -190,7 +189,8 @@ fn outbound(input: &Value) -> R<Value> {
         let q = |x: &str| format!("\"{x}\"");
         let covers = facts.iter().any(|f| {
             f.predicate.name == "grant"
-                && f.predicate.terms.iter().map(|t| format!("{t}")).collect::<Vec<_>>() == vec![q(target), q(capability)]
+                && f.predicate.terms.iter().map(|t| format!("{t}")).collect::<Vec<_>>()
+                    == vec![q(target), q(capability)]
         });
         let live = facts.iter().any(|f| {
             f.predicate.name == "expires"
@@ -203,7 +203,7 @@ fn outbound(input: &Value) -> R<Value> {
     let allowed = input
         .pointer("/policy/selfPrincipal")
         .and_then(Value::as_array)
-        .map_or(false, |a| a.iter().filter_map(Value::as_str).any(|p| stmt::pattern_matches(p, capability)));
+        .is_some_and(|a| a.iter().filter_map(Value::as_str).any(|p| stmt::pattern_matches(p, capability)));
     if allowed {
         return Ok(json!({"mandate": null, "selfPrincipal": true}));
     }

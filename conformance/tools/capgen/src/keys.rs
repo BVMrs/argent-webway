@@ -18,7 +18,6 @@ pub fn public(name: &str) -> [u8; 32] {
 }
 
 pub fn biscuit_keypair(name: &str) -> biscuit_auth::KeyPair {
-    let pk = biscuit_auth::PrivateKey::from_bytes(&seed(name), biscuit_auth::Algorithm::Ed25519)
-        .expect("32-byte seed");
+    let pk = biscuit_auth::PrivateKey::from_bytes(&seed(name), biscuit_auth::Algorithm::Ed25519).expect("32-byte seed");
     biscuit_auth::KeyPair::from(&pk)
 }

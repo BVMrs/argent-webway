@@ -14,10 +14,7 @@ pub fn parse(s: &str) -> Option<i64> {
 }
 
 pub fn fmt(secs: i64) -> String {
-    chrono::DateTime::from_timestamp(secs, 0)
-        .expect("time in range")
-        .format("%Y-%m-%dT%H:%M:%SZ")
-        .to_string()
+    chrono::DateTime::from_timestamp(secs, 0).expect("time in range").format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
 pub fn system(secs: i64) -> std::time::SystemTime {

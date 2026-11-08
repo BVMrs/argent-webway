@@ -4,6 +4,9 @@
 //!   webway-capgen check <vectors-dir>   run those files through the model, compare verdicts
 //!   webway-capgen adapter               stdio adapter (conformance/vectors/README.md)
 
+// The operation table in cap.rs reads better as a match; the generator's token builders take many fields.
+#![allow(clippy::match_like_matches_macro, clippy::too_many_arguments)]
+
 mod cap;
 mod err;
 mod gen;
@@ -88,7 +91,11 @@ fn check_all(dir: &Path) -> ExitCode {
         }
     }
     println!("{pass} passed, {fail} failed");
-    if fail == 0 { ExitCode::SUCCESS } else { ExitCode::FAILURE }
+    if fail == 0 {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
+    }
 }
 
 fn adapter() -> ExitCode {

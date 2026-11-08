@@ -20,8 +20,20 @@ pub const MAX_MANDATE_TTL: i64 = time::DAY;
 pub const REVOCATION_EXEMPT_TTL: i64 = time::HOUR;
 
 pub const RESERVED: &[&str] = &[
-    "time", "presenter", "current_holder", "resource_owner", "node", "recipient", "operation",
-    "capability", "task", "context", "arg", "calls", "mandate_principal", "mandate_owner",
+    "time",
+    "presenter",
+    "current_holder",
+    "resource_owner",
+    "node",
+    "recipient",
+    "operation",
+    "capability",
+    "task",
+    "context",
+    "arg",
+    "calls",
+    "mandate_principal",
+    "mandate_owner",
     "mandate_depth",
 ];
 
@@ -139,7 +151,7 @@ fn open(bytes: &[u8], root: &[u8; 32]) -> R<Token> {
     let schema = biscuit_auth::format::schema::Biscuit::decode(bytes).map_err(|_| E::CapabilityInvalid)?;
     let ed = biscuit_auth::format::schema::public_key::Algorithm::Ed25519 as i32;
     for b in std::iter::once(&schema.authority).chain(schema.blocks.iter()) {
-        if b.next_key.algorithm != ed || b.external_signature.as_ref().map_or(false, |x| x.public_key.algorithm != ed) {
+        if b.next_key.algorithm != ed || b.external_signature.as_ref().is_some_and(|x| x.public_key.algorithm != ed) {
             return Err(E::CapabilityInvalid);
         }
         if b.external_signature.is_some() && b.version != Some(1) {
@@ -194,7 +206,9 @@ fn authority(t: &Token, issuer: &str) -> R<Authority> {
     let ok = match role.as_str() {
         "access" => !facts_named(f, "right").is_empty() && facts_named(f, "principal").is_empty(),
         "mandate" => {
-            facts_named(f, "principal").len() == 1 && !facts_named(f, "grant").is_empty() && facts_named(f, "right").is_empty()
+            facts_named(f, "principal").len() == 1
+                && !facts_named(f, "grant").is_empty()
+                && facts_named(f, "right").is_empty()
         }
         _ => false,
     };
@@ -383,10 +397,10 @@ pub fn authorize(input: &Value) -> R<Value> {
 
     // 2. Presenter identity (CAP-041). For InviteRedeem the presenter's owner is not pinned yet:
     //    the cert in the request body is checked on its own chain (CAP-203).
-    let invite = capability.map_or(false, |c| c.starts_with("invite:"));
+    let invite = capability.is_some_and(|c| c.starts_with("invite:"));
     let cert = arr(v, &["agentCerts"])
         .into_iter()
-        .find(|c| stmt::parse(c).ok().map_or(false, |p| p.claims.get("agent").and_then(Value::as_str) == Some(presenter)))
+        .find(|c| stmt::parse(c).ok().is_some_and(|p| p.claims.get("agent").and_then(Value::as_str) == Some(presenter)))
         .ok_or(E::CapabilityDenied)?;
     if invite {
         if let Ok(p) = stmt::parse(&cert) {
@@ -402,7 +416,8 @@ pub fn authorize(input: &Value) -> R<Value> {
     if followup {
         // Step 6 against the revocation IDs recorded when the task was created (CAP-161, CAP-174).
         for a in arr(input, &["state", "task", "authorizedBy"]) {
-            let (Some(o), Some(i)) = (a.get("owner").and_then(Value::as_str), a.get("issuer").and_then(Value::as_str)) else {
+            let (Some(o), Some(i)) = (a.get("owner").and_then(Value::as_str), a.get("issuer").and_then(Value::as_str))
+            else {
                 return Err(bad_input);
             };
             if arr(&a, &["ids"]).iter().filter_map(Value::as_str).any(|id| ctx.is_revoked(o, i, id)) {
@@ -485,7 +500,11 @@ fn verify_token(
     } else {
         ctx.issuer_certs
             .iter()
-            .find(|c| stmt::parse(c).ok().map_or(false, |p| p.claims.get("issuer").and_then(Value::as_str) == Some(iss.as_str())))
+            .find(|c| {
+                stmt::parse(c)
+                    .ok()
+                    .is_some_and(|p| p.claims.get("issuer").and_then(Value::as_str) == Some(iss.as_str()))
+            })
             .cloned()
             .ok_or(E::CapabilityInvalid)?
     };
@@ -510,8 +529,11 @@ fn verify_token(
         if auth.owner != verifier_owner {
             return Err(E::CapabilityInvalid);
         }
-        let patterns: Vec<String> =
-            scope.get("resource").and_then(Value::as_array).map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect()).unwrap_or_default();
+        let patterns: Vec<String> = scope
+            .get("resource")
+            .and_then(Value::as_array)
+            .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
+            .unwrap_or_default();
         for r in facts_named(auth_facts, "right") {
             let c = term_str(&r[0])?;
             if !patterns.iter().any(|p| stmt::pattern_matches(p, c)) {
@@ -522,8 +544,16 @@ fn verify_token(
     } else {
         // M1: mandate scope; the owner must be pinned (ctx.verify already required it).
         let ms = scope.get("mandate").filter(|m| !m.is_null()).ok_or(E::CapabilityInvalid)?;
-        let targets: Vec<&str> = ms.get("targets").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).collect()).unwrap_or_default();
-        let caps: Vec<&str> = ms.get("capabilities").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).collect()).unwrap_or_default();
+        let targets: Vec<&str> = ms
+            .get("targets")
+            .and_then(Value::as_array)
+            .map(|a| a.iter().filter_map(Value::as_str).collect())
+            .unwrap_or_default();
+        let caps: Vec<&str> = ms
+            .get("capabilities")
+            .and_then(Value::as_array)
+            .map(|a| a.iter().filter_map(Value::as_str).collect())
+            .unwrap_or_default();
         for g in facts_named(auth_facts, "grant") {
             if g.len() != 2 {
                 return Err(E::CapabilityInvalid);
