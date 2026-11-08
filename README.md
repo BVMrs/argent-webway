@@ -3,7 +3,9 @@
 An architecture for agent-to-agent communication: how remote agents discover each other, talk, delegate work,
 and share context, artefacts and results, safely, across machines and owners.
 
-Status: **due diligence**. Read [`docs/due-diligence.md`](docs/due-diligence.md). It has no protocol code yet.
+Status: **due diligence, first spec drafts**. Read [`docs/due-diligence.md`](docs/due-diligence.md). The first
+draft is [`spec/ext/envelope.md`](spec/ext/envelope.md) (signed envelopes) with its
+[test vectors](conformance/vectors/envelope/v0/). There is no node code yet.
 
 ## Approach (proposed)
 
