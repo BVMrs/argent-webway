@@ -1,0 +1,17 @@
+[package]
+name = "blob-vectors"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Reference model, vector generator and stdio adapter for blob/v0 (spec/ext/blob.md)"
+
+[dependencies]
+blake3 = "1.8"
+serde_json = { version = "1", features = ["preserve_order"] }
+
+[dev-dependencies]
+# Independent implementation of the same encoding (used by iroh-blobs). The tests check that the
+# reference model in src/tree.rs produces and accepts exactly what bao-tree does.
+bao-tree = "0.17"
+
+[workspace]
