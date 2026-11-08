@@ -1,0 +1,347 @@
+{
+  "$schema": "../vector.schema.json",
+  "cases": [
+    {
+      "description": "the onward mandate covers the request to C",
+      "expect": {
+        "output": {
+          "mandate": 0
+        },
+        "result": "accept"
+      },
+      "id": "attach",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [
+            {
+              "issuerCert": {
+                "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+                "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+              },
+              "principalCert": {
+                "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+                "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+              },
+              "token": "Et8FCvQECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoPc2tpbGw6cnVuLXRlc3RzCgtvcmlnaW5fdGFzawokMDE5MGYxYzAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMGFhCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyGAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgoKCAiICBIDGIkIIg8KDQiKCBIDGIsIEgMYjAgiCgoICI0IEgMYjggiDgoMCI8IEgMYkAgSAhAAMhoKGAoCCBsSCAiRCBIDCJIIEggIkwgSAwiSCBIkCAASICRFKxJKkPJCKQq-jFAIlIhtI_8CZ66mtUBIqeqRezMdGkCPXHVdFRUwqg9Oqkf5rb9KwfI74ACJcUCtv1Wgn5-rubgAo5UsBvIVgjF9FbrA07Zi6cAWQdFtnbeNHbz0cEAMIiIKIHpugc7sDjD4MEUzds-iXynb8bnu_n-x52YVVRjJub3T"
+            }
+          ],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "the first onward mandate is for skill:lint, the second covers",
+      "expect": {
+        "output": {
+          "mandate": 1
+        },
+        "result": "accept"
+      },
+      "id": "attach-the-covering-one",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [
+            {
+              "issuerCert": {
+                "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+                "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+              },
+              "principalCert": {
+                "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+                "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+              },
+              "token": "EtoFCu8ECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoKc2tpbGw6bGludAoLb3JpZ2luX3Rhc2sKJDAxOTBmMWMwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDBhYQoGaG9sZGVyCjh3d2E6bnAyZ2kzbGF5dmZ2NXdjbGt1cWdlcjZvY3V5cHY3YnV1MjN2N2QzeG03cWV2bHBrYWNtcQoJcHJlc2VudGVyCgFrCg5jdXJyZW50X2hvbGRlchgDIg8KDQiACBIDGIEIEgMYgggiCgoICIMIEgMYhAgiCQoHCAcSAxiFCCINCgsIhggSBiC4l7zXBiINCgsIhwgSBiDIs7zXBiIKCggIiAgSAxiJCCIPCg0IiggSAxiLCBIDGIwIIgoKCAiNCBIDGI4IIg4KDAiPCBIDGJAIEgIQADIaChgKAggbEggIkQgSAwiSCBIICJMIEgMIkggSJAgAEiAAeCGvgQLhx93CHoVDWtuL6QgZpwuGW4MCFo_NM7-m_RpA1Wm5mLXp7XK6HbjyTvSaLvnPOYC5HcqNA952P2RD6FBVBgdrsN17e3mPDiJC_BwAUr6iubHZcNmlqqyUetlIAyIiCiBsW8sGtml2dnxsJQL5TGqh_QKTIRcEoL38bRDvPAs8mA"
+            },
+            {
+              "issuerCert": {
+                "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+                "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+              },
+              "principalCert": {
+                "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+                "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+              },
+              "token": "Et8FCvQECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoPc2tpbGw6cnVuLXRlc3RzCgtvcmlnaW5fdGFzawokMDE5MGYxYzAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMGFhCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyGAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgoKCAiICBIDGIkIIg8KDQiKCBIDGIsIEgMYjAgiCgoICI0IEgMYjggiDgoMCI8IEgMYkAgSAhAAMhoKGAoCCBsSCAiRCBIDCJIIEggIkwgSAwiSCBIkCAASICRFKxJKkPJCKQq-jFAIlIhtI_8CZ66mtUBIqeqRezMdGkCPXHVdFRUwqg9Oqkf5rb9KwfI74ACJcUCtv1Wgn5-rubgAo5UsBvIVgjF9FbrA07Zi6cAWQdFtnbeNHbz0cEAMIiIKIHpugc7sDjD4MEUzds-iXynb8bnu_n-x52YVVRjJub3T"
+            }
+          ],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "no onward mandate: the request must not be sent",
+      "expect": {
+        "error": "MandateRequired",
+        "result": "reject"
+      },
+      "id": "no-mandate",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "the only onward mandate is for another capability",
+      "expect": {
+        "error": "MandateRequired",
+        "result": "reject"
+      },
+      "id": "only-uncovering",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [
+            {
+              "issuerCert": {
+                "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+                "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+              },
+              "principalCert": {
+                "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+                "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+              },
+              "token": "EtoFCu8ECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoKc2tpbGw6bGludAoLb3JpZ2luX3Rhc2sKJDAxOTBmMWMwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDBhYQoGaG9sZGVyCjh3d2E6bnAyZ2kzbGF5dmZ2NXdjbGt1cWdlcjZvY3V5cHY3YnV1MjN2N2QzeG03cWV2bHBrYWNtcQoJcHJlc2VudGVyCgFrCg5jdXJyZW50X2hvbGRlchgDIg8KDQiACBIDGIEIEgMYgggiCgoICIMIEgMYhAgiCQoHCAcSAxiFCCINCgsIhggSBiC4l7zXBiINCgsIhwgSBiDIs7zXBiIKCggIiAgSAxiJCCIPCg0IiggSAxiLCBIDGIwIIgoKCAiNCBIDGI4IIg4KDAiPCBIDGJAIEgIQADIaChgKAggbEggIkQgSAwiSCBIICJMIEgMIkggSJAgAEiAAeCGvgQLhx93CHoVDWtuL6QgZpwuGW4MCFo_NM7-m_RpA1Wm5mLXp7XK6HbjyTvSaLvnPOYC5HcqNA952P2RD6FBVBgdrsN17e3mPDiJC_BwAUr6iubHZcNmlqqyUetlIAyIiCiBsW8sGtml2dnxsJQL5TGqh_QKTIRcEoL38bRDvPAs8mA"
+            }
+          ],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "the only covering mandate has expired",
+      "expect": {
+        "error": "MandateRequired",
+        "result": "reject"
+      },
+      "id": "only-expired",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [
+            {
+              "issuerCert": {
+                "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+                "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+              },
+              "principalCert": {
+                "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+                "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+              },
+              "token": "Et8FCvQECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoPc2tpbGw6cnVuLXRlc3RzCgtvcmlnaW5fdGFzawokMDE5MGYxYzAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMGFhCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyGAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGIKj7u9cGIg0KCwiHCBIGILiXvNcGIgoKCAiICBIDGIkIIg8KDQiKCBIDGIsIEgMYjAgiCgoICI0IEgMYjggiDgoMCI8IEgMYkAgSAhAAMhoKGAoCCBsSCAiRCBIDCJIIEggIkwgSAwiSCBIkCAASIDNh2CxLU_HIgkcNH2TW1WAdv_5GLmUqA5KP9j-DMIlMGkAbGuAg4wYgQKa6F3abTRslaqa05suizGcf0f3uXWdsrmK4JgPaV5OMTjrEJTrS05hbVTiAqyRK2tmObiUE9IAAIiIKIBAPVw8Y4xhxViFM3yrGnS1FH1lN6-eSvkAA9BhEoQJI"
+            }
+          ],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "no mandate, but B's owner allows acting as its own principal for skill:*",
+      "expect": {
+        "output": {
+          "mandate": null,
+          "selfPrincipal": true
+        },
+        "result": "accept"
+      },
+      "id": "self-principal-policy",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "policy": {
+          "selfPrincipal": [
+            "skill:*"
+          ]
+        },
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "the self-principal policy covers skill:lint only",
+      "expect": {
+        "error": "MandateRequired",
+        "result": "reject"
+      },
+      "id": "self-principal-other-skill",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "policy": {
+          "selfPrincipal": [
+            "skill:lint"
+          ]
+        },
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "task": {
+          "onward": [],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "a request back to the originator's owner needs no mandate",
+      "expect": {
+        "output": {
+          "mandate": null
+        },
+        "result": "accept"
+      },
+      "id": "reply-to-originator",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        },
+        "task": {
+          "onward": [],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "a request to B's own agents is not cross-owner",
+      "expect": {
+        "output": {
+          "mandate": null
+        },
+        "result": "accept"
+      },
+      "id": "same-owner-target",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "task": {
+          "onward": [],
+          "originatorOwner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    },
+    {
+      "description": "a task started by B itself needs no mandate",
+      "expect": {
+        "output": {
+          "mandate": null
+        },
+        "result": "accept"
+      },
+      "id": "local-task",
+      "input": {
+        "node": {
+          "owner": "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "capability": "skill:run-tests",
+          "targetOwner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-186"
+      ]
+    }
+  ],
+  "description": "The sender's mandate decision (CAP-186). Input {now, node: {owner}, task?: {originatorOwner, onward: [{token, issuerCert, principalCert}]}, request: {targetOwner, capability}, policy?: {selfPrincipal: [patterns]}}. Accept with output {mandate: index into task.onward | null, selfPrincipal?: true}; reject MandateRequired when the request must not be sent.",
+  "format": "webway-vectors/v0",
+  "kind": "capability/outbound",
+  "spec": "ext/capability.md#10-obligations-of-issuers-and-senders"
+}

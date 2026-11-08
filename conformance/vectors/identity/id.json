@@ -1,0 +1,217 @@
+{
+  "$schema": "../vector.schema.json",
+  "cases": [
+    {
+      "description": "did:key owner",
+      "expect": {
+        "output": {
+          "key": "shGNLU8NvpDnljlE8Jf5RS_bEKUKyxT53Zxasci_H-8",
+          "role": "owner"
+        },
+        "result": "accept"
+      },
+      "id": "owner",
+      "input": {
+        "id": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "wwi issuing key",
+      "expect": {
+        "output": {
+          "key": "mICHDx8Mrz5pPxMbMo9-Q4-P0Q_oseQm5GX1Ao7H7xE",
+          "role": "issuer"
+        },
+        "result": "accept"
+      },
+      "id": "issuer",
+      "input": {
+        "id": "wwi:tcaiody7bsxt42j7cmntfd36iohy7uip5cy6ijxemx2qfdwh54iq"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "wwn node",
+      "expect": {
+        "output": {
+          "key": "DpkdZjVNnCHBTxQbcbWyVuov0z-umDmF6pgEpnCM3fI",
+          "role": "node"
+        },
+        "result": "accept"
+      },
+      "id": "node",
+      "input": {
+        "id": "wwn:b2mr2zrvjwocdqkpcqnxdnnsk3vc7uz7v2mdtbpktackm4em3xza"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "wwa agent",
+      "expect": {
+        "output": {
+          "key": "2ZexIVwU5y8Da8co0ZWDjJBxbkZK_lF-L7YowRpzWzA",
+          "role": "agent"
+        },
+        "result": "accept"
+      },
+      "id": "agent",
+      "input": {
+        "id": "wwa:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmya"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "wwx: is not a role",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "unknown-prefix",
+      "input": {
+        "id": "wwx:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmya"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "base32 must be lowercase",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "uppercase",
+      "input": {
+        "id": "wwa:3GL3CIK4CTTS6A3LY4UNDFMDRSIHC3SGJL7FC7RPWYUMCGTTLMYA"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "no base32 padding",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "padding",
+      "input": {
+        "id": "wwa:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmya===="
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "51 characters",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "too-short",
+      "input": {
+        "id": "wwa:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmy"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "the digit 1 is not in the alphabet",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "bad-alphabet",
+      "input": {
+        "id": "wwa:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmy1"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "the unused trailing bits are not zero",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "non-canonical-trailing-bits",
+      "input": {
+        "id": "wwa:3gl3cik4ctts6a3ly4undfmdrsihc3sgjl7fc7rpwyumcgttlmyb"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "multicodec 0xec01 (X25519)",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "did-key-not-ed25519",
+      "input": {
+        "id": "did:key:z6LSofHFuXi8DS4LtohVer5WAMyG7PchV2U6KC7NZ39o5A8N"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "did:key without the z multibase prefix",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "did-key-not-base58btc",
+      "input": {
+        "id": "did:key:f6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "the identity point is not a usable key",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "did-key-small-order",
+      "input": {
+        "id": "did:key:z6MkeXATEjyXENzBXBxgC5EHk2JE5aqd7qMGGtDpLUH1e2Sj"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "wwa with the identity point",
+      "expect": {
+        "error": "IdentifierInvalid",
+        "result": "reject"
+      },
+      "id": "agent-small-order",
+      "input": {
+        "id": "wwa:aeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "requirements": [
+        "CAP-001"
+      ]
+    }
+  ],
+  "description": "Identifier syntax (CAP-001). Input {\"id\": string}. Accept with output {\"role\", \"key\" (base64url)}; reject IdentifierInvalid.",
+  "format": "webway-vectors/v0",
+  "kind": "identity/id",
+  "spec": "ext/capability.md#3-identifiers-and-keys"
+}

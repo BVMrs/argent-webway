@@ -1,0 +1,268 @@
+{
+  "$schema": "../vector.schema.json",
+  "cases": [
+    {
+      "description": "inception event with a pre-rotation commitment",
+      "expect": {
+        "output": {
+          "key": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "next": "b3:0ZI0hc3UaukaOGP-cbtRTgZzGoqN_Yd1IL8F6J6ENLU",
+          "seq": 0
+        },
+        "result": "accept"
+      },
+      "id": "inception",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "rotation to the committed key",
+      "expect": {
+        "output": {
+          "key": "did:key:z6MkwPmg63jyRFwmd8ZvLNqhBr37DqJqR8wxA5TDqKFeaxi6",
+          "next": "b3:2nkvlSI8dC7_-lP_HAV7TNSzZTign96B0KTXMGNNXwE",
+          "seq": 1
+        },
+        "result": "accept"
+      },
+      "id": "rotation",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJuZXh0IjoiYjM6Mm5rdmxTSThkQzdfLWxQX0hBVjdUTlN6WlRpZ245NkIwS1RYTUdOTlh3RSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJwcmV2IjoiYjM6TFJPZkxTQ3U3MWc4aWcxNC00eHlZMGQ5Q05fTDVuMnR0YzZQbWZvNFJWNCIsInNlcSI6MX0",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "Y4ZHwHh7uzjNf5Yo4qzT8FIMSUY0cG6saLmMt8t8vRQbhrbB8dOYU3Pk7nKUsmdIZzLCjtUOWBfItwt-B9XBCQ"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "two rotations in a row",
+      "expect": {
+        "output": {
+          "key": "did:key:z6Mkg2gzranza6JN6PaRYo8N8Xpewa6Ss9yYeftDUUBB77y7",
+          "next": null,
+          "seq": 2
+        },
+        "result": "accept"
+      },
+      "id": "two-rotations",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJuZXh0IjoiYjM6Mm5rdmxTSThkQzdfLWxQX0hBVjdUTlN6WlRpZ245NkIwS1RYTUdOTlh3RSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJwcmV2IjoiYjM6TFJPZkxTQ3U3MWc4aWcxNC00eHlZMGQ5Q05fTDVuMnR0YzZQbWZvNFJWNCIsInNlcSI6MX0",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "Y4ZHwHh7uzjNf5Yo4qzT8FIMSUY0cG6saLmMt8t8vRQbhrbB8dOYU3Pk7nKUsmdIZzLCjtUOWBfItwt-B9XBCQ"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2cyZ3pyYW56YTZKTjZQYVJZbzhOOFhwZXdhNlNzOXlZZWZ0RFVVQkI3N3k3Iiwia2V5IjoiZGlkOmtleTp6Nk1rZzJnenJhbnphNkpONlBhUllvOE44WHBld2E2U3M5eVllZnREVVVCQjc3eTciLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOnppM1RtSnY1T3J0UWRvajhPQjMzRmpkdHVnWlR1V0c5V3BXcXB6ZkFzam8iLCJzZXEiOjJ9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2cyZ3pyYW56YTZKTjZQYVJZbzhOOFhwZXdhNlNzOXlZZWZ0RFVVQkI3N3k3IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "oxyXfBAfmiAGzbkH9OV67mbedVgf0qUQu25LLPwdK87kkmoGwpAHLEB24iZwiszqA1Cn04AoKXSynVTzBDnEAQ"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "a thief of the current key rotates to its own key",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotation-uncommitted-key",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwia2V5IjoiZGlkOmtleTp6Nk1raWVESEJlZGRMNkcySkoxTk1GUXZ0MjZZY3BSUjdjUTlQSnRCRWNQaW1RN0UiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOkxST2ZMU0N1NzFnOGlnMTQtNHh5WTBkOUNOX0w1bjJ0dGM2UG1mbzRSVjQiLCJzZXEiOjF9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "nPJ8CjEuQLfs_cl9JQb__ipQ8lTRorVbgP-M6_qFwStxCwQU7vO2FThKAIa5ddKAJMd3Ehr6OJ4tCP1c0nmjBQ"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "the inception event has no next: no rotation possible",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotation-without-commitment",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwic2VxIjowfQ",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "xS5xuWi3yVDGUTnnXyOhGbEc9X76JEeihmcWvm5lwwkg4v6J4yEw4iCgk7p3g8g-sKSBjVc_Ge1IqvOs-JX8BQ"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOmJwalNsdEhHaThaRVFWdC1kNUNEZ0x2NUdnbi1WRjNkbm9za3UzM05yZnciLCJzZXEiOjF9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "5relmpyLetg6ooFBeiYVpG2BWeboUIs6s3q70benKHdIid1VmrslIBUoY2zeuvn70aBjIN5hFpqZHLbFwGPUAA"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "prev is not the ID of the held event",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotation-wrong-prev",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOmJwalNsdEhHaThaRVFWdC1kNUNEZ0x2NUdnbi1WRjNkbm9za3UzM05yZnciLCJzZXEiOjF9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "5relmpyLetg6ooFBeiYVpG2BWeboUIs6s3q70benKHdIid1VmrslIBUoY2zeuvn70aBjIN5hFpqZHLbFwGPUAA"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "seq jumps from 0 to 2",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotation-seq-skip",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOkxST2ZMU0N1NzFnOGlnMTQtNHh5WTBkOUNOX0w1bjJ0dGM2UG1mbzRSVjQiLCJzZXEiOjJ9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "QhfUZCk7PTHHydKjtlHZpU5q8eb6aGFGd7702-r3iswPtSwMtOFa2hOgjHZaRuJ4jUiiNqKc6UMOG8rwn1sYCw"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "the event names another owner",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotation-other-owner",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+          },
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJvd25lciI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwicHJldiI6ImIzOkxST2ZMU0N1NzFnOGlnMTQtNHh5WTBkOUNOX0w1bjJ0dGM2UG1mbzRSVjQiLCJzZXEiOjF9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "NXclsOdy0XYr1oeBPGsJB5rbc19gJTDMFS5B9KNZhDgjULCoXcVuKFketLVvzUaGIR29OsEUohzkvrd4QbSdBQ"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    },
+    {
+      "description": "inception signed by a key other than the owner identifier",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "inception-not-owner-key",
+      "input": {
+        "events": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwic2VxIjowfQ",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+            "signature": "aV9Zau0HZRv8TxUUHsE_1y557gjKyeRqVYBI0Vio_ay4SwENrsiFv4KMYJKv9VQk3XuTkRtZu-c_27DR5_hoCg"
+          }
+        ],
+        "pin": {
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        }
+      },
+      "requirements": [
+        "CAP-020"
+      ]
+    }
+  ],
+  "description": "Verify an owner-key event chain from seq 0. Input {pin: {owner}, events: [statement]}. Accept with output {key, next, seq}; reject StatementInvalid | StatementUntrusted.",
+  "format": "webway-vectors/v0",
+  "kind": "identity/owner-key",
+  "spec": "ext/capability.md#43-owner-keys-rotation-and-pre-rotation"
+}

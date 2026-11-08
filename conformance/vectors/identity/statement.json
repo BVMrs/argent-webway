@@ -1,0 +1,982 @@
+{
+  "$schema": "../vector.schema.json",
+  "cases": [
+    {
+      "description": "root-signed node-cert",
+      "expect": {
+        "output": {
+          "exp": "2027-10-01T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "node-cert",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010",
+        "CAP-011",
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "root-signed issuer-cert",
+      "expect": {
+        "output": {
+          "exp": "2026-11-30T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "issuer": "wwi:m2nif4s4hae23m3stjyes6tzicu6dev6uwlonpzgv3bz7areqkgq",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "scope": {
+            "agentCerts": true,
+            "cards": true,
+            "invites": true,
+            "mandate": {
+              "capabilities": [
+                "skill:*"
+              ],
+              "maxTtl": 3600,
+              "targets": [
+                "*"
+              ]
+            },
+            "resource": [
+              "skill:*",
+              "task:*",
+              "invite:*",
+              "blob:*",
+              "mailbox:*"
+            ]
+          }
+        },
+        "result": "accept"
+      },
+      "id": "issuer-cert",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "typ": "webway-issuer-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "root-signed agent-cert",
+      "expect": {
+        "output": {
+          "agent": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba",
+          "exp": "2027-10-01T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "agent-cert-root",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "gbJetlQZyb62Wpoo0oB8PJeW6q9tWVuHAZ68YqRztz74A1N-tQApEs285iF85aomCQVV0YJEU9cHX9IGz5AjCg"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "agent-cert signed by an issuing key with agentCerts scope on the same node",
+      "expect": {
+        "output": {
+          "agent": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba",
+          "exp": "2026-11-30T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "wwi:m2nif4s4hae23m3stjyes6tzicu6dev6uwlonpzgv3bz7areqkgq",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "agent-cert-issuer",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNi0xMS0zMFQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "VjWOlx8SF9RluvmjdY3SHY8blUhghfEeV6JAw8WjkBu9B61V6LEQ-fOMvRBKug9ryyidLevzkmWVC3ZfQ5TVAQ"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-040",
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "the issuing key lacks agentCerts",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "agent-cert-issuer-no-scope",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjpmYWxzZSwicmVzb3VyY2UiOlsic2tpbGw6KiJdfX0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "y4X_kyRMF4tvUhYTukjJtuPrf8Sm-0BKe11fZQuRgykcR680q26G0O3CvjgyOOUN9Yw0J3XswXFFHoMTLOQLBg"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNi0xMS0zMFQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "VjWOlx8SF9RluvmjdY3SHY8blUhghfEeV6JAw8WjkBu9B61V6LEQ-fOMvRBKug9ryyidLevzkmWVC3ZfQ5TVAQ"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-040"
+      ]
+    },
+    {
+      "description": "issuing key on gamma certifies an agent on beta",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "agent-cert-issuer-other-node",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNi0xMS0zMFQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "dhBFXoKoGZTR0h7Rst7BpAWPqvqeq1kxf-8xRdAMsHpzrEnnzbiQ3hkoZSQ0Z44lLOU1v_y03zl0HVVenR5ABg"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-040"
+      ]
+    },
+    {
+      "description": "agent-cert signed by an issuing key expires after its issuer-cert",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "agent-cert-outlives-issuer",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNi0xMi0xNVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "6wgOM5UK1V9OF7UXXPVqiAzwAhDWjdWT2E9EACsrcLoCEiULh1-RJvYdAe3tqm-yaByXBuyoST3IAxvXwcHWDw"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "issuing keys cannot sign node-certs",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "node-cert-by-issuer",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoid3dpOm0ybmlmNHM0aGFlMjNtM3N0anllczZ0emljdTZkZXY2dXdsb25wemd2M2J6N2FyZXFrZ3EiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "62hJ2xUqgSVU1D7hb4fpjayj-wuFwWCUNYZ-wIWoUMor5TPBJJ_FKjrrrcELTOQ9Q8G55lygrhlH654LKsT0DQ"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "revocation list signed by an issuing key",
+      "expect": {
+        "output": {
+          "iat": "2026-11-07T06:00:00Z",
+          "iss": "wwi:m2nif4s4hae23m3stjyes6tzicu6dev6uwlonpzgv3bz7areqkgq",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "revoked": [],
+          "seq": 1,
+          "validUntil": "2026-11-08T06:00:00Z"
+        },
+        "result": "accept"
+      },
+      "id": "revocation-list-issuer",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjEsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+          "signature": "XSTmeJtv6VQ-JDHhNHcM3LK8Nr-oBAR5TR6pJmA_a0mdh_toJ1G4AKqsOlS1GAL7lR7FOvEzlnbeoGaOUKHNAg"
+        },
+        "typ": "webway-revocation+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "issuer-signed list valid 48 hours, MAX_LIST_VALIDITY is 24",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "revocation-list-too-long",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjEsInZhbGlkVW50aWwiOiIyMDI2LTExLTA5VDA2OjAwOjAwWiJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+          "signature": "9VI9AtqciBi7oAX3aVmmcmzGKOJjbZ2XwuQYOMjQ7OFCz330IMXz69QMDv8v-ZqBE-03eImAx8dqhFjyTKQ1Dw"
+        },
+        "typ": "webway-revocation+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "one bit of the signature flipped",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "sig-bad",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrITdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-011",
+        "CAP-002"
+      ]
+    },
+    {
+      "description": "S replaced by S + L (malleated signature)",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "sig-non-canonical-s",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bf6R9JOjsXR0bKK42gRBdwbBljiLxktISZ4JpxT5EFlEg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-002"
+      ]
+    },
+    {
+      "description": "kid is the identity point (small order)",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "kid-small-order",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkeXATEjyXENzBXBxgC5EHk2JE5aqd7qMGGtDpLUH1e2Sj"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rZVhBVEVqeVhFTnpCWEJ4Z0M1RUhrMkpFNWFxZDdxTUdHdERwTFVIMWUyU2oiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2VYQVRFanlYRU56QlhCeGdDNUVIazJKRTVhcWQ3cU1HR3REcExVSDFlMlNqIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2VYQVRFanlYRU56QlhCeGdDNUVIazJKRTVhcWQ3cU1HR3REcExVSDFlMlNqIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "ISCvqaUS8QtkIKcxpRp4B64D-jM3VxM3fL3ZgnAYoQcd-z_aqMsRYhjqzeNvPy08GNf6j9rqGCAh0W2WGxW_DQ"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-002",
+        "CAP-001"
+      ]
+    },
+    {
+      "description": "a node-cert presented where an agent-cert is expected",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "typ-mismatch",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-012"
+      ]
+    },
+    {
+      "description": "protected header has an extra member (crit)",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "header-extra-member",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "djA7vSC7txVQDbTzt0MoEzgQA9f-RInNrCV5uVghs61SReq2Q51qF9OqU_4sb_iQaqJiNO-QEqfY8jO0aISXCA"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "alg is ES256",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "alg-not-eddsa",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFUzI1NiIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "yYlYh3ymqDXC_w2H6EdaRTX3kpiGv20Kvu5eAngXmXoHwUgWiJxCEj0OVXGdj6JjAYV0oc0D3GLeNePRuf30Ag"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "payload has a space, so it is not its JCS form",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "payload-not-jcs",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsICJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "4MqZmxTLidb2_6hpT3-lp8KS9r_NsQ03Axd-nzGGu9C9zXjo9IJJOdc-ak1ZkiQMXCI-BRk_sGIkB48kKKWHCQ"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "payload repeats a member (not I-JSON)",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "payload-duplicate-key",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImV4cCI6IjIwMjctMTAtMDFUMDA6MDA6MDBaIiwiaWF0IjoiMjAyNi0xMS0wMVQwMDowMDowMFoiLCJpc3MiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUifQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "RMn0Haf9XkP2CXJmURcaX4GP8kCwU2mHf6eagRM4GnnxKk5M8dtvOyMHHXRUzD62KXG2TEJPNvz5seyalwKlDw"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "claims iss differs from kid",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "iss-not-kid",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rdDN5c3RxcmpEWTFmM1dyR3hhYkJEUmhQYTVidWRFTGRwUjh6WVNOMUhxemUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "9UsuXC1meS7KZc8QvPsXAbMKjPwCGslrL9ZgQX9KmC6Tvb2h-lF72Ks6bGxkTd6vSFQ_0w5erQP0AVoYjo2aBg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "the JWS object has an unprotected header",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "jws-extra-member",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "header": {},
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-010"
+      ]
+    },
+    {
+      "description": "a valid node-cert of an owner the verifier has not pinned",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "unpinned-owner",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "X signs a node-cert claiming owner C",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "signer-not-owner-root",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          },
+          {
+            "owner": "did:key:z6MkieDHBeddL6G2JJ1NMFQvt26YcpRR7cQ9PJtBEcPimQ7E"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWVESEJlZGRMNkcySkoxTk1GUXZ0MjZZY3BSUjdjUTlQSnRCRWNQaW1RN0UiLCJub2RlIjoid3duOnJyem91NHNzemtmNzRpbXM3cnZvYmJ4NGM2c2Z1cHh2anJ4M2lzcWpta216YXhkZHZ3N2EiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "kxJSPDyKPDiHUHET5muoEULbqQWE1RvC95WCUZUwQG3LDRQMDnDLUi2FW_vA5T9w3T_n3fugNpw_aW8cVXq0DQ"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "node-cert expired one second ago",
+      "expect": {
+        "error": "StatementExpired",
+        "result": "reject"
+      },
+      "id": "expired",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTA3VDExOjU5OjU5WiIsImlhdCI6IjIwMjYtMDEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "A79iy179AIMrCZJ7N0WMpFKmzniigWbf75v5DWCiwdeVvBk9R7yzSheJ4Nccm7ujpUU-Mz90-l4aLLqMxX4MAA"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "iat 6 minutes ahead, SKEW is 5",
+      "expect": {
+        "error": "StatementExpired",
+        "result": "reject"
+      },
+      "id": "iat-future",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDdUMTI6MDY6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "xWW2hp-TX2oxBhBVy4t02YBl5WozTYFi1LMO1RSx6U6A97IjuZL1D2p7qpc5i6mjt2tmPoyc2EhLlT6vcsnaDA"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "iat 4 minutes ahead is accepted",
+      "expect": {
+        "output": {
+          "exp": "2027-10-01T00:00:00Z",
+          "iat": "2026-11-07T12:04:00Z",
+          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "iat-within-skew",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDdUMTI6MDQ6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "YVAcZYk2hDBtFhwmZT91taxBgUwbLajZJrWhKRBk7UHhdtd8CLNHJVyrgr6PlLRA5Xlvmkuki5d58N6SUE2QCw"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "issuer-cert valid 31 days",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "issuer-cert-ttl-too-long",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI2LTEyLTAyVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "icRVw3RHCMG9_-ppT-SfI4ndkyB47OTy12Mreb2UpRbNet27_nwUyBDF2HLkMaN7a7UXoRbEThQ-V70IF-zdCQ"
+        },
+        "typ": "webway-issuer-cert+jws"
+      },
+      "requirements": [
+        "CAP-014"
+      ]
+    },
+    {
+      "description": "C's root list revokes the node-cert",
+      "expect": {
+        "error": "StatementRevoked",
+        "result": "reject"
+      },
+      "id": "revoked",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "revocations": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOlsiYjM6cFhaUEpaQkV1TG80NUFPT2MtaGhsejNJU3pXVDV1N0ptdXk1bTgtTjZrOCJdLCJzZXEiOjEsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+            "signature": "LFElhyUjqXGBpNG5VPoFf6pBs0MyqH9zGKz-T2HZtkcN9NsY7QrP7M8GT25qHu4nqAPXH9vpizRIgQ8Bd1rABw"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-015"
+      ]
+    },
+    {
+      "description": "the issuer-cert that signs the agent-cert is revoked",
+      "expect": {
+        "error": "StatementRevoked",
+        "result": "reject"
+      },
+      "id": "revoked-chain",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "revocations": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOlsiYjM6UG55TkVYT0FORk9VbUthZU51RGNmSXJPcHNlS2pfTTBEVThlbmp2TnZ3USJdLCJzZXEiOjEsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+            "signature": "WeV793EwErg4mPfGaPt_X_Fxdhqwpk-yusvLt0i8Kki21wi2f5dIZwmXLfNPbJ-6F2IrOxb8DNp0P_8B8_t5Dw"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNi0xMS0zMFQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "VjWOlx8SF9RluvmjdY3SHY8blUhghfEeV6JAw8WjkBu9B61V6LEQ-fOMvRBKug9ryyidLevzkmWVC3ZfQ5TVAQ"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-015"
+      ]
+    },
+    {
+      "description": "after a normal rotation, a cert signed by the old root key stays valid",
+      "expect": {
+        "output": {
+          "exp": "2027-10-01T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "rotated-old-key-valid",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "events": [
+              {
+                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+              },
+              {
+                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJuZXh0IjoiYjM6Mm5rdmxTSThkQzdfLWxQX0hBVjdUTlN6WlRpZ245NkIwS1RYTUdOTlh3RSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJwcmV2IjoiYjM6TFJPZkxTQ3U3MWc4aWcxNC00eHlZMGQ5Q05fTDVuMnR0YzZQbWZvNFJWNCIsInNlcSI6MX0",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "Y4ZHwHh7uzjNf5Yo4qzT8FIMSUY0cG6saLmMt8t8vRQbhrbB8dOYU3Pk7nKUsmdIZzLCjtUOWBfItwt-B9XBCQ"
+              }
+            ],
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-021"
+      ]
+    },
+    {
+      "description": "a cert signed by the rotated-to root key",
+      "expect": {
+        "output": {
+          "exp": "2027-10-01T00:00:00Z",
+          "iat": "2026-11-01T00:00:00Z",
+          "iss": "did:key:z6MkwPmg63jyRFwmd8ZvLNqhBr37DqJqR8wxA5TDqKFeaxi6",
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+        },
+        "result": "accept"
+      },
+      "id": "rotated-new-key",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "events": [
+              {
+                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+              },
+              {
+                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2Iiwia2V5IjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJuZXh0IjoiYjM6Mm5rdmxTSThkQzdfLWxQX0hBVjdUTlN6WlRpZ245NkIwS1RYTUdOTlh3RSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJwcmV2IjoiYjM6TFJPZkxTQ3U3MWc4aWcxNC00eHlZMGQ5Q05fTDVuMnR0YzZQbWZvNFJWNCIsInNlcSI6MX0",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "Y4ZHwHh7uzjNf5Yo4qzT8FIMSUY0cG6saLmMt8t8vRQbhrbB8dOYU3Pk7nKUsmdIZzLCjtUOWBfItwt-B9XBCQ"
+              }
+            ],
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "4BZlqUDPjaY9SctoCsizdkIrt6rGfN4SZas2_Fh7Na_SCVsCo3IKSaWnzH2ujOlOBvuvw509D3M6zf3_qIK4Aw"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-021",
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "the same cert, but the verifier never saw the rotation",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotated-new-key-not-known",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rd1BtZzYzanlSRndtZDhadkxOcWhCcjM3RHFKcVI4d3hBNVREcUtGZWF4aTYiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "4BZlqUDPjaY9SctoCsizdkIrt6rGfN4SZas2_Fh7Na_SCVsCo3IKSaWnzH2ujOlOBvuvw509D3M6zf3_qIK4Aw"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-013"
+      ]
+    },
+    {
+      "description": "after a rotation marked compromised, the old key's certs are rejected",
+      "expect": {
+        "error": "StatementUntrusted",
+        "result": "reject"
+      },
+      "id": "rotated-compromised-old-key",
+      "input": {
+        "now": "2026-11-07T12:00:00Z",
+        "pins": [
+          {
+            "events": [
+              {
+                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
+              },
+              {
+                "payload": "eyJjb21wcm9taXNlZCI6dHJ1ZSwiaWF0IjoiMjAyNi0xMS0wMlQwMDowMDowMFoiLCJpc3MiOiJkaWQ6a2V5Ono2TWt3UG1nNjNqeVJGd21kOFp2TE5xaEJyMzdEcUpxUjh3eEE1VERxS0ZlYXhpNiIsImtleSI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwibmV4dCI6ImIzOjJua3ZsU0k4ZEM3Xy1sUF9IQVY3VE5TelpUaWduOTZCMEtUWE1HTk5Yd0UiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOkxST2ZMU0N1NzFnOGlnMTQtNHh5WTBkOUNOX0w1bjJ0dGM2UG1mbzRSVjQiLCJzZXEiOjF9",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
+                "signature": "_--rZ_0cSYgkrNzMYirS3NRhnRDvBt01hHUJUCfhOa3L14rjnubPsog1IM_3v2K-HRABMmyaImvFtnUl1D4dDw"
+              }
+            ],
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "statement": {
+          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
+          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+        },
+        "typ": "webway-node-cert+jws"
+      },
+      "requirements": [
+        "CAP-021"
+      ]
+    }
+  ],
+  "description": "Verify a signed statement as type `typ` at time `now`. Input {now, typ, statement, pins: [{owner, events?}], issuerCert?, revocations?}. `pins[].events` are owner-key events (identity/owner-key). Accept with output = the verified claims; reject StatementInvalid | StatementUntrusted | StatementExpired | StatementRevoked.",
+  "format": "webway-vectors/v0",
+  "kind": "identity/statement",
+  "spec": "ext/capability.md#42-verification"
+}
