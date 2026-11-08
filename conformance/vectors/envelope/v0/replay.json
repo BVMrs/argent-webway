@@ -1,0 +1,537 @@
+{
+  "spec": "spec/ext/envelope.md",
+  "version": "webway-envelope/0",
+  "kind": "replay",
+  "description": "Stateful scenarios against one receiving node (spec §8). Steps run in order; `purge` removes entries with exp + SKEW < now and raises the watermark.",
+  "generator": "conformance/tools/envelope-vectors",
+  "constants": {
+    "SKEW_SECONDS": 300,
+    "MAX_TTL_SECONDS": 604800,
+    "MAX_ENVELOPE_BYTES": 1048576,
+    "MAX_DEPTH": 64
+  },
+  "cases": [
+    {
+      "id": "lost-ack-retry",
+      "requirements": [
+        "ENV-500",
+        "ENV-501",
+        "ENV-510",
+        "ENV-520",
+        "ENV-530"
+      ],
+      "description": "The ack is lost and the sender's outbox resends the identical envelope: processed once, the retry gets the stored response.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:15Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "stored"
+          }
+        }
+      ]
+    },
+    {
+      "id": "duplicate-reserialised",
+      "requirements": [
+        "ENV-511"
+      ],
+      "description": "A duplicate re-serialised by an intermediary is still a duplicate (header digest over the canonical form).",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}",
+        "E1-reserialised": "{\n  \"v\": \"webway-envelope/0\",\n  \"typ\": \"request\",\n  \"op\": \"SendMessage\",\n  \"from\": \"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\n  \"to\": \"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\n  \"id\": \"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\n  \"ts\": \"2026-11-07T12:00:00Z\",\n  \"exp\": \"2026-11-07T13:00:00Z\",\n  \"ctx\": {\n    \"contextId\": \"ctx-0001\"\n  },\n  \"cap\": {\n    \"access\": \"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"\n  },\n  \"prov\": {\n    \"parts\": {\n      \"/message/parts/0\": {\n        \"taint\": {\n          \"owners\": [\n            \"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"\n          ],\n          \"unverified\": false\n        }\n      }\n    }\n  },\n  \"body_hash\": \"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\n  \"body\": {\n    \"message\": {\n      \"messageId\": \"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\n      \"contextId\": \"ctx-0001\",\n      \"role\": \"ROLE_USER\",\n      \"parts\": [\n        {\n          \"text\": \"Run the test suite on branch main.\"\n        }\n      ]\n    }\n  },\n  \"sig\": \"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"\n}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1-reserialised",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "stored"
+          }
+        }
+      ]
+    },
+    {
+      "id": "duplicate-unauthenticated-transport",
+      "requirements": [
+        "ENV-531"
+      ],
+      "description": "A third party replays a captured envelope over a connection not authenticated as alice's node: it gets only the duplicate ack.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "unauthenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "id-reuse",
+      "requirements": [
+        "ENV-500",
+        "ENV-510"
+      ],
+      "description": "alice signs a second, different envelope with the same id: rejected, not processed.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}",
+        "E1-other-body": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:02ee1b024c9c01974fc75031a5329a86cb04f561484ba297d4535ec6342a323b\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch dev.\"}]}},\"sig\":\"oBJLReLr6SyO4HrwizRORLSWAJUU9ttoIqq_EqmRstO2sgT_QNw420BC5f7ECIrfIx-5hmvd1hRK6rk4jZQXDw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1-other-body",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "reject",
+            "error": {
+              "type": "EnvelopeInvalid",
+              "code": -33001,
+              "reason": "id-reuse",
+              "retryable": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "horizon",
+      "requirements": [
+        "ENV-502",
+        "ENV-300"
+      ],
+      "description": "The entry survives a purge at exactly exp + SKEW and still deduplicates; one second later the entry may go and the envelope is expired.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "purge",
+          "now": "2026-11-07T13:05:00Z"
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T13:05:00Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "stored"
+          }
+        },
+        {
+          "action": "purge",
+          "now": "2026-11-07T13:05:01Z"
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T13:05:01Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "reject",
+            "error": {
+              "type": "EnvelopeExpired",
+              "code": -33003,
+              "reason": "expired",
+              "retryable": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "clock-rollback-after-purge",
+      "requirements": [
+        "ENV-504",
+        "ENV-502"
+      ],
+      "description": "After the entry is purged the receiver's clock steps back to before exp. The watermark still rejects the replay.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "purge",
+          "now": "2026-11-07T13:06:00Z"
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "reject",
+            "error": {
+              "type": "EnvelopeExpired",
+              "code": -33003,
+              "reason": "below-watermark",
+              "retryable": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "retryable-failure-no-entry",
+      "requirements": [
+        "ENV-521",
+        "ENV-520"
+      ],
+      "description": "Processing fails with a retryable error (e.g. MailboxFull): no entry, so the retry is processed as new.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "app_result": "retryable-error",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": false
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:40Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:01:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "stored"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fatal-failure-stored",
+      "requirements": [
+        "ENV-520"
+      ],
+      "description": "A non-retryable processing error (e.g. CapabilityDenied) is stored and returned for the retry.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "app_result": "fatal-error",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "duplicate",
+            "answer": "stored"
+          }
+        }
+      ]
+    },
+    {
+      "id": "invalid-envelope-creates-no-entry",
+      "requirements": [
+        "ENV-501",
+        "ENV-600"
+      ],
+      "description": "A forged envelope with alice's id fails verification and must not poison the dedupe store: the genuine one is processed.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1-bad-sig": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"NOUZStL1sH_7zTOnuBCFLQ5CV0y9K4pi8TOquadmLc1jsXnhinKXMXwZhHRBdUB5j8w5Onag32PkY0Y-mVo2CA\"}",
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1-bad-sig",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "reject",
+            "error": {
+              "type": "SignatureInvalid",
+              "code": -33002,
+              "reason": "verification-failed",
+              "retryable": false
+            }
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "same-id-other-sender",
+      "requirements": [
+        "ENV-510"
+      ],
+      "description": "The dedupe key includes the sender: the same id from carol is a different message.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}",
+        "E1-from-carol": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:4f2np5caf2lah3mcvkwoi3sprkh2hzg23tooqthf35bo7geuygha\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"mcwmZH5WcjAC9z5TG15uFl_6SmRHYO1i9f24Wt7CFyclW01aSBK9zeJTWsZGnGYA7bO4s0ZFWLeX9--K6BgqCg\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "E1",
+          "now": "2026-11-07T12:00:10Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "E1-from-carol",
+          "now": "2026-11-07T12:00:11Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "process",
+            "dedupe_entry": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answers",
+      "requirements": [
+        "ENV-401",
+        "ENV-402",
+        "ENV-512"
+      ],
+      "description": "A response is delivered only if it answers an envelope the node sent (matching from, to and inReplyTo), at most once, and is never answered with an error.",
+      "receiver": {
+        "hosts": [
+          "wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}",
+        "R1": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-78f7-84f6-fc9a059fbafa\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"rvjq_bHIMvw0PsS6HDKo0ZrJx5lhIWZym4GOiHIKfJhB2VmqXTsTvcSduHU0W6sGnHu-RPDLi3n4QEJ7hLFTAw\"}",
+        "R-unsolicited": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-7a21-85b4-e3ff269ed66f\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-7553-9b1a-a37d4ce61d37\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"_f263e98qkoLOYwpAtRo0WLpudQc_ZQkKiTof8sFIlP6q_S3q3d5IV4x6pxZj2xFfnMvT0TdR8aQzl-3iGo3Dg\"}",
+        "R-from-carol": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:4f2np5caf2lah3mcvkwoi3sprkh2hzg23tooqthf35bo7geuygha\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-78f7-84f6-fc9a059fbafa\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"j2rVJb66j-z9PJqcoknPawMfGXn4rCLcgG7e46YghDQYQWutnjeT7loKk_zuzrsNjLpmk-iI0sk3FGe-PRRPCg\"}"
+      },
+      "steps": [
+        {
+          "action": "receive",
+          "envelope": "R1",
+          "now": "2026-11-07T12:00:03Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "discard",
+            "reason": "unsolicited"
+          }
+        },
+        {
+          "action": "sent",
+          "envelope": "E1"
+        },
+        {
+          "action": "receive",
+          "envelope": "R1",
+          "now": "2026-11-07T12:00:03Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "deliver"
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "R1",
+          "now": "2026-11-07T12:00:04Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "drop-duplicate"
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "R-unsolicited",
+          "now": "2026-11-07T12:00:03Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "discard",
+            "reason": "unsolicited"
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "R-from-carol",
+          "now": "2026-11-07T12:00:03Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "discard",
+            "reason": "unsolicited"
+          }
+        }
+      ]
+    }
+  ]
+}

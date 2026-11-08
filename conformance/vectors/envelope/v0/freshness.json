@@ -1,0 +1,281 @@
+{
+  "spec": "spec/ext/envelope.md",
+  "version": "webway-envelope/0",
+  "kind": "freshness",
+  "description": "Pure function (now, ts, exp, watermark?) → accept or error (spec §6, ENV-504). Constants as in `constants`.",
+  "generator": "conformance/tools/envelope-vectors",
+  "constants": {
+    "SKEW_SECONDS": 300,
+    "MAX_TTL_SECONDS": 604800,
+    "MAX_ENVELOPE_BYTES": 1048576,
+    "MAX_DEPTH": 64
+  },
+  "cases": [
+    {
+      "id": "fresh",
+      "requirements": [
+        "ENV-300"
+      ],
+      "description": "Just sent.",
+      "now": "2026-11-07T12:00:01Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "mailbox-dwell",
+      "requirements": [
+        "ENV-302"
+      ],
+      "description": "Waited 3 h in a mailbox; exp is 4 h after ts.",
+      "now": "2026-11-07T15:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T16:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "at-exp",
+      "requirements": [
+        "ENV-300"
+      ],
+      "description": "now = exp.",
+      "now": "2026-11-07T13:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "at-exp-plus-skew",
+      "requirements": [
+        "ENV-300",
+        "ENV-303"
+      ],
+      "description": "now = exp + SKEW: inclusive bound.",
+      "now": "2026-11-07T13:05:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "past-exp-plus-skew-1ms",
+      "requirements": [
+        "ENV-300",
+        "ENV-303"
+      ],
+      "description": "now = exp + SKEW + 1 ms: full precision.",
+      "now": "2026-11-07T13:05:00.001Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeExpired",
+          "code": -33003,
+          "reason": "expired",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "past-exp-plus-skew-1d",
+      "requirements": [
+        "ENV-300"
+      ],
+      "description": "A day late.",
+      "now": "2026-11-08T13:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeExpired",
+          "code": -33003,
+          "reason": "expired",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "ts-at-now-plus-skew",
+      "requirements": [
+        "ENV-301",
+        "ENV-303"
+      ],
+      "description": "Sender clock ahead by exactly SKEW.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:05:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "ts-past-now-plus-skew-1ms",
+      "requirements": [
+        "ENV-301",
+        "ENV-303"
+      ],
+      "description": "Sender clock ahead by SKEW + 1 ms: retryAfter rounds up to 1 s.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:05:00.001Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeNotYetValid",
+          "code": -33004,
+          "reason": "ts-in-future",
+          "retryable": true,
+          "retryAfter": 1
+        }
+      }
+    },
+    {
+      "id": "ts-far-future",
+      "requirements": [
+        "ENV-301"
+      ],
+      "description": "Sender clock ahead by 1 h.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T13:00:00Z",
+      "exp": "2026-11-07T14:00:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeNotYetValid",
+          "code": -33004,
+          "reason": "ts-in-future",
+          "retryable": true,
+          "retryAfter": 3300
+        }
+      }
+    },
+    {
+      "id": "old-ts-long-ttl",
+      "requirements": [
+        "ENV-302"
+      ],
+      "description": "ts 6 days ago, exp tomorrow.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-01T12:00:00Z",
+      "exp": "2026-11-08T12:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "exp-equals-ts",
+      "requirements": [
+        "ENV-011"
+      ],
+      "description": "exp = ts.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T12:00:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "exp-not-after-ts",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "exp-before-ts",
+      "requirements": [
+        "ENV-011"
+      ],
+      "description": "exp before ts.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T11:59:59Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "exp-not-after-ts",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "ttl-max",
+      "requirements": [
+        "ENV-011",
+        "ENV-900"
+      ],
+      "description": "exp − ts = MAX_TTL.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-14T12:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "ttl-over-max",
+      "requirements": [
+        "ENV-011",
+        "ENV-900"
+      ],
+      "description": "exp − ts = MAX_TTL + 1 ms.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-14T12:00:00.001Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "ttl-too-long",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "watermark-blocks-rollback",
+      "requirements": [
+        "ENV-504"
+      ],
+      "description": "The receiver's clock stepped back 2 h; the envelope looks fresh, but its exp + SKEW is at or below the watermark.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T11:00:00Z",
+      "exp": "2026-11-07T12:10:00Z",
+      "watermark": "2026-11-07T12:15:00Z",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeExpired",
+          "code": -33003,
+          "reason": "below-watermark",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "watermark-below",
+      "requirements": [
+        "ENV-504"
+      ],
+      "description": "exp + SKEW is above the watermark: accepted.",
+      "now": "2026-11-07T12:00:00Z",
+      "ts": "2026-11-07T12:00:00Z",
+      "exp": "2026-11-07T13:00:00Z",
+      "watermark": "2026-11-07T13:00:00Z",
+      "expect": {
+        "result": "accept"
+      }
+    }
+  ]
+}

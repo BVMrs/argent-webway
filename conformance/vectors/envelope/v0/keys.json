@@ -1,0 +1,41 @@
+{
+  "description": "TEST KEYS ONLY. Never use them outside tests. seed = BLAKE3(\"argent-webway/test-vectors/envelope/v0/\" + name); Ed25519 key pair from the 32-byte seed (RFC 8032).",
+  "keys": {
+    "alice": {
+      "role": "agent, owner A, node alpha (usual sender)",
+      "seed_hex": "3791c83892cd02dd3e5a1161746a31b6c8566d7cfbab413acebaa80d2c6e3251",
+      "public_hex": "efa5ebec0508f6795578c51c4f27b79c23ac9056032b80ef4419d2327412cd98",
+      "agent_id": "wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma"
+    },
+    "bob": {
+      "role": "agent, owner B, node beta (usual receiver)",
+      "seed_hex": "27eed77d9bacc3fb6d1a11d692f6af67932cb6eb02c387ecd7a747b8e10b4686",
+      "public_hex": "615f631297d3aa184e08572c3714deefa0dd341204a95369ccdd5a47d62779f3",
+      "agent_id": "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+    },
+    "carol": {
+      "role": "agent, owner B, another node",
+      "seed_hex": "5ccbc73ee7cf3764272a271e232bcfbe2c660d82d45a0f9e5bf1421ccb3cbc4d",
+      "public_hex": "e174d7f4402e9603ed82aaace46e4f8a8fa3e4dadcdce84ce5df42ef9894c18e",
+      "agent_id": "wwa:4f2np5caf2lah3mcvkwoi3sprkh2hzg23tooqthf35bo7geuygha"
+    },
+    "mallory": {
+      "role": "attacker",
+      "seed_hex": "a7f017268c52846db8ec673c8a90a28f1155f13b864189d99212ba0bf71949b4",
+      "public_hex": "63cc71646135b3b93432c7cddb039c98ce2aa4962239887b3a9a2960cfc4dbc6",
+      "agent_id": "wwa:mpghczdbgwz3snbsy7g5wa44tdhcvjewei4yq6z2tiuwbt6e3pda"
+    },
+    "owner-a": {
+      "role": "owner A root key (taint owner)",
+      "seed_hex": "dcdd3aae5e0ecf45d6555fddf203e6965256e7e79e39a33e8fdef4b8ce7b66ae",
+      "public_hex": "ad8624f7ab146e0d021a76eeb037c79c4f45ab030fd49de83704ef10bb3ffe61",
+      "did_key": "did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz"
+    },
+    "owner-b": {
+      "role": "owner B root key",
+      "seed_hex": "68e6f0231a2a4861c2f2edb26fe6bda6241e3b417ad85b20b06ef53a46cf9fc9",
+      "public_hex": "8c433c198e2e0296f4c6e7916c98be517f92da232e89fcf40e760fffdd24466e",
+      "did_key": "did:key:z6MkotnawLDeaX9GYnveF3rj7CFFeQX93wEKestLDpB1XgdT"
+    }
+  }
+}

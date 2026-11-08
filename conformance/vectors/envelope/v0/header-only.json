@@ -1,0 +1,54 @@
+{
+  "spec": "spec/ext/envelope.md",
+  "version": "webway-envelope/0",
+  "kind": "header-signature",
+  "description": "Verify only the signature of a stored signed header (no body): steps 3–4 on the envelope without `body`.",
+  "generator": "conformance/tools/envelope-vectors",
+  "constants": {
+    "SKEW_SECONDS": 300,
+    "MAX_TTL_SECONDS": 604800,
+    "MAX_ENVELOPE_BYTES": 1048576,
+    "MAX_DEPTH": 64
+  },
+  "cases": [
+    {
+      "id": "header-only-valid",
+      "requirements": [
+        "ENV-213"
+      ],
+      "description": "A stored signed header (body redacted) still verifies.",
+      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-7e8f-bfcf-327eb911b2c3\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:96b43c8602bfdfd38541c01d51bab6167d3874d02231c34ec99f1c0080decc8d\",\"sig\":\"r8QbqUshwogLR4O7XjyEYH_F1ITJKoIOifUO-atuYM_uTstPON1xC_6nSWUFv8M5qx4-TUvV_xGRdEyGIqWbCA\"}",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "header-only-with-unknown-member",
+      "requirements": [
+        "ENV-213"
+      ],
+      "description": "A stored header that kept an unknown member verifies.",
+      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-7bee-96e2-a42d6322e399\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"x-future\":true,\"body_hash\":\"blake3:cf167d8c416b473e4c452b4b6cafab292d72dc26ac4f4a4d5a3d1cb423ccd57f\",\"sig\":\"lMFDquuO5LJ3Rw-pdQH1nB5jYax2Q_h174EhrDKilNBxFyPnmnOmnQLzJXmWvAe-2tqOPS0i55I-cOPtnIIDDg\"}",
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "header-only-unknown-member-dropped",
+      "requirements": [
+        "ENV-213"
+      ],
+      "description": "A store that dropped the unknown member can no longer verify the header.",
+      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-7bee-96e2-a42d6322e399\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:cf167d8c416b473e4c452b4b6cafab292d72dc26ac4f4a4d5a3d1cb423ccd57f\",\"sig\":\"lMFDquuO5LJ3Rw-pdQH1nB5jYax2Q_h174EhrDKilNBxFyPnmnOmnQLzJXmWvAe-2tqOPS0i55I-cOPtnIIDDg\"}",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "SignatureInvalid",
+          "code": -33002,
+          "reason": "verification-failed",
+          "retryable": false
+        }
+      }
+    }
+  ]
+}

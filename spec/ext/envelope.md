@@ -7,7 +7,7 @@
 | Envelope version string | `webway-envelope/0` |
 | Requirement prefix | `ENV-` |
 | Test vectors | [`conformance/vectors/envelope/v0/`](../../conformance/vectors/envelope/v0/) |
-| Depends on | A2A 1.0 (`a2a.proto`), RFC 8785 (JCS), RFC 7493 (I-JSON), RFC 8032 (Ed25519), BLAKE3, RFC 9562 (UUIDv7) |
+| Depends on | A2A 1.0 (`a2a.proto` at tag `v1.0.1`, package `lf.a2a.v1`), RFC 8785 (JCS), RFC 7493 (I-JSON), RFC 8032 (Ed25519), BLAKE3, RFC 9562 (UUIDv7) |
 | Referenced by | `profile.md`, `binding-webway-quic.md`, `capability.md`, `mailbox.md`, `provenance.md`, `audit.md` (all planned) |
 
 ## 1. Purpose and scope
@@ -290,8 +290,10 @@ reconcile these, because it canonicalises JSON, not protobuf. So v0 pins one spe
 
 - field names in `lowerCamelCase` (the proto3 `json_name`),
 - enums as their string names (`"ROLE_USER"`, not `1`),
-- fields equal to their default or empty value omitted (`""`, `0`, `false`, empty arrays and objects, the
-  `*_UNSPECIFIED` enum value),
+- singular scalar, string, `bytes` and enum fields **without explicit presence** omitted when equal to their
+  default (`""`, `0`, `false`, the `*_UNSPECIFIED` enum value), and repeated and map fields omitted when empty.
+  Fields with explicit presence (`optional` fields, members of a `oneof`, message-typed fields) are emitted when
+  set, even to a default value: `{"text": ""}` is a valid Part, and `"historyLength": 0` is a meaningful setting,
 - `bytes` as standard base64 (RFC 4648 §4) with padding,
 - `int64`, `uint64`, `fixed64` and their signed variants as JSON strings in decimal,
 - `google.protobuf.Timestamp` in the timestamp format of [§3.2](#32-field-formats), and the canonical proto3 JSON
@@ -698,9 +700,9 @@ tested by the black-box harness (T4), not by a pure vector.
 | ENV-041 | MUST NOT | no credentials in body | harness |
 | ENV-050 | MUST | taint for every Part | `envelopes.json` |
 | ENV-051 | MUST | `prov` pointers resolve | `envelopes.json` |
-| ENV-052 | MUST NOT | `prov` never raises trust | provenance vectors (T13) |
+| ENV-052 | MUST NOT | `prov` never raises trust | `envelopes.json` (kept, ignored), provenance vectors (T13) |
 | ENV-100 | MUST | I-JSON input | `jcs.json`, `envelopes.json` |
-| ENV-101 | MUST | size and depth limits | `envelopes.json` (depth), harness (size) |
+| ENV-101 | MUST | size and depth limits | `jcs.json`, `envelopes.json` (depth), harness (size) |
 | ENV-110 | MUST | canonicalise the generic value | `jcs.json`, `envelopes.json` |
 | ENV-111 | MUST | JCS only | `jcs.json` |
 | ENV-120 | MUST | signer emits signer form | `envelopes.json` (valid cases) |
@@ -710,11 +712,11 @@ tested by the black-box harness (T4), not by a pure vector.
 | ENV-210 | MUST | weak keys | `envelopes.json` |
 | ENV-211 | MUST | strict verification | `envelopes.json` |
 | ENV-212 | MUST | `body_hash` check | `envelopes.json` |
-| ENV-213 | MUST | keep full signed header | `envelopes.json` (`header_only` cases) |
-| ENV-300 | MUST | expiry | `freshness.json`, `envelopes.json` |
+| ENV-213 | MUST | keep full signed header | `header-only.json` |
+| ENV-300 | MUST | expiry | `freshness.json`, `envelopes.json`, `replay.json` |
 | ENV-301 | MUST | future `ts` | `freshness.json`, `envelopes.json` |
-| ENV-302 | MUST NOT | no age limit from `ts` | `freshness.json` |
-| ENV-303 | MUST | inclusive, full precision | `freshness.json` |
+| ENV-302 | MUST NOT | no age limit from `ts` | `freshness.json`, `envelopes.json` |
+| ENV-303 | MUST | inclusive, full precision | `freshness.json`, `envelopes.json` |
 | ENV-304 | MUST | sender stops at `exp` | harness |
 | ENV-305 | SHOULD | mailbox discards expired | harness |
 | ENV-400 | MUST | recipient binding | `envelopes.json` |
@@ -724,7 +726,7 @@ tested by the black-box harness (T4), not by a pure vector.
 | ENV-501 | MUST | when entries are created | `replay.json` |
 | ENV-502 | MUST | entry lifetime | `replay.json` |
 | ENV-503 | MUST | durable, atomic entries | harness |
-| ENV-504 | MUST | purge watermark | `replay.json`, `freshness.json` |
+| ENV-504 | MUST | purge watermark | `replay.json`, `freshness.json`, `envelopes.json` |
 | ENV-505 | MUST | one at a time per key | harness |
 | ENV-510 | MUST | classification | `replay.json` |
 | ENV-511 | MUST | canonical header digest | `replay.json` |
@@ -751,7 +753,7 @@ tested by the black-box harness (T4), not by a pure vector.
 
 ## Appendix B. Body locations (provisional)
 
-Locations are JSON Pointer patterns, `*` matching any array index. They follow `a2a.proto` (package `lf.a2a.v1`).
+Locations are JSON Pointer patterns, `*` matching any array index. They follow `a2a.proto` at tag `v1.0.1` (package `lf.a2a.v1`).
 `profile.md` will take this table over ([open question 5](#open-questions)).
 
 | `typ` / `op` | Parts at | `taskId` at | `contextId` at |

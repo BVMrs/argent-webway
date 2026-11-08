@@ -1,0 +1,403 @@
+{
+  "spec": "spec/ext/envelope.md",
+  "version": "webway-envelope/0",
+  "kind": "jcs",
+  "description": "Parse as I-JSON (spec §4.1) and canonicalise with RFC 8785 (§4.2).",
+  "generator": "conformance/tools/envelope-vectors",
+  "constants": {
+    "SKEW_SECONDS": 300,
+    "MAX_TTL_SECONDS": 604800,
+    "MAX_ENVELOPE_BYTES": 1048576,
+    "MAX_DEPTH": 64
+  },
+  "cases": [
+    {
+      "id": "rfc8785-sorting",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "RFC 8785 §3.2.3: keys sorted by UTF-16 code units.",
+      "input": "{\"\\u20ac\":\"Euro Sign\",\"\\r\":\"Carriage Return\",\"\\ufb33\":\"Hebrew Letter Dalet With Dagesh\",\"1\":\"One\",\"\\ud83d\\ude00\":\"Emoji: Grinning Face\",\"\\u0080\":\"Control\",\"\\u00f6\":\"Latin Small Letter O With Diaeresis\"}",
+      "expect": {
+        "result": "canonical",
+        "canonical": "{\"\\r\":\"Carriage Return\",\"1\":\"One\",\"\":\"Control\",\"ö\":\"Latin Small Letter O With Diaeresis\",\"€\":\"Euro Sign\",\"😀\":\"Emoji: Grinning Face\",\"דּ\":\"Hebrew Letter Dalet With Dagesh\"}"
+      }
+    },
+    {
+      "id": "whitespace-and-nesting",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "Insignificant whitespace removed, nested objects sorted.",
+      "input": "{ \"b\" : [ 1 , { \"z\":true, \"a\":null } ] ,\n\t\"a\" : { } , \"c\":[ ] }",
+      "expect": {
+        "result": "canonical",
+        "canonical": "{\"a\":{},\"b\":[1,{\"a\":null,\"z\":true}],\"c\":[]}"
+      }
+    },
+    {
+      "id": "numbers-es6",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "Numbers serialised as ECMAScript Number.prototype.toString.",
+      "input": "[1.0, -0, 1e21, 1e20, 1E-7, 0.000001, 123.4560, 5e-324, 1.7976931348623157e308, 9007199254740991, -9007199254740991, 0.1, 100e-2, 2e0, 0.30000000000000004, 4.5e-10]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[1,0,1e+21,100000000000000000000,1e-7,0.000001,123.456,5e-324,1.7976931348623157e+308,9007199254740991,-9007199254740991,0.1,1,2,0.30000000000000004,4.5e-10]"
+      }
+    },
+    {
+      "id": "number-large-with-fraction",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "9007199254740993.0 has a fraction part, so it is not an unsafe-integer token; it rounds to the double 9007199254740992.",
+      "input": "[9007199254740993.0]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[9007199254740992]"
+      }
+    },
+    {
+      "id": "number-underflow",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "1e-400 underflows to 0 (only overflow is rejected).",
+      "input": "[1e-400]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[0]"
+      }
+    },
+    {
+      "id": "string-escapes",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "Only \", \\ and control characters are escaped; \\/ and \\u0041 are unescaped; U+007F is emitted raw.",
+      "input": "[\"\\u0041\\u00e9\\/\\b\\f\\n\\r\\t\\u001f\\u007f\\\"\\\\\"]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[\"Aé/\\b\\f\\n\\r\\t\\u001f\\\"\\\\\"]"
+      }
+    },
+    {
+      "id": "surrogate-pair",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "An escaped surrogate pair and a raw emoji both become raw UTF-8.",
+      "input": "[\"\\ud83d\\ude80\", \"🚀\"]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[\"🚀\",\"🚀\"]"
+      }
+    },
+    {
+      "id": "literals",
+      "requirements": [
+        "ENV-110",
+        "ENV-111"
+      ],
+      "description": "true, false, null.",
+      "input": "[true,false,null]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[true,false,null]"
+      }
+    },
+    {
+      "id": "depth-64",
+      "requirements": [
+        "ENV-101"
+      ],
+      "description": "64 nested arrays: at MAX_DEPTH, accepted.",
+      "input": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "expect": {
+        "result": "canonical",
+        "canonical": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+      }
+    },
+    {
+      "id": "depth-65",
+      "requirements": [
+        "ENV-101"
+      ],
+      "description": "65 nested arrays: over MAX_DEPTH.",
+      "input": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "too-deep",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "duplicate-key",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Two members named a.",
+      "input": "{\"a\":1,\"a\":2}",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "duplicate-key",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "duplicate-key-escaped",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "\"a\" and \"\\u0061\" are the same name.",
+      "input": "{\"a\":1,\"\\u0061\":2}",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "duplicate-key",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "duplicate-key-nested",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Duplicate inside a nested object.",
+      "input": "{\"x\":{\"k\":1,\"k\":1}}",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "duplicate-key",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "lone-high-surrogate",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "\\ud800 not followed by a low surrogate.",
+      "input": "[\"\\ud800x\"]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "invalid-unicode",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "lone-low-surrogate",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "\\udc00 on its own.",
+      "input": "[\"\\udc00\"]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "invalid-unicode",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "invalid-utf8",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Byte 0xC3 followed by an ASCII byte.",
+      "input_hex": "5b22c328225d",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "invalid-unicode",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "unsafe-integer-positive",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "2^53 written as a plain integer.",
+      "input": "[9007199254740992]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "unsafe-integer-negative",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "−2^53 written as a plain integer.",
+      "input": "[-9007199254740992]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "number-overflow",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "1e400 overflows a double.",
+      "input": "[1e400]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "number-out-of-range",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "number-overflow-negative",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "−1e400.",
+      "input": "[-1e400]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "number-out-of-range",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "not-json-trailing-comma",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Trailing comma.",
+      "input": "[1,]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "not-json",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "not-json-leading-zero",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Leading zero.",
+      "input": "[01]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "not-json",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "not-json-nan",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "NaN is not JSON.",
+      "input": "[NaN]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "not-json",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "not-json-single-quotes",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "Single-quoted string.",
+      "input": "['a']",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "not-json",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "not-json-raw-control",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "A raw tab inside a string.",
+      "input": "[\"a\tb\"]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "not-json",
+          "retryable": false
+        }
+      }
+    }
+  ]
+}
