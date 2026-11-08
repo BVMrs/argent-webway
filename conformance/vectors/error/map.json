@@ -2,7 +2,7 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "error/map",
-  "description": "Error registry. Input {name, context?: task-op (the operation names a task the caller may not see) | terminal-task}. Output {name, code, reason, retryable, http?, grpc?} of the error the node actually returns. http and grpc are present for errors with an edge mapping.",
+  "description": "Error registry. Input {name, context?: task-op (the operation names a task the caller may not see) | terminal-task}. Output {name, code, reason, retryable, http?, grpc?, profileReason?} of the error the node actually returns. reason is that of the primary ErrorInfo, profileReason that of the profile-domain refinement if any. http and grpc are present for errors with an edge mapping.",
   "spec": "profile.md#10-error-model",
   "cases": [
     {"id":"a2a-task-not-found","description":"TaskNotFoundError keeps its A2A code and statuses","requirements":["PROF-051","PROF-053"],"input":{"name":"TaskNotFoundError"},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","code":-32001,"reason":"TASK_NOT_FOUND","retryable":false,"http":404,"grpc":"NOT_FOUND"}}},
@@ -35,6 +35,6 @@
     {"id":"prof-provenance-policy-violation","description":"ProvenancePolicyViolation has its registered code, reason, retryability and edge statuses","requirements":["PROF-051","PROF-053"],"input":{"name":"ProvenancePolicyViolation"},"expect":{"result":"accept","output":{"name":"ProvenancePolicyViolation","code":-30040,"reason":"PROVENANCE_POLICY_VIOLATION","retryable":false,"http":403,"grpc":"PERMISSION_DENIED"}}},
     {"id":"denied-task-op-hides-existence","description":"CapabilityDenied on an operation naming a task is reported as TaskNotFoundError","requirements":["PROF-047"],"input":{"name":"CapabilityDenied","context":"task-op"},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","code":-32001,"reason":"TASK_NOT_FOUND","retryable":false,"http":404,"grpc":"NOT_FOUND"}}},
     {"id":"missing-task-op-hides-existence","description":"CapabilityMissing on an operation naming a task is reported as TaskNotFoundError","requirements":["PROF-047"],"input":{"name":"CapabilityMissing","context":"task-op"},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","code":-32001,"reason":"TASK_NOT_FOUND","retryable":false,"http":404,"grpc":"NOT_FOUND"}}},
-    {"id":"terminal-task-reason","description":"UnsupportedOperationError on a terminal task uses reason TASK_TERMINAL","requirements":["PROF-051"],"input":{"name":"UnsupportedOperationError","context":"terminal-task"},"expect":{"result":"accept","output":{"name":"UnsupportedOperationError","code":-32004,"reason":"TASK_TERMINAL","retryable":false,"http":400,"grpc":"FAILED_PRECONDITION"}}}
+    {"id":"terminal-task-reason","description":"UnsupportedOperationError on a terminal task keeps the A2A reason and adds a profile TASK_TERMINAL detail","requirements":["PROF-051","PROF-081"],"input":{"name":"UnsupportedOperationError","context":"terminal-task"},"expect":{"result":"accept","output":{"name":"UnsupportedOperationError","code":-32004,"reason":"UNSUPPORTED_OPERATION","retryable":false,"http":400,"grpc":"FAILED_PRECONDITION","profileReason":"TASK_TERMINAL"}}}
   ]
 }

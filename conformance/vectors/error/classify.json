@@ -2,7 +2,7 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "error/classify",
-  "description": "Client-side error classification. Input {code, reason?, httpStatus?}. Output {name, retryable}. name is Unknown for a code not in profile §10 (or the two Go codes).",
+  "description": "Client-side error classification. Input {code? (JSON-RPC code), domain?, reason? (from the ErrorInfo), httpStatus?}. Output {name, retryable}. name is Unknown for a code not in profile §10 (or the two Go codes).",
   "spec": "profile.md#101-structure",
   "cases": [
     {"id":"a2a-code","description":"Classified by JSON-RPC code","requirements":["PROF-052"],"input":{"code":-32001},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","retryable":false}}},
@@ -15,6 +15,10 @@
     {"id":"internal","description":"InternalError is retryable","requirements":["PROF-052"],"input":{"code":-32603},"expect":{"result":"accept","output":{"name":"InternalError","retryable":true}}},
     {"id":"terminal-reason","description":"The refinement reason does not change the error","requirements":["PROF-052"],"input":{"code":-32004,"reason":"TASK_TERMINAL"},"expect":{"result":"accept","output":{"name":"UnsupportedOperationError","retryable":false}}},
     {"id":"unknown-code","description":"An unknown code is not retryable, whatever the status","requirements":["PROF-052"],"input":{"code":-30099,"httpStatus":503},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}},
+    {"id":"http-json-a2a","description":"HTTP+JSON: no JSON-RPC code, identified by ErrorInfo","requirements":["PROF-052"],"input":{"domain":"a2a-protocol.org","reason":"TASK_NOT_FOUND","httpStatus":404},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","retryable":false}}},
+    {"id":"http-json-profile","description":"HTTP+JSON: a profile error by ErrorInfo","requirements":["PROF-052"],"input":{"domain":"github.com/BVMrs/argent-webway","reason":"PEER_UNREACHABLE","httpStatus":503},"expect":{"result":"accept","output":{"name":"PeerUnreachable","retryable":true}}},
+    {"id":"status-alone","description":"An HTTP status alone identifies nothing","requirements":["PROF-052"],"input":{"httpStatus":503},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}},
+    {"id":"reason-wrong-domain","description":"A reason under a foreign domain is not ours","requirements":["PROF-052"],"input":{"domain":"example.com","reason":"TASK_NOT_FOUND","httpStatus":404},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}},
     {"id":"unknown-a2a-range","description":"An unknown code in A2A's range (a future A2A error) is not retryable","requirements":["PROF-052"],"input":{"code":-32010},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}}
   ]
 }

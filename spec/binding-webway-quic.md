@@ -162,9 +162,12 @@ does.
 - [BIND-009] On a REQUEST stream, a responder MUST accept a request envelope only if its `from` agent is bound to
   the connection's peer node by a valid binding statement (`ext/capability.md`). Otherwise it MUST answer
   `IdentityUntrusted`. A requester MUST likewise accept response and event envelopes on a REQUEST stream only if
-  their `from` is the agent the request was sent `to`, or the responder node itself (§8.2).
+  their `from` is the agent the request was sent `to`, or the node that agent is bound to (§8.2).
 - On a DELIVER stream the peer may be a mailbox host carrying other nodes' envelopes, so the connection's peer key
-  says nothing about `from`. Each envelope is verified on its own (signature, binding statement, freshness).
+  says nothing about `from`. Each envelope is verified on its own (signature, binding statement, freshness), and
+  a response or event counts for a request only if it is signed by the request's `to` agent or the node that agent
+  is bound to (profile PROF-078). An error signed by any other node, such as a mailbox host's `RecipientUnknown`,
+  is a per-hop failure.
 
 ## 6. Framing and payloads
 
@@ -204,7 +207,11 @@ Frame {
 - [BIND-013] JSON payloads MUST be UTF-8 encoded I-JSON (RFC 7493), one JSON value per frame, with no byte order
   mark. A receiver MUST treat a HELLO, GOAWAY, END or CUSTODY payload that is not such a JSON object as a
   connection error `ProtocolError`. A REQUEST, RESPONSE, EVENT or DELIVER payload that does not parse is an
-  envelope error, answered as §11.1 says, not a connection error.
+  envelope error, not a connection error. A REQUEST whose envelope `id` cannot be read is answered with an
+  `EnvelopeInvalid` RESPONSE whose `rpc.id` is `null` and whose `ctx` has no `inReplyTo` (JSON-RPC's rule for
+  unreadable requests). The requester matches it by the stream, which carries one request. A DELIVER whose `id` or
+  `from` cannot be read gets a CUSTODY `rejected` with `id` and `from` set to `null`, matched by position
+  (BIND-024). A RESPONSE or EVENT that does not parse is `InvalidAgentResponseError` for the requester.
 
 ### 6.2 Envelopes and the binding body
 
@@ -230,8 +237,8 @@ BindingBody {
   object whose `id` equals the request's `id` and whose `result` is an A2A `StreamResponse` (exactly one of
   `task`, `message`, `statusUpdate`, `artifactUpdate`), exactly as one SSE event of the A2A JSON-RPC binding
   carries. Response and event envelopes MUST have `ctx.inReplyTo` equal to the request's `id`, and an `id` of their
-  own that differs from it. A requester MUST treat a RESPONSE or EVENT that breaks this as
-  `InvalidAgentResponseError`.
+  own that differs from it. The one exception is the error answer to an unreadable request (BIND-013). A requester
+  MUST treat a RESPONSE or EVENT that breaks this as `InvalidAgentResponseError`.
 - [BIND-016] An EVENT whose `StreamResponse` concerns a task (a `task`, a `statusUpdate`, an `artifactUpdate`, or a
   `message` with a `taskId`) MUST carry `ctx.taskId` and `ctx.seq` (profile PROF-020, PROF-021). A requester MUST
   treat one without them as `InvalidAgentResponseError`.
@@ -246,7 +253,7 @@ so that signatures are reproducible (the pinned signer form of `ext/envelope.md`
 
 | `a2a.proto` type | JSON form on this binding |
 |---|---|
-| message | object, `lowerCamelCase` field names, fields at default value omitted |
+| message | object, `lowerCamelCase` field names. A field without explicit presence is omitted when it has its default value. A field with explicit presence (`optional` in `a2a.proto`, such as `historyLength`) is present exactly when it is set, even to its default. A `REQUIRED` field is always present. `ext/envelope.md` must pin the same rule. |
 | `string` | string |
 | `bytes` | standard base64 with padding (RFC 4648 §4) |
 | `int32`, `uint32`, `bool`, `double` | number or boolean |
@@ -305,14 +312,18 @@ A REQUEST stream carries exactly one operation:
 
 ```text
 requester → responder:   REQUEST  FIN
-responder → requester:   unary:      RESPONSE  FIN
-                         streaming:  EVENT+ END FIN
-                                   | EVENT* RESPONSE FIN        // RESPONSE carries an error
+responder → requester:   unary:                 RESPONSE  FIN
+                         SendStreamingMessage:  EVENT+ END FIN
+                                              | EVENT* RESPONSE FIN    // RESPONSE carries an error
+                         SubscribeToTask:       EVENT* END FIN
+                                              | EVENT* RESPONSE FIN    // RESPONSE carries an error
 ```
 
 - [BIND-019] A requester MUST open a new REQUEST stream for each operation, send exactly one REQUEST frame and then
-  end its side of the stream. A responder MUST follow the grammar above for the operation's mode. A RESPONSE on a
-  streaming operation MUST carry an error, not a result. Any other sequence MUST be treated as a stream error
+  end its side of the stream. A responder MUST follow the grammar above for the operation. A RESPONSE on a
+  streaming operation MUST carry an error, not a result. (A `SendStreamingMessage` stream always starts with the
+  task or message. A `SubscribeToTask` stream can end with no event, for example when the responder shuts down
+  before anything happened.) Any other sequence MUST be treated as a stream error
   `FrameUnexpected` (unknown frame types excepted, BIND-012).
 - [BIND-020] A responder MUST answer a REQUEST that fails envelope verification, authentication, authorisation or
   version checks with a RESPONSE carrying the error (§11). When the error occurs before the request can be
@@ -388,8 +399,9 @@ CUSTODY is per hop and unsigned. It moves the requester's delivery state to `sen
 A2A §12.6 asks each binding to say which schemes it supports, how credentials travel, and how challenges work.
 
 - **Scheme.** The card declares this binding's authentication as the `webway` security scheme of type
-  `mtlsSecurityScheme` (profile §5). It is the only scheme that applies on this binding. The card's other schemes
-  (OAuth 2.0, OIDC …) apply to its HTTP interfaces.
+  `mtlsSecurityScheme` (profile §5). A2A applies `securityRequirements` card-wide, as alternatives. On this
+  binding only the `webway` alternative can be met, and it is the only one a node checks here. The card's other
+  alternatives (OAuth 2.0, OIDC …) are for its HTTP interfaces (profile PROF-075).
 - **Credentials.** The node key is proved by the QUIC/TLS handshake (BIND-002). The agent key is proved by the
   envelope signature. Authorisation is carried as capability tokens in the envelope's `cap` field
   (`ext/capability.md`), inside the signature. No credential is carried in `svc`, in `metadata` or in message

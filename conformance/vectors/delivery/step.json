@@ -7,9 +7,9 @@
   "cases": [
     {"id":"queued-transmit","description":"transmit in queued gives sent","requirements":["PROF-033"],"input":{"state":"queued","event":"transmit"},"expect":{"result":"accept","output":{"state":"sent"}}},
     {"id":"queued-custody","description":"custody in queued gives sent","requirements":["PROF-033"],"input":{"state":"queued","event":"custody"},"expect":{"result":"accept","output":{"state":"sent"}}},
-    {"id":"queued-response","description":"response in queued gives acknowledged","requirements":["PROF-033"],"input":{"state":"queued","event":"response"},"expect":{"result":"accept","output":{"state":"acknowledged"}}},
-    {"id":"queued-retryable-error","description":"retryable-error in queued gives sent","requirements":["PROF-033"],"input":{"state":"queued","event":"retryable-error"},"expect":{"result":"accept","output":{"state":"sent"}}},
-    {"id":"queued-final-error","description":"final-error in queued gives refused","requirements":["PROF-033"],"input":{"state":"queued","event":"final-error"},"expect":{"result":"accept","output":{"state":"refused"}}},
+    {"id":"queued-response","description":"response in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"response"},"expect":{"result":"reject"}},
+    {"id":"queued-retryable-error","description":"retryable-error in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"retryable-error"},"expect":{"result":"reject"}},
+    {"id":"queued-final-error","description":"final-error in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"final-error"},"expect":{"result":"reject"}},
     {"id":"queued-expiry","description":"expiry in queued gives expired","requirements":["PROF-033"],"input":{"state":"queued","event":"expiry"},"expect":{"result":"accept","output":{"state":"expired"}}},
     {"id":"queued-local-cancel","description":"local-cancel in queued gives withdrawn","requirements":["PROF-033","PROF-035"],"input":{"state":"queued","event":"local-cancel"},"expect":{"result":"accept","output":{"state":"withdrawn"}}},
     {"id":"sent-transmit","description":"transmit in sent gives sent","requirements":["PROF-033"],"input":{"state":"sent","event":"transmit"},"expect":{"result":"accept","output":{"state":"sent"}}},

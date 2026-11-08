@@ -111,7 +111,7 @@ Status of each A2A 1.0 feature in this profile:
 | `GetTask` | mandatory | mandatory | Scoped to the caller (§9) |
 | `ListTasks` | mandatory | mandatory | Scoped to the caller (§9) |
 | `CancelTask` | mandatory | mandatory | §6.3 |
-| `SubscribeToTask` | mandatory | mandatory | Plus the profile's cursor (§7.2) |
+| `SubscribeToTask` | mandatory, plus the profile's cursor (§7.2) | mandatory, A2A behaviour only (no cursor) | |
 | Push notification config (Create/Get/List/Delete) | optional. Otherwise `PushNotificationNotSupportedError` | optional | Inside the overlay, event delivery to offline requesters is the mailbox (§8.4), not webhooks |
 | `GetExtendedAgentCard` | optional | optional | |
 | Agent Card | mandatory, signed (§5) | mandatory, the same card | |
@@ -122,8 +122,10 @@ Status of each A2A 1.0 feature in this profile:
 | Multi-tenancy (`tenant`) | optional | optional | Routing only, never authorisation (PROF-046) |
 
 - [PROF-002] A node MUST implement every operation marked mandatory in the table above, on every interface it
-  declares. A node MUST send the `A2A-Version` service parameter with value `1.0` on every A2A request it sends, on
-  every binding. It MUST NOT send a minor version higher than the target interface's declared `protocolVersion`.
+  declares. A node MUST send the `A2A-Version` service parameter on every A2A request it sends, on every binding,
+  with the version chosen as follows: `1.0`, unless both the node and the peer implement a higher `1.x` (on
+  `webway-quic/v0`, as HELLO says, binding BIND-029) and the target interface declares it. It MUST NOT send a minor
+  version higher than the target interface's declared `protocolVersion`.
 - [PROF-003] A node acting as a client MUST select the interface it calls by both `protocolBinding` and
   `protocolVersion`, never by `protocolBinding` alone. An interface is usable if the client implements its
   binding and implements an A2A version of the same major that is not above the interface's `protocolVersion`.
@@ -155,8 +157,8 @@ Unknown fields that are not argent-webway data SHOULD be ignored, as A2A §5.7 s
 
 - [PROF-008] Every agent hosted by a node MUST publish an A2A 1.0 Agent Card that:
   1. lists in `supportedInterfaces` one interface with `protocolBinding` equal to the binding URI, `url` equal to
-     the agent address, and `protocolVersion` `"1.0"`, plus any HTTP interfaces the agent's node offers at its
-     edge;
+     the agent address, and `protocolVersion` the highest `1.x` the agent implements (`"1.0"` for nodes without
+     A2A 1.1 support), plus any HTTP interfaces the agent's node offers at its edge;
   2. sets `capabilities.streaming` to `true`;
   3. declares the profile in `capabilities.extensions` as an `AgentExtension` with `uri` equal to the profile URI,
      `required: false`, and `params` `{"version": "<MAJOR.MINOR>"}`;
@@ -182,9 +184,17 @@ Unknown fields that are not argent-webway data SHOULD be ignored, as A2A §5.7 s
   a peer is untrusted data. A node MUST NOT put it into an agent's instructions. It MUST give it to agents only as
   labelled data (§9.3).
 
-The interface declares argent-webway authentication with an existing scheme type (PROF-005): a `securitySchemes`
-entry named `webway` of type `mtlsSecurityScheme`, whose `description` points to the binding URI. It appears in
-`securityRequirements` as one alternative next to whatever the HTTP edge uses. Example (abridged, unsigned):
+The card declares argent-webway authentication with an existing scheme type (PROF-005): a `securitySchemes`
+entry named `webway` of type `mtlsSecurityScheme`, whose `description` points to the binding URI. A2A applies
+`securityRequirements` to the whole card, not per interface, and its entries are alternatives. So `webway` is
+listed as one alternative next to the schemes the HTTP edge accepts (OAuth 2.0, OIDC …). On `webway-quic/v0` only
+the `webway` alternative can be met. On an HTTP interface a stock client meets one of the others, and a webway peer
+may meet `webway` with HTTP Message Signatures by its key (PROF-061).
+
+- [PROF-075] A card that lists an HTTP interface MUST list in `securityRequirements` at least one alternative that
+  does not use the `webway` scheme, or stock clients could not call that interface.
+
+Example (abridged, unsigned):
 
 ```json
 {
@@ -205,8 +215,10 @@ entry named `webway` of type `mtlsSecurityScheme`, whose `description` points to
     ]
   },
   "securitySchemes": {
-    "webway": { "mtlsSecurityScheme": { "description": "argent-webway: https://github.com/BVMrs/argent-webway/spec/binding/webway-quic/v0" } }
-  }
+    "webway": { "mtlsSecurityScheme": { "description": "argent-webway: https://github.com/BVMrs/argent-webway/spec/binding/webway-quic/v0" } },
+    "owner-oauth": { "oauth2SecurityScheme": { "flows": { "clientCredentials": { "tokenUrl": "https://auth.beta.example.org/token", "scopes": {} } } } }
+  },
+  "securityRequirements": [ { "schemes": { "webway": { } } }, { "schemes": { "owner-oauth": { } } } ]
 }
 ```
 
@@ -215,6 +227,8 @@ entry named `webway` of type `mtlsSecurityScheme`, whose `description` points to
 A2A 1.0 lists the task states but gives no transition table (research §2). This section fixes one. It is
 deliberately permissive where A2A is silent, so that stock agents behind a bridge are not broken by it, and strict
 about the two things that matter for durable delivery: tasks start in `submitted`, and terminal states are final.
+`rejected` follows `a2a.proto`, which says an agent may reject "during initial task creation or later once an
+agent has determined it can't or won't proceed".
 
 ### 6.1 Who drives the state
 
@@ -222,7 +236,7 @@ about the two things that matter for durable delivery: tasks start in `submitted
   `SendStreamingMessage` that does not name an existing task (§6.4).
 - The **responder agent** drives every later transition, except those listed below.
 - The **responder node** itself may move a task to `canceled` (for `CancelTask`), to `rejected` (a policy refusal
-  after creation, from `submitted` only), or to `failed` (the agent crashed, timed out or is gone).
+  after creation), or to `failed` (the agent crashed, timed out or is gone).
 - The **requester** never sets a state directly. It acts with `SendMessage` (continue), `CancelTask` and the
   read operations.
 
@@ -234,17 +248,19 @@ about the two things that matter for durable delivery: tasks start in `submitted
 |---|---|---|---|---|---|---|---|---|
 | **∅** | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | **submitted** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| **working** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **input-required** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
-| **auth-required** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **working** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **input-required** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **auth-required** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **completed** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | **failed** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | **canceled** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | **rejected** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 
-In words: a task is born `submitted`. `rejected` is reachable only from `submitted` (the agent declined before
-starting). Nothing returns to `submitted`. An active state may repeat itself, which is a progress update carrying a
-new status message. Terminal states are final.
+In words: a task is born `submitted`. Nothing returns to `submitted`. Any active state may move to any other
+state. An active state may repeat itself, which is a progress update carrying a new status message. Terminal
+states are final. The table is closed under composition: if a sequence of legal transitions leads from `a` to `b`,
+then `a → b` is itself legal. So a requester that missed events can check a snapshot against the last state it
+recorded with one lookup (PROF-028).
 
 - [PROF-015] A node MUST record the first state of every task it creates as `submitted`, and MUST emit only the
   transitions marked ✓ in the table above, for tasks it hosts and for proxy tasks it shows its own agents.
@@ -253,9 +269,8 @@ new status message. Terminal states are final.
   event as `InvalidAgentResponseError` (−32006), end that stream (if any), and reconcile with `GetTask`. A task
   it has recorded as terminal MUST stay terminal in its own records whatever later events say.
 - [PROF-017] A bridge agent whose upstream (a stock A2A server or an MCP server) reports an illegal transition
-  MUST NOT forward it as such. It MUST map it to the nearest legal transition defined in §12.4 or, if none exists,
-  move its own task to `failed` with reason `InvalidAgentResponse` in the status message, and record an audit
-  anomaly.
+  MUST NOT forward it. The only illegal upstream transitions are a return to `submitted` and any change after a
+  terminal state. The bridge MUST keep its own task in its current state for both, and record an audit anomaly.
 
 ### 6.3 Operations by state
 
@@ -264,14 +279,15 @@ behaviour A2A 1.0 already prescribes.
 
 | Operation \ state | submitted | working | input-required | auth-required | terminal |
 |---|---|---|---|---|---|
-| `SendMessage` / `SendStreamingMessage` with this `taskId` | accepted, appended to history; state unchanged unless the agent changes it | same as submitted | accepted; the agent normally moves to `working` | accepted; the agent normally moves to `working` | `UnsupportedOperationError` (A2A), reason `TASK_TERMINAL` |
+| `SendMessage` / `SendStreamingMessage` with this `taskId` | accepted, appended to history; state unchanged unless the agent changes it | same as submitted | accepted; the agent normally moves to `working` | accepted; the agent normally moves to `working` | `UnsupportedOperationError` (A2A), profile detail `TASK_TERMINAL` |
 | `CancelTask` | moves to `canceled` (PROF-018) | `canceled`, or `TaskNotCancelableError` if the agent cannot stop | as working | as working | `TaskNotCancelableError` (A2A) |
-| `SubscribeToTask` without cursor | snapshot, then live events (A2A) | same | same | same | `UnsupportedOperationError` (A2A), reason `TASK_TERMINAL` |
+| `SubscribeToTask` without cursor | snapshot, then live events (A2A) | same | same | same | `UnsupportedOperationError` (A2A), profile detail `TASK_TERMINAL` |
 | `SubscribeToTask` with cursor (§7.2) | replay from cursor, then live | same | same | same | replay from cursor up to the terminal event, then end |
 | `GetTask` | snapshot | snapshot | snapshot | snapshot | snapshot |
 
-- [PROF-018] A node MUST handle requester operations as the table above specifies. In particular, `CancelTask`
-  on a `submitted` task MUST succeed and move it to `canceled`, because the agent has not started.
+- [PROF-018] A responder node MUST handle requester operations on tasks it hosts as the table above specifies. In
+  particular, `CancelTask` on a `submitted` task it hosts MUST succeed and move it to `canceled`, because the agent
+  has not started. Proxy tasks follow §8.3 instead (PROF-035).
 - [PROF-019] An `auth-required` state is not an authorisation. A node MUST check authorisation for the message
   that resumes an `auth-required` task exactly as for any other message (§9.2). Credentials the agent asked for
   MUST NOT travel in message text (§9.4).
@@ -292,16 +308,22 @@ same answer as for a task that does not exist (PROF-047).
   with `seq` `n`. (The envelopes differ, because each is signed for one recipient and one request.)
 - [PROF-021] The `seq` of an event MUST travel in the signed envelope header (`ctx.seq`, `ext/envelope.md`), never
   only in an unsigned frame. A `Task` snapshot sent outside the log (the first frame of a cursorless subscribe,
-  a `GetTask` result) carries the `seq` of the last log entry it reflects.
+  a `GetTask` result) is not a log entry. It MUST carry in `ctx.seq` the `seq` of the last log entry it reflects,
+  so that requesters can order it against events.
 - [PROF-022] A responder node MUST make the new task (or the continuation) and its first log entry durable before
   it sends any response or acknowledgement for the message that caused them. A crash after that point MUST NOT
   lose the task, and a crash before it MUST NOT leave a task the requester was told about.
 - [PROF-023] A node MUST de-duplicate received envelopes on `(from, id)` for as long as `ext/envelope.md`
-  requires (until at least `exp + SKEW`). The dedupe entry MUST be written in the same atomic transaction as the
-  task or event it caused. A duplicate inside that horizon MUST NOT be processed again and MUST be answered with
-  the stored original response envelope, byte for byte. For a duplicate streaming request, the "original
-  response" is the task's event log: the node replays it from `seq` 0 (the same entries, PROF-020, in envelopes
-  for the new stream) and continues live, as a cursor subscribe from 0 would.
+  requires (until at least `exp + SKEW`). For `SendMessage` and `SendStreamingMessage` the envelope `id` MUST
+  equal the request's `message.messageId`, so the key is also `(sender agent, messageId)`. The dedupe entry MUST
+  be written in the same atomic transaction as the task or event it caused. A duplicate inside that horizon MUST
+  NOT be processed again and MUST be answered with the stored original response envelope, byte for byte. If the
+  original is still being processed (a blocking `SendMessage`), the duplicate MUST wait for the original's
+  response and then get it. For a duplicate streaming request, the "original response" is the task's event log:
+  the node replays it from `seq` 0 (the same entries, PROF-020, in envelopes for the new stream) and continues
+  live, as a cursor subscribe from 0 would.
+- [PROF-076] A responder MUST give every response envelope an `exp` no earlier than the request's `exp + SKEW`, so
+  that a stored response sent again for a duplicate is still fresh for as long as duplicates can arrive.
 
 A2A makes `messageId` deduplication optional (A2A §3.3.1). In this profile it is mandatory, because at-least-once
 delivery with idempotent receivers is how offline peers work (§8).
@@ -321,19 +343,27 @@ delivery with idempotent receivers is how offline peers work (§8).
 ### 7.2 Resuming from a cursor
 
 A2A 1.0 has no stream resumption, and no SDK replays missed events (research §3.4). The profile adds a cursor.
-On `webway-quic/v0` the cursor is the service parameter `webway-from-seq` (binding §7). Over a bridge it is
-`metadata["https://github.com/BVMrs/argent-webway/spec/profile/v0"].fromSeq` where the request type has a
-`metadata` field.
+On `webway-quic/v0` the cursor is the service parameter `webway-from-seq` (binding §7). The A2A HTTP bindings have
+no place for it (`SubscribeToTaskRequest` has only `tenant` and `id`, and PROF-004 forbids new fields), so at the
+HTTP edge `SubscribeToTask` behaves as A2A 1.0 says: snapshot first, then live events. Stock clients reconcile with
+the snapshot.
 
 - [PROF-027] On `SubscribeToTask` with cursor `k`, a responder node MUST send, in order, every log entry with
   `seq ≥ k`, and then live events. It MUST NOT send a snapshot first. If the log no longer holds entry `k`
   (retention), it MUST instead send the current `Task` snapshot first, with the `seq` of the last entry it
-  reflects, and then live events. If the task is terminal, it MUST end the stream after the terminal event. A
-  cursor greater than the last `seq` plus one MUST be rejected with `InvalidParamsError` (−32602).
+  reflects, and then live events. If the task is terminal, it MUST end the stream after the terminal event, and
+  if the cursor is already past the terminal event (`k` = last `seq` + 1) it MUST send the current, terminal
+  `Task` snapshot and end. A cursor greater than the last `seq` plus one MUST be rejected with
+  `InvalidParamsError` (−32602).
 - [PROF-028] A requester MUST de-duplicate received events by `seq` per task and MUST ignore an event whose `seq`
-  it has already applied. A `Task` snapshot replaces its view of the task and resets its cursor to the
-  snapshot's `seq`. A gap (an event whose `seq` is more than one above the last applied) MUST NOT be applied. The
-  requester MUST end that stream and resubscribe from the first missing `seq`.
+  it has already applied. A `Task` snapshot whose `seq` is greater than the last applied replaces its view of the
+  task and moves its cursor to the snapshot's `seq`, provided its state is the last recorded state or a legal
+  transition from it (§6.2). A snapshot with a lower or equal `seq` MUST be ignored, and one with an illegal state
+  MUST be handled as PROF-016 says. A gap (an event whose `seq` is more than one above the last applied) MUST NOT
+  be applied. On a stream, the requester MUST end that stream and resubscribe from the first missing `seq`. For
+  events arriving by deferred delivery, which can be reordered between a mailbox path and a direct path, it MUST
+  hold out-of-order events and apply them in order once the gap is filled. If the gap is still open after a
+  local timeout (RECOMMENDED: 60 s) and the responder is reachable, it MUST fill it with a cursor subscribe.
 
 Retention: a responder node SHOULD keep the full event log of a task until at least `MAX_TTL` after the task
 became terminal.
@@ -384,7 +414,12 @@ own `taskId` that never changes, which mirrors the remote task once the remote s
   remote task's id becomes known.
 - [PROF-031] A requester node MUST keep a proxy task's `delivery` state as the machine in §8.3 specifies, MUST
   expose it in the proxy task's metadata under the profile URI, and MUST mirror the remote task's states and
-  events into the proxy task once the delivery is `acknowledged`. Mirrored events MUST obey §6.2.
+  events into the proxy task once the delivery is `acknowledged`. Mirrored events MUST obey §6.2. The node MUST
+  record the remote `taskId` and `contextId` in the proxy task's metadata under the profile URI (`remoteTaskId`,
+  `remoteContextId`), and MUST translate task ids between proxy and remote form in both directions wherever they
+  appear (`taskId`, `referenceTaskIds`), so that the agent sees only proxy ids and the remote sees only its own.
+- [PROF-077] If the remote answers with a `Message` and no task, the requester node MUST append that message to
+  the proxy task's history and move the proxy task to `completed`, with the message as its status message.
 - [PROF-032] Requests and events for a task MUST NOT be re-ordered by the outbox: a node MUST hand envelopes for
   the same task to the network in the order its agent produced them.
 
@@ -395,7 +430,7 @@ own `taskId` that never changes, which mirrors the remote task once the remote s
 | `queued` | In the requester node's outbox, never transmitted. Nobody else has it. | `submitted` |
 | `sent` | Transmitted at least once, on a live stream or into a mailbox host's custody (binding §9). The responder may or may not have it. | `submitted` |
 | `acknowledged` | The responder's response arrived. The remote task id is known (or the answer was a `Message`). | mirrors the remote task |
-| `refused` | The responder answered with an error that is not retryable. | `failed`, the error in the status message |
+| `refused` | The responder answered with an error that is not retryable (PROF-078 says who may). | `failed`, the error in the status message |
 | `expired` | No response before `exp + SKEW` of the request envelope. | `failed`, reason `DELIVERY_EXPIRED` |
 | `withdrawn` | Canceled by the requester's agent while still `queued`. | `canceled` |
 
@@ -403,31 +438,45 @@ Events and transitions:
 
 | from \ event | transmit | custody | response | retryable error | final error | `now > exp + SKEW` | local cancel |
 |---|---|---|---|---|---|---|---|
-| `queued` | `sent` | `sent` | `acknowledged` | `sent` | `refused` | `expired` | `withdrawn` |
+| `queued` | `sent` | `sent` | illegal | illegal | illegal | `expired` | `withdrawn` |
 | `sent` | `sent` | `sent` | `acknowledged` | `sent` (retry with backoff) | `refused` | `expired` | `sent` (cancel held, PROF-035) |
 | `acknowledged` | unchanged | unchanged | unchanged (duplicate) | unchanged | unchanged | unchanged | unchanged (cancel forwarded, PROF-035) |
 | `refused` | unchanged | unchanged | unchanged | unchanged | unchanged | unchanged | unchanged |
 | `expired` | unchanged | unchanged | unchanged (late response, PROF-034) | unchanged | unchanged | unchanged | unchanged |
 | `withdrawn` | illegal | illegal | illegal | illegal | illegal | unchanged | unchanged |
 
-`transmit` is the node starting a live attempt. An error or response always follows a transmission, so in
-`queued` those columns describe a transmission the node has not yet recorded. `acknowledged`, `refused`, `expired`
-and `withdrawn` are final. Signals that arrive after a final state come from
-retries that took another path (a mailbox copy and a live copy of the same envelope), so they are ignored. A
-`withdrawn` request never left the node, so a network signal for it is illegal and is an audit anomaly.
+`transmit` is the node starting a live attempt or a hand-off. The node records `sent` durably before the first
+transmission (PROF-033), so `queued` really means "never left the node", and a response or error for a `queued`
+or `withdrawn` request is impossible: it is an audit anomaly and is otherwise ignored. A `custody` acknowledgement
+or a `rejected` CUSTODY from a mailbox host is per hop: `custody` means `sent`, and a CUSTODY `rejected` is a
+retryable error for that hop whatever its code, because the next path may work. `acknowledged`, `refused`,
+`expired` and `withdrawn` are final. Signals that arrive after a final state come from retries that took another
+path (a mailbox copy and a live copy of the same envelope), so they are ignored, apart from late responses
+(PROF-034).
 
-- [PROF-033] A requester node MUST implement the delivery state machine above. It MUST stop retrying a request
-  when its envelope's `exp` has passed, and MUST move it to `expired` once `now > exp + SKEW` without a response.
-  Retries MUST resend the byte-identical envelope (same `id`, same signature), so the responder's dedupe applies.
+- [PROF-033] A requester node MUST implement the delivery state machine above. It MUST record the move to `sent`
+  durably before it first transmits the request. It MUST stop retrying a request when its envelope's `exp` has
+  passed, and MUST move it to `expired` once `now > exp + SKEW` without a response. Retries MUST resend the
+  byte-identical envelope (same `id`, same signature), so the responder's dedupe applies.
+- [PROF-078] Only a signed response whose signer is the agent the request was sent `to`, or the node that agent is
+  bound to by its binding statement (`ext/capability.md`), may move a delivery to `acknowledged` or `refused`. A
+  requester node MUST treat any other error (from a mailbox host, from another node, an unsigned CUSTODY
+  `rejected`, a transport error) as retryable for the delivery, whatever its code, and keep trying other paths
+  until `exp`.
 - [PROF-034] `expired` means "the responder did not acknowledge in time, and will not accept the request any more".
   It does not mean "not processed": the responder may have accepted it just before `exp + SKEW`. A node MUST
   report `expired` to its agent with that meaning (error `DeliveryExpired`, whose definition says so), MUST
   record any response that arrives after `expired` in its audit log, and MUST attach the remote task reference to
-  the proxy task's metadata under the profile URI as `lateResponse`, without changing the proxy task's state.
-- [PROF-035] A `CancelTask` from the agent for a proxy task in `queued` MUST remove the request from the outbox
-  and move the delivery to `withdrawn`. In `sent`, the node cannot recall the request, so it MUST hold the
-  cancel and send `CancelTask` for the remote task as soon as the delivery is `acknowledged`. In `acknowledged`
-  the node forwards `CancelTask` to the remote task (live or deferred).
+  the proxy task's metadata under the profile URI as `lateResponse`, without changing the proxy task's state. If
+  the agent had asked to cancel the proxy task, the node MUST then send `CancelTask` for the remote task.
+- [PROF-035] A `CancelTask` from the agent for a proxy task in `queued` MUST remove the request from the outbox,
+  move the delivery to `withdrawn` and the proxy task to `canceled`. In `sent`, the node cannot recall the
+  request, so it MUST answer the agent with the proxy task unchanged (still `submitted`), with
+  `cancelRequested: true` in its metadata under the profile URI, hold the cancel, and send `CancelTask` for the
+  remote task as soon as the delivery is `acknowledged` (or a late response arrives, PROF-034). In `acknowledged`
+  the node forwards `CancelTask` to the remote task (live or deferred) and the proxy task follows the remote
+  task's answer. A proxy task becomes `canceled` only when the remote task is, or when the request was
+  `withdrawn`.
 
 ### 8.4 Event delivery to an offline requester
 
@@ -479,7 +528,8 @@ replay), `ext/capability.md` (identity, capabilities, delegation), `ext/provenan
 - [PROF-040] A node MUST check that the envelope's `from` agent is certified by an owner the node trusts, through
   the binding statement of `ext/capability.md`, before acting on the content. Otherwise it MUST answer
   `IdentityUntrusted`.
-- [PROF-041] A node MUST check that the envelope's `to` names an agent it hosts. Otherwise it MUST answer
+- [PROF-041] A node MUST check that the envelope's `to` names an agent it hosts. Otherwise, unless it is acting as
+  a mailbox host for that agent on a DELIVER stream (`ext/mailbox.md`, binding BIND-023), it MUST answer
   `RecipientUnknown` and MUST NOT forward the envelope (a node is not an open relay).
 
 ### 9.2 Authorisation per capability
@@ -489,13 +539,19 @@ replay), `ext/capability.md` (identity, capabilities, delegation), `ext/provenan
 
   | Operation | Capability |
   |---|---|
-  | `SendMessage`, `SendStreamingMessage` creating a task | `skill:<id>` for a skill of the agent, or `agent:<wwa>#message` if the agent declares no skills |
+  | `SendMessage`, `SendStreamingMessage` creating a task | `skill:<id>` for the skill the request names, or `agent:<wwa>#message` if the agent declares no skills |
   | `SendMessage` continuing a task, `GetTask`, `SubscribeToTask` | `task:<id>#read` and, for messages, `task:<id>#message`. The node grants these implicitly to the agent that created the task, with the same holder. |
   | `CancelTask` | `task:<id>#cancel`, implicitly granted to the creator |
   | `ListTasks` | none beyond authentication. Results are only tasks the caller holds `task:<id>#read` for. |
-  | Push config operations | `task:<id>#read` |
+  | `GetTaskPushNotificationConfig`, `ListTaskPushNotificationConfigs` | `task:<id>#read` |
+  | `CreateTaskPushNotificationConfig`, `DeleteTaskPushNotificationConfig` | `task:<id>#manage`, implicitly granted to the creator |
   | `GetExtendedAgentCard` | `agent:<wwa>#card-extended` |
 
+- [PROF-079] A2A 1.0 messages do not say which skill they invoke, so a request that creates a task on an agent
+  with skills MUST name the skill in `SendMessageRequest.metadata` under the profile URI, as `{"skill": "<id>"}`.
+  A request that names no skill is for the agent's only skill if it declares exactly one. Otherwise the node MUST
+  answer `InvalidParamsError`. The named skill decides the capability needed (PROF-042) and is all the agent may
+  do for that task. A requester's message text cannot widen it.
 - [PROF-043] A node MUST NOT rely on a stock peer, or on the A2A SDK it uses, to enforce authorisation, the card's
   `securitySchemes`, or required extensions.
 
@@ -538,19 +594,28 @@ replay), `ext/capability.md` (identity, capabilities, delegation), `ext/provenan
 
 ### 10.1 Structure
 
-Errors are JSON-RPC 2.0 error objects, as in the A2A JSON-RPC binding (A2A §9.5), on every binding:
-`{"code": <int>, "message": <string>, "data": [<detail>, …]}`.
+Each binding carries errors in its own format, as A2A specifies:
 
-- [PROF-051] Every error a node returns MUST include in `data` one `google.rpc.ErrorInfo` detail
+| Binding | Format | Where the error is identified |
+|---|---|---|
+| `webway-quic/v0`, A2A JSON-RPC | JSON-RPC 2.0 error object `{"code", "message", "data": [<detail>…]}` (A2A §9.5) | `code`, and the `ErrorInfo` in `data` |
+| A2A HTTP+JSON | `google.rpc.Status` JSON, `details` array (A2A §11.6). Its `code` is the HTTP status. | the `ErrorInfo` in `details` |
+| A2A gRPC | gRPC status with `details` (A2A §10.6) | the `ErrorInfo` in `details` |
+
+- [PROF-051] Every error a node returns MUST carry, among its details, one `google.rpc.ErrorInfo`
   (`"@type": "type.googleapis.com/google.rpc.ErrorInfo"`) with:
-  - `reason`: the error's `REASON` from the tables below;
+  - `reason`: the error's `REASON` from the tables below (for A2A errors, the A2A error type in UPPER_SNAKE_CASE,
+    as A2A requires);
   - `domain`: `a2a-protocol.org` for A2A errors, `github.com/BVMrs/argent-webway` for profile errors;
   - `metadata.retryable`: `"true"` or `"false"`, as the tables say;
   - `metadata.retryAfterMs`: a decimal string, when the responder knows how long to wait. Optional.
-- [PROF-052] A client MUST classify errors by JSON-RPC `code` and `ErrorInfo.reason`, never by HTTP or gRPC
-  status, and MUST also recognise the non-standard codes −31401 (unauthenticated) and −31403 (unauthorised) that
-  one stock SDK emits (research §3.8), mapping them to `IdentityUntrusted` and `CapabilityDenied` for retry
-  decisions. A code it does not know MUST be classified as not retryable.
+- [PROF-081] A profile refinement of an A2A error (such as `TASK_TERMINAL`) MUST be a second `ErrorInfo` with the
+  profile domain, never a change to the A2A one.
+- [PROF-052] A client MUST classify an error by its `ErrorInfo` (`domain` and `reason`) on every binding, and also
+  by the JSON-RPC `code` where there is one, never by the HTTP or gRPC status alone. It MUST also recognise the
+  non-standard JSON-RPC codes −31401 (unauthenticated) and −31403 (unauthorised) that one stock SDK emits
+  (research §3.8), mapping them to `IdentityUntrusted` and `CapabilityDenied` for retry decisions. An error it
+  cannot identify MUST be classified as not retryable.
 
 - [PROF-073] A client MAY retry an error marked retryable, with backoff and jitter, honouring `retryAfterMs`. It
   MUST NOT retry a non-retryable error with the same envelope. A retry always resends the same envelope
@@ -558,14 +623,14 @@ Errors are JSON-RPC 2.0 error objects, as in the A2A JSON-RPC binding (A2A §9.5
 
 ### 10.2 A2A errors, reused
 
-Codes and meanings are those of A2A §5.4. The profile only adds `retryable` and its own refinement reasons.
+Codes and meanings are those of A2A §5.4. The profile only adds `retryable` and its own refinement details.
 
 | Name | Code | `REASON` | Retryable | Profile use |
 |---|---|---|---|---|
 | `TaskNotFoundError` | −32001 | `TASK_NOT_FOUND` | no | Also for tasks the caller may not see (PROF-047) |
 | `TaskNotCancelableError` | −32002 | `TASK_NOT_CANCELABLE` | no | §6.3 |
 | `PushNotificationNotSupportedError` | −32003 | `PUSH_NOTIFICATION_NOT_SUPPORTED` | no | |
-| `UnsupportedOperationError` | −32004 | `UNSUPPORTED_OPERATION`, or `TASK_TERMINAL` for an operation on a terminal task | no | §6.3 |
+| `UnsupportedOperationError` | −32004 | `UNSUPPORTED_OPERATION`. On a terminal task, plus a profile `ErrorInfo` with reason `TASK_TERMINAL` | no | §6.3 |
 | `ContentTypeNotSupportedError` | −32005 | `CONTENT_TYPE_NOT_SUPPORTED` | no | |
 | `InvalidAgentResponseError` | −32006 | `INVALID_AGENT_RESPONSE` | no | PROF-016 |
 | `ExtendedAgentCardNotConfiguredError` | −32007 | `EXTENDED_AGENT_CARD_NOT_CONFIGURED` | no | |
@@ -637,9 +702,10 @@ previous profile major for at least 12 months after the new major is published.
 - [PROF-056] On `webway-quic/v0`, the profile, `envelope/v0` and `capability/v0` are always active and MUST NOT be
   listed in `a2a-extensions` to make them so. Any other extension is active for a request only if the requester
   lists it in `a2a-extensions` and the responder confirms it in the response's signed `a2a-extensions` service
-  parameter (binding §7). A requester MUST NOT infer activation from anything else. At the HTTP edge, where stock
-  peers rarely echo activation (research §3.3), a node MUST confirm activation in the response `metadata` under
-  the extension's URI.
+  parameter (binding §7). A requester MUST NOT infer activation from anything else. At its HTTP edge a node MUST
+  confirm activation with the `A2A-Extensions` response header (gRPC: response metadata). A node calling a stock
+  peer that sends no such echo (most do not, research §3.3) MUST treat the extension as not active for that
+  response.
 - [PROF-057] A breaking change to an extension, the profile or the binding MUST get a new URI. A node MUST NOT
   fall back silently to an older major.
 
@@ -722,6 +788,11 @@ agent sees "delegate to remote agent X" as an MCP tool.
 - [PROF-069] Long-running remote work MUST be usable without the MCP tasks extension: a tool call waits up to a
   caller-given timeout and then returns the proxy task snapshot, and a separate tool waits on or reads the proxy
   task. The facade uses the MCP tasks extension only when the client negotiates it for that request.
+- [PROF-080] MCP makes a client re-issue a request whose stream broke, and a re-issued call is a new MCP request.
+  `webway.message.send` MUST therefore accept an optional client-chosen `messageId`, and the facade MUST use it as
+  the A2A `messageId` and envelope `id` (PROF-023), so that a re-issued call with the same `messageId` reaches the
+  same task. The HTTP edge likewise MUST de-duplicate on `(edge principal, messageId)` with the same horizon as
+  PROF-023, and MUST reuse the envelope it first created when it forwards a duplicate into the overlay.
 
 Tools the facade offers (names normalised to `[A-Za-z0-9_.-]{1,128}`): `webway.agents.list`,
 `webway.message.send`, `webway.task.get`, `webway.task.wait`, `webway.task.cancel`, `webway.artifact.fetch`. Their
@@ -756,6 +827,8 @@ schemas are specified with the MCP facade (roadmap T12).
   | JSON-RPC error, or task `failed` | `failed` |
   | task `cancelled` | `canceled` |
   | JSON-RPC error before any work, for authorisation or invalid arguments | `rejected` |
+  | stream broken before a result, without the MCP tasks extension | `failed`, reason `OUTCOME_UNKNOWN`. Never re-issued: closing the stream may have cancelled the call, or it may have run. |
+  | stream broken, with an MCP task | unchanged. The bridge polls `tasks/get`. |
 
 - [PROF-074] MCP bridges and the MCP facade MUST target MCP 2026-07-28 and MUST NOT rely on MCP sessions to carry
   `contextId`, `taskId` or any other state. MCP data they add MUST travel in `_meta` under
@@ -781,7 +854,7 @@ document and the binding:
 | R-C4 cards byte for byte | Adopted | PROF-012 |
 | R-C5 map transport identity explicitly | Adopted: the node key is the QUIC identity, the agent key signs the envelope | binding §5, PROF-040 |
 | R-D1 extensions with versioned URIs | Adopted | §2, PROF-057 |
-| R-D2 in-band activation | Adopted: signed `a2a-extensions` in the response on the overlay, `metadata` at the edge | PROF-056 |
+| R-D2 in-band activation | Adopted on the overlay (signed `a2a-extensions` in the response). At the edge: our responses echo in the header, and a missing echo from a stock peer means not active. | PROF-056 |
 | R-D3 required is not a control | Adopted | PROF-009, PROF-050 |
 | R-D4 message integrity as extension | Adopted: `envelope/v0` | PROF-039 (details T2) |
 | R-E1 end of stream is not completion | Adopted | PROF-024 |
@@ -795,7 +868,7 @@ document and the binding:
 | R-F3 signed push | Refined: inside the overlay push is replaced by signed deferred delivery. A signed webhook payload at the edge is deferred to `ext/mailbox.md`. | §8.4 |
 | R-F4 SSRF-safe webhooks | Adopted | PROF-037, PROF-064 |
 | R-F5 delivery without inbound reachability | Adopted | §8.4, binding §9 |
-| R-G1 authorise per capability | Adopted | PROF-042, PROF-043 |
+| R-G1 authorise per capability | Adopted. The skill is named in request metadata, because A2A messages do not carry it. | PROF-042, PROF-043, PROF-079 |
 | R-G2 no shared anonymous scope | Adopted | PROF-046, PROF-061 |
 | R-G3 no existence leak, error codes | Adopted | PROF-047, PROF-052, §10.3 |
 | R-G4 audit everything | Adopted (format in T9) | PROF-049 |
@@ -803,7 +876,7 @@ document and the binding:
 | R-I1 MCP 2026-07-28, no sessions | Adopted | PROF-074 |
 | R-I2 bridge as MCP client | Adopted | PROF-071 |
 | R-I3 bridge as MCP server | Adopted | PROF-070 |
-| R-I4 explicit state mapping | Adopted, with `isError: true` → `failed` | PROF-072 |
+| R-I4 explicit state mapping | Adopted, with `isError: true` → `failed` and lost calls → `failed` (`OUTCOME_UNKNOWN`) | PROF-072 |
 | R-I5 work without MCP tasks | Adopted | PROF-069 |
 | R-I6 `_meta` prefix, opaque signed bytes | Adopted | PROF-074 |
 | R-I7 rmcp hardening | Deferred to the MCP facade implementation (T12). It is about one library, not the protocol. | — |
@@ -822,13 +895,13 @@ the vector kinds this document introduces.
 | `stream/resume` | `{"lastSeq": <int>, "retainedFrom": <int>, "terminal": <bool>, "fromSeq": <int or null>}` | `{"snapshotFirst": <bool>, "replay": [<seq>…], "thenLive": <bool>}` | `UnsupportedOperationError`, `InvalidParamsError` |
 | `stream/observe` | `{"applied": <int or null>, "received": [{"seq": <int>, "kind": "task" \| "event", "terminal"?: <bool>} …], "streamEnded": <bool>}` | `{"applied": <int>, "finished": <bool>, "action": "none" \| "resubscribe", "fromSeq"?: <int>}` | none |
 | `delivery/step` | `{"state": <delivery state>, "event": "transmit" \| "custody" \| "response" \| "retryable-error" \| "final-error" \| "expiry" \| "local-cancel"}` | `{"state": <delivery state>}` | any (illegal step) |
-| `error/map` | `{"name": <error name>, "context"?: "task-op"}` | `{"name", "code", "reason", "retryable", "http"?, "grpc"?}` | none |
+| `error/map` | `{"name": <error name>, "context"?: "task-op" \| "terminal-task"}` | `{"name", "code", "reason", "retryable", "http"?, "grpc"?, "profileReason"?}`; `profileReason` is the reason of the second, profile-domain `ErrorInfo` (PROF-051) | none |
 | `card/check` | `{"card": <Agent Card JSON>}` | none | any (card does not satisfy §5) |
 | `bridge/mcp-state` | `{"mcp": <outcome>, "isError"?: <bool>}` | `{"state": <A2A state>}` | none |
 | `card/select` | `{"interfaces": [<AgentInterface>…], "bindings": [<binding the client implements>…], "a2aVersions": [<version>…]}` | `{"url", "protocolBinding", "protocolVersion"}` of the chosen interface | `VersionNotSupportedError` |
 | `wire/outbound` | `{"peer": "stock", "type": "Message", "value": <JSON>}` | none | any (the object breaks §4) |
-| `card/verify` | `{"signed": <bool>, "protected"?: <decoded JWS protected header>, "policyRequiresSignature": <bool>, "jkuAllowList"?: [<URL>…]}` | none | any (the card must not be used) |
-| `error/classify` | `{"code": <int>, "reason"?: <string>, "httpStatus"?: <int>}` | `{"name", "retryable"}`; `name` is `Unknown` for a code not in §10 | none |
+| `card/verify` | `{"signed": <bool>, "protected"?: <decoded JWS protected header>, "policyRequiresSignature": <bool>, "jkuAllowList"?: [<URL>…]}` | `{"fetchJku": <bool>}`: whether the node may fetch the `jku` (otherwise it verifies by `kid` against the owner key) | any (the card must not be used) |
+| `error/classify` | `{"code"?: <int>, "domain"?: <string>, "reason"?: <string>, "httpStatus"?: <int>}` (`code` is the JSON-RPC code, absent on HTTP+JSON and gRPC) | `{"name", "retryable"}`; `name` is `Unknown` for an error it cannot identify | none |
 | `push/target` | `{"requester": <agent address>, "url": <push config URL>}` | none | `InvalidParamsError` |
 
 The vectors are under `conformance/vectors/` (`task/`, `stream/`, `delivery/`, `error/`, `card/`, `bridge/`,
@@ -845,7 +918,7 @@ table below says which.
 | PROF-027 | `stream/resume` |
 | PROF-033, PROF-035 (state part) | `delivery/step` |
 | PROF-008, PROF-009, PROF-010 (shape), PROF-004, PROF-005 (card part) | `card/check` |
-| PROF-047, PROF-051, PROF-053 | `error/map` |
+| PROF-047, PROF-051, PROF-053, PROF-081 | `error/map` |
 | PROF-072 | `bridge/mcp-state` |
 | PROF-002 (version cap), PROF-003 | `card/select`, and `bind/negotiate` of the binding |
 | PROF-004, PROF-005, PROF-006 (messages) | `wire/outbound` |
@@ -867,5 +940,15 @@ table below says which.
    token encoding is T3's.
 4. **A2A 1.1.** When an SDK ships 1.1, `generation` should be mapped to `seq` (same role) and the cursor
    parameter aligned with `last_seen_generation`.
-5. **Upstreaming.** The cursor (§7.2) and the transition table (§6.2) are generic and are candidates for the A2A
-   project (roadmap T20).
+5. **Upstreaming.** The cursor (§7.2), the transition table (§6.2) and a skill field on messages (PROF-079) are
+   generic and are candidates for the A2A project (roadmap T20).
+6. **What `ext/envelope.md` (T2) must provide** for this profile and the binding: `id` equal to `messageId` for
+   messages (PROF-023), node-signed (`wwn`) error envelopes (binding BIND-020), response `exp` rules (PROF-076), the
+   field-presence rule of the pinned JSON form (binding §6.3), and `ctx` with `taskId`, `contextId`, `seq`,
+   `inReplyTo`.
+7. **Documents on other branches.** [`conventions.md`](conventions.md) and the vector format
+   (`conformance/vectors/README.md`, `vector.schema.json`) come with issue #7, the research report
+   (`docs/research/a2a-mcp-interop.md`) with issue #13, and the threat model with issue #6. Links to them resolve
+   once those land.
+8. **No resumable streams at the HTTP edge.** Stock clients get A2A 1.0 behaviour (snapshot, then live). With A2A
+   1.1's `last_seen_generation` the edge could offer resumption too.
