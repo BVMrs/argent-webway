@@ -186,6 +186,18 @@ fn revocation_list(
         json!({"owner": owner(own), "seq": seq, "iat": iat, "validUntil": valid_until, "revoked": revoked}),
     )
 }
+/// A root-signed list of owner `own`, valid 2026-11-05 .. 2026-12-01.
+fn root_list(own: &str, seq: i64, revoked: Vec<String>) -> Value {
+    revocation_list(
+        &format!("owner:{own}"),
+        &owner(own),
+        own,
+        seq,
+        "2026-11-05T00:00:00Z",
+        "2026-12-01T00:00:00Z",
+        revoked,
+    )
+}
 fn issuer_list(i: &str, own: &str, seq: i64, revoked: Vec<String>) -> Value {
     revocation_list(&ik(i), &issuer(i), own, seq, "2026-11-07T06:00:00Z", "2026-11-08T06:00:00Z", revoked)
 }
@@ -204,7 +216,7 @@ fn auth_input(presenter: &str, capability: &str, access: Option<String>) -> Valu
             "issuerCerts": [issuer_cert("C", "C", "gamma")],
             "agentCerts": presenter_certs(presenter),
         },
-        "request": {"presenter": agent(presenter), "operation": "SendMessage", "taskId": TASK, "args": {"repo": "github.com/acme/app", "suite": "unit"}},
+        "request": {"presenter": agent(presenter), "operation": "SendMessage", "args": {"repo": "github.com/acme/app", "suite": "unit"}},
         "cap": cap,
         "state": {"calls": {"access": 0, "mandate": 0}, "revocations": []},
     })
@@ -275,6 +287,7 @@ fn authorize_cases() -> Vec<Case> {
     );
     let mut i = auth_input("broker", &format!("task:{TASK}#read"), Some(b64(&t)));
     i["request"]["operation"] = json!("GetTask");
+    i["request"]["taskId"] = json!(TASK);
     v.push(case("task-read", "task:<id>#read allows GetTask on that task", &["CAP-102"], i, ok));
 
     // long-lived token with fresh list (not revoking)
@@ -284,11 +297,32 @@ fn authorize_cases() -> Vec<Case> {
         "eph:long",
     );
     let mut i = std_input(&tl);
-    i["state"]["revocations"] = json!([issuer_list("C", "C", 7, vec![])]);
-    v.push(case("long-lived-fresh-list", "20-day token with a fresh list from its issuing key", &["CAP-172"], i, ok));
+    i["state"]["revocations"] = json!([issuer_list("C", "C", 7, vec![]), root_list("C", 2, vec![])]);
+    v.push(case(
+        "long-lived-fresh-list",
+        "20-day token with fresh lists from its issuing key and its owner's root key",
+        &["CAP-172"],
+        i,
+        ok,
+    ));
     let mut i = std_input(&tl);
-    i["cap"]["revocations"] = json!([issuer_list("C", "C", 7, vec![])]);
-    v.push(case("long-lived-stapled-list", "the fresh list is stapled by the sender", &["CAP-173", "CAP-172"], i, ok));
+    i["cap"]["revocations"] = json!([issuer_list("C", "C", 7, vec![]), root_list("C", 2, vec![])]);
+    v.push(case(
+        "long-lived-stapled-list",
+        "the fresh lists are stapled by the sender",
+        &["CAP-173", "CAP-172"],
+        i,
+        ok,
+    ));
+    let mut i = std_input(&tl);
+    i["state"]["revocations"] = json!([issuer_list("C", "C", 7, vec![])]);
+    v.push(case(
+        "long-lived-no-root-list",
+        "20-day token, fresh issuer list but no fresh root list",
+        &["CAP-172"],
+        i,
+        Err(RevocationStatusUnavailable),
+    ));
 
     // a list signed by another owner's issuing key cannot revoke C's token
     let tb = std_access("", "eph:basic");
@@ -1085,6 +1119,7 @@ fn authorize_cases() -> Vec<Case> {
     // --- invite redemption
     v.extend(redeem_cases());
     v.extend(followup_cases());
+    v.extend(review_cases());
     v
 }
 
@@ -1108,7 +1143,7 @@ fn redeem_cases() -> Vec<Case> {
     let t = delegate(&t, "invite-key:1", "invitee", 1, "", "eph:inv:1");
     let mut i = auth_input("invitee", &format!("invite:{INVITE_ID}#redeem"), Some(b64(&t)));
     i["request"]["operation"] = json!("InviteRedeem");
-    i["state"]["revocations"] = json!([issuer_list("C", "C", 7, vec![])]);
+    i["state"]["revocations"] = json!([issuer_list("C", "C", 7, vec![]), root_list("C", 2, vec![])]);
     let mut consumed = i.clone();
     consumed["state"]["consumedInvites"] = json!([INVITE_ID]);
     let mut wrongop = i.clone();
@@ -1513,11 +1548,11 @@ fn statement_cases() -> Vec<Case> {
     let (events, _) = rotation_events(false);
     let old_signed = node_cert();
     v.push(case(
-        "rotated-old-key-valid",
-        "after a normal rotation, a cert signed by the old root key stays valid",
+        "rotated-old-key-retired",
+        "after a rotation, a cert signed by the old root key is no longer accepted (owners reissue)",
         &["CAP-021"],
-        stmt_input(stmt::NODE_CERT, old_signed.clone(), json!([{"owner": owner("C"), "events": events}])),
-        ok,
+        stmt_input(stmt::NODE_CERT, old_signed, json!([{"owner": owner("C"), "events": events}])),
+        Err(StatementUntrusted),
     ));
     let new_signed = sign(
         stmt::NODE_CERT,
@@ -1543,14 +1578,7 @@ fn statement_cases() -> Vec<Case> {
         stmt_input(stmt::NODE_CERT, new_signed, pin_c()),
         Err(StatementUntrusted),
     ));
-    let (cevents, _) = rotation_events(true);
-    v.push(case(
-        "rotated-compromised-old-key",
-        "after a rotation marked compromised, the old key's certs are rejected",
-        &["CAP-021"],
-        stmt_input(stmt::NODE_CERT, old_signed, json!([{"owner": owner("C"), "events": cevents}])),
-        Err(StatementUntrusted),
-    ));
+    v.extend(review_statement_cases());
     v
 }
 
@@ -1759,6 +1787,10 @@ fn invite_redeem_grant(iss: &str, invite_key: &str, id: &str) -> biscuit_auth::B
 }
 
 fn invite_string(o: &InviteOpts) -> String {
+    invite_with_owner_keys(o, None)
+}
+
+fn invite_with_owner_keys(o: &InviteOpts, owner_keys: Option<Vec<Value>>) -> String {
     let mut c = json!({
         "owner": owner("B"),
         "issuerCert": o.issuer_cert,
@@ -1776,6 +1808,9 @@ fn invite_string(o: &InviteOpts) -> String {
     }
     if let Some(k) = &o.invite_key {
         c["inviteKey"] = json!(k);
+    }
+    if let Some(ev) = owner_keys {
+        c["ownerKeys"] = json!(ev);
     }
     let s = sign(stmt::INVITE, &sk(&ik(o.signer)), &issuer(o.signer), c);
     format!("{}{}", model::INVITE_PREFIX, B64.encode(crate::jcs::canonical(&s).unwrap().as_bytes()))
@@ -1925,6 +1960,7 @@ fn invite_cases() -> Vec<Case> {
         inp(&o),
         Err(InviteInvalid),
     ));
+    v.extend(review_invite_cases());
     v
 }
 
@@ -1956,12 +1992,13 @@ pub fn files() -> Vec<File> {
 fn followup_cases() -> Vec<Case> {
     let t = std_access("", "eph:fu");
     let ids = cap::revocation_ids(&t);
-    let task = json!({"taskId": TASK, "creator": agent("broker"), "authorizedBy": [{"owner": owner("C"), "issuer": issuer("C"), "ids": ids}]});
+    let task = json!({"taskId": TASK, "creator": agent("broker"), "capability": "skill:run-tests", "authorizedBy": [{"owner": owner("C"), "issuer": issuer("C"), "ids": ids}]});
     let base = |op: &str, presenter: &str| {
         let mut i = auth_input(presenter, "skill:run-tests", None);
         i["cap"] = json!({});
         i["request"]["operation"] = json!(op);
         i["state"]["task"] = task.clone();
+        i["request"]["taskId"] = json!(TASK);
         i
     };
     let mut revoked = base("GetTask", "broker");
@@ -2148,4 +2185,273 @@ fn delegate(
 ) -> biscuit_auth::Biscuit {
     let to_key = if to.contains(':') { to.to_string() } else { ak(to) };
     cap::delegate(t, from, &to_key, depth, extra, eph)
+}
+
+/// Regression cases for the findings of the first spec review (H1–H5, M1, L1, exact decoding).
+fn review_cases() -> Vec<Case> {
+    use E::*;
+    let ok = Ok(());
+    let mut v = vec![];
+
+    // H1: a rule in the authority block could derive rights beyond the issuer-cert scope.
+    let narrow = issuer_cert_full("C", "C", "gamma", json!({"resource": ["skill:run-tests"]}), CERT_IAT, ISSUER_EXP);
+    let tw = std_access("right($c) <- capability($c);", "eph:h1");
+    let mut i = auth_input("broker", "invite:0190f1d0-1111-7000-8000-000000000001#redeem", Some(b64(&tw)));
+    i["request"]["operation"] = json!("InviteRedeem");
+    i["verifier"]["issuerCerts"] = json!([narrow.clone()]);
+    v.push(case(
+        "authority-rule-widening",
+        "an authority-block rule right($c) <- capability($c)",
+        &["CAP-105"],
+        i,
+        Err(CapabilityInvalid),
+    ));
+    let mut i = std_input(&std_access("", "eph:basic"));
+    i["verifier"]["issuerCerts"] = json!([narrow]);
+    i["cap"]["capability"] = json!("skill:lint");
+    v.push(case(
+        "capability-outside-scope",
+        "the requested capability is outside the issuing key's resource scope",
+        &["CAP-030"],
+        i,
+        Err(CapabilityDenied),
+    ));
+    let mw = mint(
+        &ik("A"),
+        &mandate_code(
+            "A",
+            "A",
+            "planner",
+            &[("C", "skill:none")],
+            "broker",
+            T_ISSUED,
+            T_EXPIRES,
+            "grant($o, $c) <- resource_owner($o), capability($c);",
+        ),
+        "eph:h1m",
+    );
+    v.push(case(
+        "mandate-rule-widening",
+        "a mandate authority-block rule derives grant() for any request",
+        &["CAP-105"],
+        with_mandate(std_input(&std_access("", "eph:basic")), mandate_obj(&mw)),
+        Err(CapabilityInvalid),
+    ));
+
+    // H2: the resource in the capability is the one the request touches.
+    let t = mint(
+        &ik("C"),
+        &access_code("C", "C", &[&format!("task:{TASK}#read")], "broker", T_ISSUED, T_EXPIRES, ""),
+        "eph:h2",
+    );
+    let mut i = auth_input("broker", &format!("task:{TASK}#read"), Some(b64(&t)));
+    i["request"]["operation"] = json!("GetTask");
+    i["request"]["taskId"] = json!("0190f1c2-7d3a-7000-8000-0000000000ff");
+    v.push(case("task-id-mismatch", "task:T1#read presented for task T2", &["CAP-106"], i, Err(CapabilityDenied)));
+    let task = json!({"taskId": TASK, "creator": agent("broker"), "capability": "skill:run-tests", "authorizedBy": []});
+    let mut i = std_input(&std_access("", "eph:basic"));
+    i["request"]["taskId"] = json!(TASK);
+    i["state"]["task"] = task.clone();
+    v.push(case(
+        "skill-continue-own-task",
+        "the creator continues its task, presenting its skill token again",
+        &["CAP-106", "CAP-161"],
+        i,
+        ok,
+    ));
+    let th = mint(&ik("C"), &access_code("C", "C", &["skill:run-tests"], "helper", T_ISSUED, T_EXPIRES, ""), "eph:h2h");
+    let mut i = auth_input("helper", "skill:run-tests", Some(b64(&th)));
+    i["request"]["taskId"] = json!(TASK);
+    i["state"]["task"] = task.clone();
+    v.push(case(
+        "skill-continue-other-task",
+        "another holder of the same skill cannot inject into broker's task",
+        &["CAP-106"],
+        i,
+        Err(CapabilityDenied),
+    ));
+    let tw = mint(
+        &ik("C"),
+        &access_code("C", "C", &[&format!("task:{TASK}#write")], "helper", T_ISSUED, T_EXPIRES, ""),
+        "eph:h2w",
+    );
+    let mut i = auth_input("helper", &format!("task:{TASK}#write"), Some(b64(&tw)));
+    i["request"]["taskId"] = json!(TASK);
+    i["state"]["task"] = task.clone();
+    v.push(case(
+        "task-write-granted",
+        "task:<id>#write lets another agent continue that task",
+        &["CAP-106", "CAP-102"],
+        i,
+        ok,
+    ));
+
+    // H3: token-less follow-ups are reads and cancel only.
+    let mut i = auth_input("broker", "skill:run-tests", None);
+    i["cap"] = json!({});
+    i["request"]["taskId"] = json!(TASK);
+    i["state"]["task"] = task;
+    v.push(case(
+        "followup-continue-needs-token",
+        "continuing a task with new input needs the token again",
+        &["CAP-161"],
+        i,
+        Err(CapabilityMissing),
+    ));
+
+    // H5: keys can be revoked, so a renewed or overlapping cert does not help.
+    let renewed = issuer_cert_full("A", "A", "alpha", full_scope(), "2026-11-02T00:00:00Z", "2026-11-30T00:00:00Z");
+    let mut mobj = mandate_obj(&std_mandate("", "eph:h5"));
+    mobj["issuerCert"] = renewed;
+    let mut i = with_mandate(std_input(&std_access("", "eph:basic")), mobj);
+    i["state"]["revocations"] = json!([root_list("A", 3, vec![issuer("A")])]);
+    v.push(case(
+        "revoked-issuer-key",
+        "A's root list revokes the issuing key itself; another cert for it does not help",
+        &["CAP-175"],
+        i,
+        Err(CapabilityRevoked),
+    ));
+    let mut i = std_input(&std_access("", "eph:basic"));
+    i["state"]["revocations"] = json!([root_list("B", 3, vec![agent("broker")])]);
+    v.push(case(
+        "revoked-presenter-key",
+        "B's root list revokes broker's agent key",
+        &["CAP-175", "CAP-041"],
+        i,
+        Err(CapabilityDenied),
+    ));
+
+    // M1: access tokens only at the node of the issuing key.
+    let t2 =
+        mint(&ik("C2"), &access_code("C2", "C", &["skill:run-tests"], "broker", T_ISSUED, T_EXPIRES, ""), "eph:m1");
+    let mut i = std_input(&t2);
+    i["verifier"]["issuerCerts"].as_array_mut().unwrap().push(issuer_cert("C", "C2", "gamma2"));
+    v.push(case(
+        "access-other-node",
+        "a token minted by C's issuing key on node gamma2, presented at gamma",
+        &["CAP-110"],
+        i,
+        Err(CapabilityInvalid),
+    ));
+
+    // L1: a redemption cannot carry a mandate rooted in the (unpinned) redeemer.
+    let mut base = redeem_cases().remove(0).input;
+    let mx = mint(
+        &ik("X"),
+        &mandate_code("X", "X", "invitee", &[("C", "invite:*")], "invitee", T_ISSUED, T_EXPIRES, ""),
+        "eph:l1",
+    );
+    base["cap"]["mandate"] = json!({"token": b64(&mx), "issuerCert": issuer_cert("X", "X", "x"), "principalCert": agent_cert("X", "invitee", "x")});
+    v.push(case(
+        "redeem-with-mandate",
+        "a redemption carrying a mandate rooted in the redeemer's own owner",
+        &["CAP-203"],
+        base,
+        Err(CapabilityInvalid),
+    ));
+
+    // Exact decoding: a string that looks like Datalog is just a string.
+    let fake =
+        format!("note(\"x\\\"); holder(\\\"{}\\\", 1); time(2030-01-01T00:00:00Z); y(\\\"z\");", agent("helper"));
+    let ts = attenuate(&std_access("", "eph:str:0"), &fake, "eph:str:1");
+    v.push(case(
+        "string-looks-like-datalog",
+        "a fact string containing quotes and Datalog syntax sets no holder and no time",
+        &["CAP-103", "CAP-120"],
+        std_input(&ts),
+        ok,
+    ));
+    v.push(case(
+        "string-looks-like-datalog-holder",
+        "the same token presented by the agent the string names",
+        &["CAP-121"],
+        auth_input("helper", "skill:run-tests", Some(b64(&ts))),
+        Err(CapabilityDenied),
+    ));
+    v
+}
+
+fn review_statement_cases() -> Vec<Case> {
+    use E::*;
+    let mut v = vec![];
+    let ac = agent_cert("C", "runner", "gamma");
+    let mut i = stmt_input(stmt::AGENT_CERT, ac, pin_c());
+    i["revocations"] = json!([root_list("C", 1, vec![agent("runner")])]);
+    v.push(case(
+        "revoked-subject-key",
+        "C's root list revokes the agent key the cert certifies",
+        &["CAP-175"],
+        i,
+        Err(StatementRevoked),
+    ));
+    let late = revocation_list(&ik("C"), &issuer("C"), "C", 1, "2026-11-29T12:00:00Z", "2026-11-30T06:00:00Z", vec![]);
+    let mut i = stmt_input(stmt::REVOCATION, late, pin_c());
+    i["now"] = json!("2026-11-29T13:00:00Z");
+    i["issuerCert"] = issuer_cert("C", "C", "gamma");
+    v.push(case(
+        "revocation-list-outlives-issuer",
+        "an issuer-signed list valid after its issuer-cert expires",
+        &["CAP-014"],
+        i,
+        Err(StatementInvalid),
+    ));
+    v
+}
+
+fn review_invite_cases() -> Vec<Case> {
+    use E::*;
+    let ob = owner("B");
+    let e0 = owner_event("owner:B", &ob, 0, None, Some("owner:B:root1"), false);
+    let e1 = owner_event("owner:B:root1", &ob, 1, stmt::statement_id(&e0), None, false);
+    let rotated_cert = sign(
+        stmt::ISSUER_CERT,
+        &sk("owner:B:root1"),
+        &ids::owner("owner:B:root1"),
+        json!({"owner": ob, "issuer": issuer("B"), "node": node("beta"), "iat": CERT_IAT, "exp": ISSUER_EXP, "scope": full_scope()}),
+    );
+    let mut o = invite_default("bound");
+    o.issuer_cert = rotated_cert.clone();
+    o.agent_cert = sign(
+        stmt::AGENT_CERT,
+        &sk("owner:B:root1"),
+        &ids::owner("owner:B:root1"),
+        json!({"owner": ob, "agent": agent("broker"), "node": node("beta"), "iat": CERT_IAT, "exp": AGENT_EXP}),
+    );
+    let good = invite_with_owner_keys(&o, Some(vec![e0.clone(), e1.clone()]));
+    // A forged chain: an "inception" for B signed by X, then the attacker's issuer-cert.
+    let forged_e0 = owner_event("owner:X", &ob, 0, None, None, false);
+    let mut fo = invite_default("bound");
+    fo.issuer_cert = sign(
+        stmt::ISSUER_CERT,
+        &sk("owner:X"),
+        &owner("X"),
+        json!({"owner": ob, "issuer": issuer("B"), "node": node("beta"), "iat": CERT_IAT, "exp": ISSUER_EXP, "scope": full_scope()}),
+    );
+    let forged = invite_with_owner_keys(&fo, Some(vec![forged_e0]));
+    let no_chain = invite_with_owner_keys(&o, None);
+    let inp = |s: String| json!({"now": NOW, "invite": s, "acceptingAgent": agent("planner")});
+    vec![
+        case(
+            "owner-keys-rotated",
+            "the invite carries B's full key chain; its certs are signed by the rotated root key",
+            &["CAP-201", "CAP-202"],
+            inp(good),
+            Ok(()),
+        ),
+        case(
+            "owner-keys-forged",
+            "a key chain for B whose inception is signed by another key",
+            &["CAP-201", "CAP-202"],
+            inp(forged),
+            Err(InviteInvalid),
+        ),
+        case(
+            "owner-keys-missing",
+            "certs signed by B's rotated key, but no key chain in the invite",
+            &["CAP-201"],
+            inp(no_chain),
+            Err(InviteInvalid),
+        ),
+    ]
 }

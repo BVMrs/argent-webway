@@ -70,7 +70,13 @@ fn invite(input: &Value) -> R<Value> {
     let owner = stmt::str_claim(&unverified.claims, "owner").map_err(|_| bad)?.to_string();
     let ic = unverified.claims.get("issuerCert").cloned().ok_or(bad)?;
     // The invite channel authenticates `owner`: verify as if it were pinned.
-    let ctx = Ctx::new(now, vec![Pin::simple(&owner)], vec![ic]);
+    // An invite may carry the owner's full key-event chain (CAP-202): it is verified from
+    // inception (CAP-020), never taken as a single "latest" event.
+    let pin = match unverified.claims.get("ownerKeys") {
+        None => Pin::simple(&owner),
+        Some(evs) => stmt::owner_keys(&owner, evs.as_array().ok_or(bad)?).map_err(|_| bad)?,
+    };
+    let ctx = Ctx::new(now, vec![pin.clone()], vec![ic]);
     let v = ctx.verify(stmt::INVITE, &jws).map_err(|e| match e {
         E::StatementExpired => E::InviteExpired,
         _ => bad,
@@ -132,30 +138,27 @@ fn invite(input: &Value) -> R<Value> {
     for g in &grants {
         let bytes = B64.decode(g.as_bytes()).map_err(|_| bad)?;
         let pk = biscuit_auth::PublicKey::from_bytes(&root, biscuit_auth::Algorithm::Ed25519).map_err(|_| bad)?;
-        let t = Biscuit::from(&bytes, pk).map_err(|_| bad)?;
-        let src = t.print_block_source(0).map_err(|_| bad)?;
-        let (facts, _, _) = Biscuit::builder().code(src).map_err(|_| bad)?.dump();
-        let get = |name: &str| -> Vec<Vec<String>> {
-            facts
-                .iter()
-                .filter(|f| f.predicate.name == name)
-                .map(|f| f.predicate.terms.iter().map(|t| format!("{t}")).collect())
-                .collect()
+        Biscuit::from(&bytes, pk).map_err(|_| bad)?;
+        let blocks = cap::decode_blocks(&bytes).map_err(|_| bad)?;
+        let facts = &blocks[0].facts;
+        let get = |name: &str| -> Vec<Vec<cap::T>> {
+            cap::facts_named(facts, name).into_iter().map(|t| t.to_vec()).collect()
         };
-        let q = |s: &str| format!("\"{s}\"");
-        if get("webway") != vec![vec![q("capability/v0"), q("access")]]
-            || get("owner") != vec![vec![q(&owner)]]
-            || get("issuer") != vec![vec![q(&iss)]]
-            || get("holder") != vec![vec![q(&holder0), "0".to_string()]]
+        let s = |x: &str| cap::T::Str(x.to_string());
+        if get("webway") != vec![vec![s("capability/v0"), s("access")]]
+            || get("owner") != vec![vec![s(&owner)]]
+            || get("issuer") != vec![vec![s(&iss)]]
+            || get("holder") != vec![vec![s(&holder0), cap::T::Int(0)]]
         {
             return Err(bad);
         }
-        if mode == "redeem" && get("right") != vec![vec![q(&format!("invite:{id}#redeem"))]] {
+        if mode == "redeem" && get("right") != vec![vec![s(&format!("invite:{id}#redeem"))]] {
             return Err(bad);
         }
     }
     Ok(json!({
         "owner": owner,
+        "ownerKey": pin.current,
         "node": c.get("node"),
         "mode": mode,
         "agents": agents,
@@ -182,20 +185,11 @@ fn outbound(input: &Value) -> R<Value> {
     for (i, m) in onward.iter().enumerate() {
         let Some(tok) = m.get("token").and_then(Value::as_str) else { continue };
         let Ok(bytes) = B64.decode(tok.as_bytes()) else { continue };
-        let Ok(u) = biscuit_auth::UnverifiedBiscuit::from(&bytes) else { continue };
-        let Ok(src) = u.print_block_source(0) else { continue };
-        let Ok(b) = Biscuit::builder().code(src) else { continue };
-        let (facts, _, _) = b.dump();
-        let q = |x: &str| format!("\"{x}\"");
-        let covers = facts.iter().any(|f| {
-            f.predicate.name == "grant"
-                && f.predicate.terms.iter().map(|t| format!("{t}")).collect::<Vec<_>>()
-                    == vec![q(target), q(capability)]
-        });
-        let live = facts.iter().any(|f| {
-            f.predicate.name == "expires"
-                && matches!(f.predicate.terms.first(), Some(biscuit_auth::builder::Term::Date(d)) if now <= *d as i64)
-        });
+        let Ok(blocks) = cap::decode_blocks(&bytes) else { continue };
+        let facts = &blocks[0].facts;
+        let s = |x: &str| cap::T::Str(x.to_string());
+        let covers = cap::facts_named(facts, "grant").iter().any(|t| *t == [s(target), s(capability)]);
+        let live = cap::facts_named(facts, "expires").iter().any(|t| matches!(t, [cap::T::Date(d)] if now <= *d));
         if covers && live {
             return Ok(json!({"mandate": i}));
         }

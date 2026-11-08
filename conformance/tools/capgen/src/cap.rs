@@ -5,9 +5,10 @@ use crate::err::{E, R};
 use crate::ids::{self, Role};
 use crate::stmt::{self, Ctx, Pin};
 use crate::{keys, time};
-use biscuit_auth::builder::{boolean, date, fact, int, string, Fact, Rule, Term};
+use biscuit_auth::builder::{boolean, date, fact, int, string, Fact};
 use biscuit_auth::datalog::{RunLimits, SymbolTable};
-use biscuit_auth::{AuthorizerBuilder, Biscuit, BlockBuilder, PublicKey, UnverifiedBiscuit};
+use biscuit_auth::format::schema;
+use biscuit_auth::{AuthorizerBuilder, Biscuit, BlockBuilder, PublicKey};
 use data_encoding::BASE64URL_NOPAD as B64;
 use prost::Message;
 use serde_json::{json, Value};
@@ -68,7 +69,7 @@ pub fn third_party(t: &Biscuit, signer: &str, code: &str, eph: &str) -> Biscuit 
     t.append_third_party_with_keypair(kp.public(), blk, keys::biscuit_keypair(eph)).unwrap()
 }
 
-/// Re-delegates from the agent `from` (current holder at depth `depth`) to agent `to`.
+/// Re-delegates from the agent key `from` (current holder at depth `depth - 1`) to the agent key `to`.
 pub fn delegate(t: &Biscuit, from: &str, to: &str, depth: i64, extra: &str, eph: &str) -> Biscuit {
     third_party(t, from, &format!("holder(\"{}\", {depth});\n{extra}", ids::agent(to)), eph)
 }
@@ -85,53 +86,114 @@ pub fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect()
 }
 
-// ---------------------------------------------------------------- parsed token
+// ---------------------------------------------------------------- exact block decoding
 
-struct BlockInfo {
-    facts: Vec<Fact>,
-
-    external: Option<[u8; 32]>,
+/// A term of a token fact, decoded from the block protobuf (not from printed source, so
+/// strings that look like Datalog stay strings).
+#[derive(Clone, Debug, PartialEq)]
+pub enum T {
+    Str(String),
+    Int(i64),
+    Date(i64),
+    Other,
 }
 
-struct Token {
-    biscuit: Biscuit,
-    blocks: Vec<BlockInfo>,
-    ids: Vec<String>,
+#[derive(Clone, Debug)]
+pub struct F {
+    pub name: String,
+    pub terms: Vec<T>,
 }
 
-fn block_source_dump(src: &str) -> R<(Vec<Fact>, Vec<Rule>)> {
-    let (f, r, _) = Biscuit::builder().code(src).map_err(|_| E::CapabilityInvalid)?.dump();
-    Ok((f, r))
+pub struct BlockInfo {
+    pub facts: Vec<F>,
+    pub rule_heads: Vec<String>,
+    pub external: Option<[u8; 32]>,
 }
 
-fn facts_named<'a>(facts: &'a [Fact], name: &str) -> Vec<&'a [Term]> {
-    facts.iter().filter(|f| f.predicate.name == name).map(|f| f.predicate.terms.as_slice()).collect()
+/// Decodes every block's facts and rule heads with exact symbol resolution. Does not verify
+/// signatures: callers do that separately (`open`) or use the result only as a lookup hint.
+pub fn decode_blocks(bytes: &[u8]) -> R<Vec<BlockInfo>> {
+    let bad = E::CapabilityInvalid;
+    let token = schema::Biscuit::decode(bytes).map_err(|_| bad)?;
+    let defaults = SymbolTable::new();
+    let mut shared: Vec<String> = vec![];
+    let mut out = vec![];
+    for sb in std::iter::once(&token.authority).chain(token.blocks.iter()) {
+        let block = schema::Block::decode(sb.block.as_slice()).map_err(|_| bad)?;
+        let external = match &sb.external_signature {
+            None => None,
+            Some(x) => Some(<[u8; 32]>::try_from(x.public_key.key.as_slice()).map_err(|_| bad)?),
+        };
+        // Third-party blocks have their own symbol table; the others extend the shared one.
+        let table: Vec<String> = if external.is_some() {
+            block.symbols.clone()
+        } else {
+            shared.extend(block.symbols.iter().cloned());
+            shared.clone()
+        };
+        let sym = |i: u64| -> R<String> {
+            if i < 1024 {
+                defaults.get_symbol(i).map(String::from).ok_or(bad)
+            } else {
+                table.get((i - 1024) as usize).cloned().ok_or(bad)
+            }
+        };
+        let term = |t: &schema::Term| -> R<T> {
+            use schema::term::Content;
+            Ok(match &t.content {
+                Some(Content::String(i)) => T::Str(sym(*i)?),
+                Some(Content::Integer(i)) => T::Int(*i),
+                Some(Content::Date(d)) => T::Date(*d as i64),
+                _ => T::Other,
+            })
+        };
+        let mut facts = vec![];
+        for f in &block.facts {
+            facts
+                .push(F { name: sym(f.predicate.name)?, terms: f.predicate.terms.iter().map(term).collect::<R<_>>()? });
+        }
+        let rule_heads = block.rules.iter().map(|r| sym(r.head.name)).collect::<R<_>>()?;
+        out.push(BlockInfo { facts, rule_heads, external });
+    }
+    Ok(out)
 }
 
-fn one<'a>(facts: &'a [Fact], name: &str) -> R<&'a [Term]> {
+pub fn facts_named<'a>(facts: &'a [F], name: &str) -> Vec<&'a [T]> {
+    facts.iter().filter(|f| f.name == name).map(|f| f.terms.as_slice()).collect()
+}
+
+fn one<'a>(facts: &'a [F], name: &str) -> R<&'a [T]> {
     match facts_named(facts, name).as_slice() {
         [t] => Ok(t),
         _ => Err(E::CapabilityInvalid),
     }
 }
 
-fn term_str(t: &Term) -> R<&str> {
+pub fn t_str(t: &T) -> R<&str> {
     match t {
-        Term::Str(s) => Ok(s),
+        T::Str(s) => Ok(s),
         _ => Err(E::CapabilityInvalid),
     }
 }
-fn term_date(t: &Term) -> R<i64> {
+fn t_date(t: &T) -> R<i64> {
     match t {
-        Term::Date(d) => Ok(*d as i64),
+        T::Date(d) => Ok(*d),
         _ => Err(E::CapabilityInvalid),
     }
 }
-fn term_int(t: &Term) -> R<i64> {
+fn t_int(t: &T) -> R<i64> {
     match t {
-        Term::Integer(i) => Ok(*i),
+        T::Int(i) => Ok(*i),
         _ => Err(E::CapabilityInvalid),
     }
+}
+
+// ---------------------------------------------------------------- parsed token
+
+struct Token {
+    biscuit: Biscuit,
+    blocks: Vec<BlockInfo>,
+    ids: Vec<String>,
 }
 
 /// Decodes the bytes, reads the `issuer` fact before verification (a lookup hint only).
@@ -140,17 +202,16 @@ fn peek_issuer(s: &str) -> R<(Vec<u8>, String)> {
     if bytes.len() > MAX_TOKEN_BYTES {
         return Err(E::CapabilityInvalid);
     }
-    let u = UnverifiedBiscuit::from(&bytes).map_err(|_| E::CapabilityInvalid)?;
-    let (facts, _) = block_source_dump(&u.print_block_source(0).map_err(|_| E::CapabilityInvalid)?)?;
-    let iss = term_str(&one(&facts, "issuer")?[0])?.to_string();
+    let blocks = decode_blocks(&bytes)?;
+    let iss = t_str(&one(&blocks[0].facts, "issuer")?[0])?.to_string();
     Ok((bytes, iss))
 }
 
-/// Signature and format checks (CAP-100), block contents (CAP-103).
+/// Signature and format checks (CAP-100), block contents (CAP-103, CAP-105).
 fn open(bytes: &[u8], root: &[u8; 32]) -> R<Token> {
-    let schema = biscuit_auth::format::schema::Biscuit::decode(bytes).map_err(|_| E::CapabilityInvalid)?;
-    let ed = biscuit_auth::format::schema::public_key::Algorithm::Ed25519 as i32;
-    for b in std::iter::once(&schema.authority).chain(schema.blocks.iter()) {
+    let sch = schema::Biscuit::decode(bytes).map_err(|_| E::CapabilityInvalid)?;
+    let ed = schema::public_key::Algorithm::Ed25519 as i32;
+    for b in std::iter::once(&sch.authority).chain(sch.blocks.iter()) {
         if b.next_key.algorithm != ed || b.external_signature.as_ref().is_some_and(|x| x.public_key.algorithm != ed) {
             return Err(E::CapabilityInvalid);
         }
@@ -163,20 +224,16 @@ fn open(bytes: &[u8], root: &[u8; 32]) -> R<Token> {
     if biscuit.block_count() > MAX_BLOCKS {
         return Err(E::CapabilityInvalid);
     }
-    let mut blocks = vec![];
-    for i in 0..biscuit.block_count() {
-        let (facts, rules) = block_source_dump(&biscuit.print_block_source(i).map_err(|_| E::CapabilityInvalid)?)?;
-        if facts.iter().any(|f| RESERVED.contains(&f.predicate.name.as_str()))
-            || rules.iter().any(|r| RESERVED.contains(&r.head.name.as_str()))
+    let blocks = decode_blocks(bytes)?;
+    for b in &blocks {
+        if b.facts.iter().any(|f| RESERVED.contains(&f.name.as_str()))
+            || b.rule_heads.iter().any(|h| RESERVED.contains(&h.as_str()))
         {
             return Err(E::CapabilityInvalid); // CAP-103
         }
-        let external = biscuit
-            .block_external_key(i)
-            .map_err(|_| E::CapabilityInvalid)?
-            .map(|k| k.to_bytes().try_into().map_err(|_| E::CapabilityInvalid))
-            .transpose()?;
-        blocks.push(BlockInfo { facts, external });
+    }
+    if !blocks[0].rule_heads.is_empty() {
+        return Err(E::CapabilityInvalid); // CAP-105
     }
     let ids = revocation_ids(&biscuit);
     Ok(Token { biscuit, blocks, ids })
@@ -193,16 +250,16 @@ struct Authority {
 fn authority(t: &Token, issuer: &str) -> R<Authority> {
     let f = &t.blocks[0].facts;
     let w = one(f, "webway")?;
-    if w.len() != 2 || term_str(&w[0])? != "capability/v0" {
+    if w.len() != 2 || t_str(&w[0])? != "capability/v0" {
         return Err(E::CapabilityInvalid);
     }
-    let role = term_str(&w[1])?.to_string();
-    if term_str(&one(f, "issuer")?[0])? != issuer {
+    let role = t_str(&w[1])?.to_string();
+    if t_str(&one(f, "issuer")?[0])? != issuer {
         return Err(E::CapabilityInvalid);
     }
-    let owner = term_str(&one(f, "owner")?[0])?.to_string();
-    let issued = term_date(&one(f, "issued")?[0])?;
-    let expires = term_date(&one(f, "expires")?[0])?;
+    let owner = t_str(&one(f, "owner")?[0])?.to_string();
+    let issued = t_date(&one(f, "issued")?[0])?;
+    let expires = t_date(&one(f, "expires")?[0])?;
     let ok = match role.as_str() {
         "access" => !facts_named(f, "right").is_empty() && facts_named(f, "principal").is_empty(),
         "mandate" => {
@@ -219,15 +276,15 @@ fn authority(t: &Token, issuer: &str) -> R<Authority> {
 }
 
 /// CAP-120: the holder chain, walked in code.
-fn holder_chain(t: &Token) -> R<Vec<String>> {
-    let first = facts_named(&t.blocks[0].facts, "holder");
+pub fn holder_chain(blocks: &[BlockInfo]) -> R<Vec<String>> {
+    let first = facts_named(&blocks[0].facts, "holder");
     let [h0] = first.as_slice() else { return Err(E::CapabilityInvalid) };
-    if h0.len() != 2 || term_int(&h0[1])? != 0 {
+    if h0.len() != 2 || t_int(&h0[1])? != 0 {
         return Err(E::CapabilityInvalid);
     }
-    let mut chain = vec![term_str(&h0[0])?.to_string()];
+    let mut chain = vec![t_str(&h0[0])?.to_string()];
     ids::parse_role(&chain[0], Role::Agent).ok_or(E::CapabilityInvalid)?;
-    for b in &t.blocks[1..] {
+    for b in &blocks[1..] {
         let hs = facts_named(&b.facts, "holder");
         match b.external {
             None => {
@@ -241,10 +298,10 @@ fn holder_chain(t: &Token) -> R<Vec<String>> {
                     return Err(E::CapabilityInvalid);
                 }
                 let [h] = hs.as_slice() else { return Err(E::CapabilityInvalid) };
-                if h.len() != 2 || term_int(&h[1])? != chain.len() as i64 {
+                if h.len() != 2 || t_int(&h[1])? != chain.len() as i64 {
                     return Err(E::CapabilityInvalid);
                 }
-                let next = term_str(&h[0])?.to_string();
+                let next = t_str(&h[0])?.to_string();
                 ids::parse_role(&next, Role::Agent).ok_or(E::CapabilityInvalid)?;
                 if chain.contains(&next) || chain.len() as i64 > MAX_HOLDER_DEPTH {
                     return Err(E::CapabilityInvalid);
@@ -338,6 +395,7 @@ pub fn operation_allowed(cap: &str, op: &str) -> bool {
     match (kind, opname, op) {
         ("skill", None, "SendMessage" | "SendStreamingMessage") => true,
         ("task", Some("read"), "GetTask" | "SubscribeToTask") => true,
+        ("task", Some("write"), "SendMessage" | "SendStreamingMessage") => true,
         ("task", Some("cancel"), "CancelTask") => true,
         ("invite", Some("redeem"), "InviteRedeem") => true,
         ("blob", Some("read"), "BlobGet") => true,
@@ -345,6 +403,33 @@ pub fn operation_allowed(cap: &str, op: &str) -> bool {
         ("doc", Some("append"), "DocAppend") => true,
         ("mailbox", Some("deposit"), "MailboxDeposit") => true,
         _ => false,
+    }
+}
+
+/// CAP-106: the resource named in the capability is the one the request touches.
+fn resource_bound(cap: &str, input: &Value, presenter: &str) -> R<()> {
+    let (kind, rest) = cap.split_once(':').ok_or(E::CapabilityDenied)?;
+    let name = rest.rsplit_once('#').map_or(rest, |(n, _)| n);
+    let task_id = sstr(input, &["request", "taskId"]);
+    let ok = match kind {
+        // A skill capability creates tasks. Continuing one needs to be its creator, under the
+        // same capability (§6.4).
+        "skill" => match task_id {
+            None => true,
+            Some(t) => {
+                sstr(input, &["state", "task", "taskId"]) == Some(t)
+                    && sstr(input, &["state", "task", "creator"]) == Some(presenter)
+                    && sstr(input, &["state", "task", "capability"]) == Some(cap)
+            }
+        },
+        "task" => task_id == Some(name),
+        "invite" => task_id.is_none(),
+        _ => sstr(input, &["request", "resource"]) == Some(name),
+    };
+    if ok {
+        Ok(())
+    } else {
+        Err(E::CapabilityDenied)
     }
 }
 
@@ -381,11 +466,11 @@ pub fn authorize(input: &Value) -> R<Value> {
     let capability = sstr(input, &["cap", "capability"]);
     let access = sstr(input, &["cap", "access"]);
 
-    // 0. Follow-up on an existing task by its creator, without a token (§6.4, CAP-161).
+    // 0. Token-less follow-up by the task's creator: reads and cancel only (§6.4, CAP-161).
     let operation = sstr(input, &["request", "operation"]).ok_or(bad_input)?;
     let task = sget(input, &["state", "task"]);
     let followup = access.is_none()
-        && matches!(operation, "GetTask" | "SubscribeToTask" | "CancelTask" | "SendMessage" | "SendStreamingMessage")
+        && matches!(operation, "GetTask" | "SubscribeToTask" | "CancelTask")
         && task.and_then(|t| t.get("creator")).and_then(Value::as_str) == Some(presenter)
         && sstr(input, &["request", "taskId"]).is_some()
         && task.and_then(|t| t.get("taskId")) == sget(input, &["request", "taskId"]);
@@ -396,22 +481,21 @@ pub fn authorize(input: &Value) -> R<Value> {
     }
 
     // 2. Presenter identity (CAP-041). For InviteRedeem the presenter's owner is not pinned yet:
-    //    the cert in the request body is checked on its own chain (CAP-203).
+    //    the cert in the request body is checked on its own chain, in a separate context that
+    //    does not pin that owner for anything else (CAP-203).
     let invite = capability.is_some_and(|c| c.starts_with("invite:"));
     let cert = arr(v, &["agentCerts"])
         .into_iter()
         .find(|c| stmt::parse(c).ok().is_some_and(|p| p.claims.get("agent").and_then(Value::as_str) == Some(presenter)))
         .ok_or(E::CapabilityDenied)?;
     if invite {
-        if let Ok(p) = stmt::parse(&cert) {
-            if let Some(o) = p.claims.get("owner").and_then(Value::as_str) {
-                if ctx.pin(o).is_none() {
-                    ctx.pins.push(Pin::simple(o));
-                }
-            }
-        }
+        let o = stmt::parse(&cert).ok().and_then(|p| p.claims.get("owner").and_then(Value::as_str).map(String::from));
+        let mut ictx = Ctx::new(now, vec![Pin::simple(o.as_deref().unwrap_or(own))], vec![]);
+        ictx.add_lists(&lists);
+        ictx.verify(stmt::AGENT_CERT, &cert).map_err(|_| E::CapabilityDenied)?;
+    } else {
+        ctx.verify(stmt::AGENT_CERT, &cert).map_err(|_| E::CapabilityDenied)?;
     }
-    ctx.verify(stmt::AGENT_CERT, &cert).map_err(|_| E::CapabilityDenied)?;
 
     if followup {
         // Step 6 against the revocation IDs recorded when the task was created (CAP-161, CAP-174).
@@ -420,13 +504,18 @@ pub fn authorize(input: &Value) -> R<Value> {
             else {
                 return Err(bad_input);
             };
-            if arr(&a, &["ids"]).iter().filter_map(Value::as_str).any(|id| ctx.is_revoked(o, i, id)) {
+            if ctx.key_revoked(o, i)
+                || arr(&a, &["ids"]).iter().filter_map(Value::as_str).any(|id| ctx.is_revoked(o, i, id))
+            {
                 return Err(E::CapabilityRevoked);
             }
         }
         return Ok(json!({"followUp": true}));
     }
     let (Some(capability), Some(access)) = (capability, access) else { return Err(E::CapabilityMissing) };
+    if invite && sget(input, &["cap", "mandate"]).is_some() {
+        return Err(E::CapabilityInvalid); // a redemption never acts for someone else
+    }
 
     let req = Req {
         now,
@@ -434,7 +523,7 @@ pub fn authorize(input: &Value) -> R<Value> {
         owner: own,
         node: sstr(v, &["node"]).ok_or(bad_input)?,
         recipient: sstr(v, &["recipient"]).ok_or(bad_input)?,
-        operation: sstr(input, &["request", "operation"]).ok_or(bad_input)?,
+        operation,
         capability,
         task: sstr(input, &["request", "taskId"]),
         context: sstr(input, &["request", "contextId"]),
@@ -442,16 +531,14 @@ pub fn authorize(input: &Value) -> R<Value> {
     };
 
     // 3–6. Access token.
-    let (tok, auth, holders, _) = verify_token(&ctx, access, "access", own, &req, None)?;
-    let _ = auth;
+    let (tok, _, holders, _) = verify_token(&ctx, access, "access", &req, None)?;
 
     // 7. Mandate.
     let mut mandate_facts = vec![];
     let mut out = json!({ "holders": holders });
     if let Some(m) = sget(input, &["cap", "mandate"]) {
         let mtoken = sstr(m, &["token"]).ok_or(E::CapabilityInvalid)?;
-        let (mt, mauth, mholders, principal) = verify_token(&ctx, mtoken, "mandate", own, &req, Some(m))?;
-        // M4: same holder as the access token, which is the presenter.
+        let (mt, mauth, mholders, principal) = verify_token(&ctx, mtoken, "mandate", &req, Some(m))?;
         // M5: mandate Datalog.
         let calls = sget(input, &["state", "calls", "mandate"]).and_then(Value::as_i64).unwrap_or(0);
         run_datalog(&mt.biscuit, request_facts(&req, mholders.last().unwrap(), calls), None, MANDATE_POLICY)?;
@@ -465,10 +552,11 @@ pub fn authorize(input: &Value) -> R<Value> {
         out["principal"] = json!(principal);
     }
 
-    // 8. Operation (CAP-102), single-use invites (CAP-203).
+    // 8. Operation (CAP-102), resource binding (CAP-106), single-use invites (CAP-203).
     if !operation_allowed(capability, req.operation) {
         return Err(E::CapabilityDenied);
     }
+    resource_bound(capability, input, presenter)?;
     if invite {
         let id = capability.trim_start_matches("invite:").trim_end_matches("#redeem");
         if arr(input, &["state", "consumedInvites"]).iter().any(|c| c.as_str() == Some(id)) {
@@ -484,17 +572,21 @@ pub fn authorize(input: &Value) -> R<Value> {
     Ok(out)
 }
 
+fn strings(v: Option<&Value>) -> Vec<&str> {
+    v.and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).collect()).unwrap_or_default()
+}
+
 /// Steps 3–6 for an access token, or M1–M4 for a mandate (`mandate` = the `cap.mandate` object).
 fn verify_token(
     ctx: &Ctx,
     encoded: &str,
     role: &str,
-    verifier_owner: &str,
     req: &Req,
     mandate: Option<&Value>,
 ) -> R<(Token, Authority, Vec<String>, Option<String>)> {
     let (bytes, iss) = peek_issuer(encoded)?;
-    // Find and verify the issuer-cert (CAP-030, M1).
+    // Find and verify the issuer-cert (CAP-030, M1). Its revocation, and the revocation of the
+    // issuing key itself, are reported here (step 3).
     let cert = if let Some(m) = mandate {
         m.get("issuerCert").ok_or(E::CapabilityInvalid)?.clone()
     } else {
@@ -525,47 +617,44 @@ fn verify_token(
     let mut principal = None;
     let max_ttl;
     if role == "access" {
-        // CAP-110: rooted in the verifier's own owner.
-        if auth.owner != verifier_owner {
+        // CAP-110: rooted in the verifier's own owner, minted by the issuing key of this node.
+        if auth.owner != req.owner || ic.claims.get("node").and_then(Value::as_str) != Some(req.node) {
             return Err(E::CapabilityInvalid);
         }
-        let patterns: Vec<String> = scope
-            .get("resource")
-            .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(|x| x.as_str().map(String::from)).collect())
-            .unwrap_or_default();
+        let patterns = strings(scope.get("resource"));
         for r in facts_named(auth_facts, "right") {
-            let c = term_str(&r[0])?;
+            let c = t_str(&r[0])?;
             if !patterns.iter().any(|p| stmt::pattern_matches(p, c)) {
                 return Err(E::CapabilityInvalid);
             }
+        }
+        // CAP-030: the requested capability itself must be inside the scope.
+        if !patterns.iter().any(|p| stmt::pattern_matches(p, req.capability)) {
+            return Err(E::CapabilityDenied);
         }
         max_ttl = MAX_ACCESS_TTL;
     } else {
         // M1: mandate scope; the owner must be pinned (ctx.verify already required it).
         let ms = scope.get("mandate").filter(|m| !m.is_null()).ok_or(E::CapabilityInvalid)?;
-        let targets: Vec<&str> = ms
-            .get("targets")
-            .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(Value::as_str).collect())
-            .unwrap_or_default();
-        let caps: Vec<&str> = ms
-            .get("capabilities")
-            .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(Value::as_str).collect())
-            .unwrap_or_default();
+        let targets = strings(ms.get("targets"));
+        let caps = strings(ms.get("capabilities"));
+        let covered = |o: &str, c: &str| {
+            (targets == ["*"] || targets.contains(&o)) && caps.iter().any(|p| stmt::pattern_matches(p, c))
+        };
         for g in facts_named(auth_facts, "grant") {
             if g.len() != 2 {
                 return Err(E::CapabilityInvalid);
             }
-            let (o, c) = (term_str(&g[0])?, term_str(&g[1])?);
-            if !(targets == ["*"] || targets.contains(&o)) || !caps.iter().any(|p| stmt::pattern_matches(p, c)) {
+            if !covered(t_str(&g[0])?, t_str(&g[1])?) {
                 return Err(E::CapabilityInvalid);
             }
         }
+        if !covered(req.owner, req.capability) {
+            return Err(E::CapabilityDenied);
+        }
         max_ttl = ms.get("maxTtl").and_then(Value::as_i64).unwrap_or(0).min(MAX_MANDATE_TTL);
         // M2 (CAP-031): principal certified to the issuing key's node.
-        let p = term_str(&one(auth_facts, "principal")?[0])?.to_string();
+        let p = t_str(&one(auth_facts, "principal")?[0])?.to_string();
         let pc = mandate.and_then(|m| m.get("principalCert")).ok_or(E::CapabilityInvalid)?;
         let pv = ctx.verify(stmt::AGENT_CERT, pc).map_err(map_stmt)?;
         if pv.claims.get("agent").and_then(Value::as_str) != Some(p.as_str())
@@ -581,16 +670,18 @@ fn verify_token(
         return Err(E::CapabilityInvalid);
     }
     // 4. Holder chain (CAP-120).
-    let holders = holder_chain(&tok)?;
+    let holders = holder_chain(&tok.blocks)?;
     // 5. Expiry and presenter (CAP-111, CAP-121).
     if req.now > auth.expires || holders.last().map(String::as_str) != Some(req.presenter) {
         return Err(E::CapabilityDenied);
     }
-    // 6. Revocation (CAP-171, CAP-172). The issuer-cert was checked by ctx.verify.
+    // 6. Revocation of the token's blocks (CAP-171) and freshness (CAP-172).
     if tok.ids.iter().any(|id| ctx.is_revoked(&auth.owner, &iss, id)) {
         return Err(E::CapabilityRevoked);
     }
-    if auth.expires - auth.issued > REVOCATION_EXEMPT_TTL && !ctx.fresh_list(&auth.owner, &iss) {
+    if auth.expires - auth.issued > REVOCATION_EXEMPT_TTL
+        && !(ctx.fresh_list(&auth.owner, &iss) && ctx.fresh_root_list(&auth.owner))
+    {
         return Err(E::RevocationStatusUnavailable);
     }
     Ok((tok, auth, holders, principal))

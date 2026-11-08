@@ -104,19 +104,18 @@ pub fn id_claim(c: &Claims, k: &str, role: Role) -> R<[u8; 32]> {
 #[derive(Clone, Debug)]
 pub struct Pin {
     pub owner: String,
+    /// The only root key that signs valid statements: a rotation retires the older ones (CAP-021).
     pub current: String,
-    /// Older root keys that still sign valid statements (rotations without `compromised`).
-    pub older: Vec<String>,
     pub next: Option<String>,
     pub seq: i64,
 }
 
 impl Pin {
     pub fn simple(owner: &str) -> Pin {
-        Pin { owner: owner.into(), current: owner.into(), older: vec![], next: None, seq: 0 }
+        Pin { owner: owner.into(), current: owner.into(), next: None, seq: 0 }
     }
     pub fn may_sign(&self, did: &str) -> bool {
-        self.current == did || self.older.iter().any(|k| k == did)
+        self.current == did
     }
 }
 
@@ -148,21 +147,15 @@ pub fn owner_keys(owner: &str, events: &[Value]) -> R<Pin> {
         }
         match pin.take() {
             None => {
-                if seq != 0 || key != owner || c.contains_key("prev") || c.contains_key("compromised") {
+                if seq != 0 || key != owner || c.contains_key("prev") {
                     return Err(untrusted);
                 }
-                pin = Some(Pin { owner: owner.into(), current: key.into(), older: vec![], next, seq });
+                pin = Some(Pin { owner: owner.into(), current: key.into(), next, seq });
             }
             Some(mut old) => {
                 let committed = old.next.clone().ok_or(untrusted)?;
                 if seq != old.seq + 1 || str_claim(c, "prev")? != prev_id || committed != commitment(&key_bytes) {
                     return Err(untrusted);
-                }
-                let compromised = c.get("compromised").and_then(Value::as_bool).unwrap_or(false);
-                if compromised {
-                    old.older.clear();
-                } else {
-                    old.older.push(old.current.clone());
                 }
                 old.current = key.into();
                 old.next = next;
@@ -243,6 +236,22 @@ impl Ctx {
         })
     }
 
+    /// Is the key `key` (`wwi:`, `wwa:` or `wwn:`) revoked by a root-signed list of `owner`? (CAP-175)
+    pub fn key_revoked(&self, owner: &str, key: &str) -> bool {
+        self.lists.values().any(|l| {
+            l.owner == owner
+                && self.pin(owner).is_some_and(|p| p.may_sign(&l.iss))
+                && l.revoked.iter().any(|r| r == key)
+        })
+    }
+
+    /// A root-signed list of `owner` that is still within its `validUntil` (CAP-172).
+    pub fn fresh_root_list(&self, owner: &str) -> bool {
+        self.lists.values().any(|l| {
+            l.owner == owner && self.pin(owner).is_some_and(|p| p.may_sign(&l.iss)) && self.now <= l.valid_until
+        })
+    }
+
     pub fn fresh_list(&self, owner: &str, signer: &str) -> bool {
         self.lists.values().any(|l| l.owner == owner && l.iss == signer && self.now <= l.valid_until)
     }
@@ -320,7 +329,7 @@ impl Ctx {
         if typ == REVOCATION {
             let vu = time_claim(c, "validUntil")?;
             let max = if kid_role == Role::Owner { MAX_ISSUER_CERT_TTL } else { MAX_LIST_VALIDITY };
-            if vu - iat > max || vu < iat {
+            if vu - iat > max || vu < iat || vu > issuer_exp {
                 return Err(E::StatementInvalid);
             }
         } else {
@@ -339,8 +348,15 @@ impl Ctx {
         }
 
         // Revocation (CAP-015). The issuer-cert in the chain was checked by the recursive call.
-        if check_revoked && self.is_revoked(&owner, &p.kid, &p.id) {
-            return Err(E::StatementRevoked);
+        if check_revoked {
+            // The statement itself, its signing key, or the key it certifies (CAP-015, CAP-175).
+            let subject = ["issuer", "agent", "node"].iter().find_map(|k| c.get(*k).and_then(Value::as_str));
+            if self.is_revoked(&owner, &p.kid, &p.id)
+                || (kid_role == Role::Issuer && self.key_revoked(&owner, &p.kid))
+                || subject.is_some_and(|k| typ != INVITE && self.key_revoked(&owner, k))
+            {
+                return Err(E::StatementRevoked);
+            }
         }
         Ok(Verified { claims: p.claims, kid: p.kid })
     }
