@@ -287,8 +287,9 @@ same answer as for a task that does not exist (PROF-047).
 - [PROF-020] A responder node MUST keep, for every task it hosts, a durable **event log**: the creating `Task`
   snapshot and every later `TaskStatusUpdateEvent`, `TaskArtifactUpdateEvent` and agent `Message` for the task,
   in the order they were produced. Each entry has a per-task sequence number `seq`. The creating snapshot has
-  `seq` 0, and each later entry has the previous entry's `seq` plus one. The node MUST store each entry as the
-  signed envelope it sends, so that a replay is byte-identical.
+  `seq` 0, and each later entry has the previous entry's `seq` plus one. An entry's `seq` and content MUST NOT
+  change once written: every stream and every replay that carries entry `n` carries the same `StreamResponse`
+  with `seq` `n`. (The envelopes differ, because each is signed for one recipient and one request.)
 - [PROF-021] The `seq` of an event MUST travel in the signed envelope header (`ctx.seq`, `ext/envelope.md`), never
   only in an unsigned frame. A `Task` snapshot sent outside the log (the first frame of a cursorless subscribe,
   a `GetTask` result) carries the `seq` of the last log entry it reflects.
@@ -298,9 +299,9 @@ same answer as for a task that does not exist (PROF-047).
 - [PROF-023] A node MUST de-duplicate received envelopes on `(from, id)` for as long as `ext/envelope.md`
   requires (until at least `exp + SKEW`). The dedupe entry MUST be written in the same atomic transaction as the
   task or event it caused. A duplicate inside that horizon MUST NOT be processed again and MUST be answered with
-  the stored original response envelope. For a duplicate streaming request, the "original response" is the
-  task's event log: the node replays it from `seq` 0 (byte-identical envelopes) and continues live, as a cursor
-  subscribe from 0 would.
+  the stored original response envelope, byte for byte. For a duplicate streaming request, the "original
+  response" is the task's event log: the node replays it from `seq` 0 (the same entries, PROF-020, in envelopes
+  for the new stream) and continues live, as a cursor subscribe from 0 would.
 
 A2A makes `messageId` deduplication optional (A2A §3.3.1). In this profile it is mandatory, because at-least-once
 delivery with idempotent receivers is how offline peers work (§8).
@@ -367,7 +368,9 @@ A request reaches its responder node by one of two paths:
   and the task's later events, come back the same way to the requester node or to the requester's mailbox host.
 
 Only `SendMessage` and `CancelTask` may take the deferred path. A deferred `SendMessage` is processed as if
-`return_immediately` were `true`, because nobody is waiting on it.
+`return_immediately` were `true`, because nobody is waiting on it. A requester node that may send a request by
+the deferred path sets the service parameter `webway-reply: deferred` on it (binding §7). This is signed, so the
+responder treats every copy of the envelope alike, whichever path a copy arrives by.
 
 ### 8.2 Proxy tasks
 
@@ -432,9 +435,11 @@ Inside the overlay, A2A push webhooks are replaced by deferred delivery. A respo
 task created by a deferred `SendMessage` as `DELIVER` frames (binding §9) to the requester node, or to the
 requester's mailbox host when the requester node is unreachable.
 
-- [PROF-036] For a task created through the deferred path, a responder node MUST deliver every event-log entry to
-  the requester agent through the deferred path, in `seq` order, until the terminal event. The target MUST be the
-  requester agent named in the creating envelope's `from`, and no one else.
+- [PROF-036] For a task whose creating request carries `webway-reply: deferred`, a responder node MUST deliver
+  every event-log entry to the requester agent through the deferred path, in `seq` order, until the terminal
+  event, whether or not the requester also subscribes. The target MUST be the requester agent named in the
+  creating envelope's `from`, and no one else. A requester node MUST set `webway-reply: deferred` on every
+  request it hands to its outbox for possible deferred delivery.
 - [PROF-037] A push notification config received on `webway-quic/v0`, if the node supports push at all, MUST name
   as its target only the requesting agent's own agent address. Any other URL (in particular an `https` webhook)
   MUST be refused with `InvalidParamsError`, so that a node can never be used to post to third parties (SSRF).
@@ -443,7 +448,7 @@ requester's mailbox host when the requester node is unreachable.
 
 | Operation from the local agent | Peer unreachable: behaviour |
 |---|---|
-| `SendMessage` (either form), `SendStreamingMessage` | Proxy task in `submitted`, `delivery: queued` (PROF-030). A streaming call streams the proxy task and stays open. Remote events are streamed when they arrive. |
+| `SendMessage` (either form), `SendStreamingMessage` | Proxy task in `submitted`, `delivery: queued` (PROF-030). The node sends the request as a `SendMessage` with `return_immediately` and `webway-reply: deferred` (§8.1), and keeps retrying that same envelope. A streaming call from the agent streams the proxy task and stays open. Remote events are streamed to it as they arrive. |
 | `GetTask` on a proxy task | The last known snapshot, with metadata `stale: true` and `asOf` (RFC 3339) under the profile URI |
 | `CancelTask` on a proxy task | §8.3, PROF-035 |
 | `SubscribeToTask` on a proxy task | Local stream of the proxy task. Mirrored events flow when the peer comes back. |

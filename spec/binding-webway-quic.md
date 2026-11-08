@@ -210,8 +210,9 @@ Frame {
 
 Every REQUEST, RESPONSE, EVENT and DELIVER payload is one envelope as `ext/envelope.md` defines it. This binding
 relies on these envelope properties: it is a JSON object; it is signed by `from`; it names `to`, `id`, `exp` and
-`ctx` (`taskId`, `contextId`, `seq`, `inReplyTo`); and its `body` is a JSON value that the signature covers. This
-binding defines `body`, the **binding body**:
+`ctx` (`taskId`, `contextId`, `seq`, `inReplyTo`); its `body` is a JSON value that the signature covers; and
+`from` may be a node identity (`wwn:`) for errors the node produces itself (BIND-020). `ext/envelope.md` (T2)
+must provide all of these. This binding defines `body`, the **binding body**:
 
 ```text
 BindingBody {
@@ -274,6 +275,7 @@ Defined names:
 | `a2a-extensions` | request | comma-separated URIs, no spaces | Extensions the requester asks to activate (A2A `A2A-Extensions`) |
 | `a2a-extensions` | response | comma-separated URIs, no spaces | Extensions the responder activated for this request. The signed echo of profile PROF-056. |
 | `webway-from-seq` | `SubscribeToTask` request | decimal integer ≥ 0 | Resume cursor (profile §7.2) |
+| `webway-reply` | `SendMessage`, `CancelTask` request | `deferred` | Deliver the response by deferred delivery when the request did not arrive on a live REQUEST stream, and deliver the task's later events by deferred delivery to the requester (profile §8.1, PROF-036) |
 
 Names starting `a2a-` are reserved for A2A. Names starting `webway-` are reserved for argent-webway documents.
 Unknown names are ignored but, being signed, are forwarded unchanged. A2A says parameter names are
