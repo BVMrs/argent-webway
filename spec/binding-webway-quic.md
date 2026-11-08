@@ -112,8 +112,11 @@ HELLO payload (a JSON object, unsigned: it is authenticated by the connection, a
 | `roles` | array of strings | yes | `"node"`, and `"mailbox-host"` if the sender holds envelopes for other nodes (`ext/mailbox.md`) |
 | `features` | array of URIs | no | Binding-level features (extension stream or frame types) the sender implements |
 
-Unknown fields MUST be ignored (BIND-030). Until it has the peer's HELLO, an endpoint assumes `maxFrameSize` of
-16 384. HELLO itself MUST fit in 16 384 bytes.
+Unknown fields are ignored (BIND-030).
+
+- [BIND-034] Until it has the peer's HELLO, an endpoint MUST NOT send frames larger than 16 384 bytes. A HELLO MUST
+  NOT exceed 16 384 bytes, and a receiver MUST treat a larger HELLO as a connection error `FrameTooLarge`, whatever
+  `maxFrameSize` it announced.
 
 ### 3.3 GOAWAY and closing
 
@@ -219,14 +222,18 @@ BindingBody {
 
 - [BIND-014] The `rpc` member of a request MUST be a JSON-RPC 2.0 request object whose `method` is an A2A 1.0
   method name (A2A §5.3), whose `params` is the request message in the A2A JSON-RPC form, and whose `id` is the
-  string equal to the envelope's `id`.
-- [BIND-015] The `rpc` member of a RESPONSE MUST be a JSON-RPC 2.0 response object (`result` or `error`) whose `id`
-  equals the request's `id`. The `rpc` member of an EVENT MUST be a JSON-RPC 2.0 response object whose `id` equals
-  the request's `id` and whose `result` is an A2A `StreamResponse`, exactly as one SSE event of the A2A JSON-RPC
-  binding carries. Response and event envelopes MUST have `ctx.inReplyTo` equal to the request's `id`, and a fresh
-  `id` of their own.
-- [BIND-016] An EVENT whose `StreamResponse` concerns a task MUST carry `ctx.taskId` and `ctx.seq` (profile
-  PROF-020, PROF-021).
+  string equal to the envelope's `id`. A responder MUST answer a request whose `rpc` breaks this with
+  `MethodNotFoundError` if only the method is unknown, and with `InvalidRequestError` otherwise.
+- [BIND-015] The `rpc` member of a RESPONSE MUST be a JSON-RPC 2.0 response object (exactly one of `result` and
+  `error`) whose `id` equals the request's `id`. The `rpc` member of an EVENT MUST be a JSON-RPC 2.0 response
+  object whose `id` equals the request's `id` and whose `result` is an A2A `StreamResponse` (exactly one of
+  `task`, `message`, `statusUpdate`, `artifactUpdate`), exactly as one SSE event of the A2A JSON-RPC binding
+  carries. Response and event envelopes MUST have `ctx.inReplyTo` equal to the request's `id`, and an `id` of their
+  own that differs from it. A requester MUST treat a RESPONSE or EVENT that breaks this as
+  `InvalidAgentResponseError`.
+- [BIND-016] An EVENT whose `StreamResponse` concerns a task (a `task`, a `statusUpdate`, an `artifactUpdate`, or a
+  `message` with a `taskId`) MUST carry `ctx.taskId` and `ctx.seq` (profile PROF-020, PROF-021). A requester MUST
+  treat one without them as `InvalidAgentResponseError`.
 
 A gateway can therefore turn an overlay exchange into the A2A JSON-RPC binding by taking `rpc` out of each
 envelope, and the reverse by wrapping, with no change to the A2A objects.
@@ -521,21 +528,29 @@ Byte strings are lowercase hex.
 
 | Kind | Input | Output on `accept` | Rejections |
 |---|---|---|---|
-| `bind/frame` | `{"direction": "dialer-to-listener" \| "listener-to-dialer" \| "opener-to-peer" \| "peer-to-opener", "bidi": <bool>, "hex": <stream bytes>, "fin": <bool>, "maxFrameSize": <int>}` | `{"streamType": <name>, "frames": [{"type": <name>, "length": <int>}…], "ignored": <int>}`. Unknown frames are counted in `ignored`, not listed. | `ProtocolError`, `FrameTooLarge`, `FrameUnexpected`, `StreamTypeUnknown` |
+| `bind/frame` | `{"bidi": <bool>, "direction": "opener-to-peer" \| "peer-to-opener", "streamType"?: <name>, "hex": <bytes>, "fin": <bool>, "maxFrameSize": <int>}` | `{"streamType": <name>, "frames": [{"type": <name>, "length": <int>}…], "ignored": <int>}`. Unknown frames are counted in `ignored`, not listed. | `ProtocolError`, `FrameTooLarge`, `FrameUnexpected`, `StreamTypeUnknown` |
 | `bind/stream` | `{"op": <A2A method>, "toResponder": [<frame name>…], "toRequester": [<frame name>…]}` | none | `FrameUnexpected` |
 | `bind/negotiate` | `{"dialer": {"alpn": […], "hello": <HELLO>}, "listener": {"alpn": […], "hello": <HELLO>}, "targetProtocolVersion"?: <string>}` | `{"alpn", "binding", "profile", "a2aVersions", "requestA2aVersion"?}` | `NoApplicationProtocol`, `VersionMismatch`, `VersionNotSupportedError` |
 | `bind/svc` | `{"svc": <object or absent>, "op": <A2A method>, "supported": [<A2A version>…]}` | `{"a2aVersion", "extensions": […], "fromSeq"?: <int>}` | `InvalidRequestError`, `VersionNotSupportedError` |
+| `bind/body` | `{"frame": "REQUEST" \| "RESPONSE" \| "EVENT", "envelope": {"id", "ctx"?, "body"}, "requestId"?: <string>}`. `requestId` (the request envelope's `id`) is given for RESPONSE and EVENT. | `{"method"}` for REQUEST, else none | `InvalidRequestError`, `MethodNotFoundError`, `InvalidAgentResponseError` |
 
-For `bind/frame`, `direction` and `bidi` say which side of which kind of stream the bytes come from. The first
-varint of `hex` is the stream type. With `fin: false`, a partial frame at the end is not an error and is not
-listed.
+For `bind/frame`, `bidi` and `direction` say which kind of stream the bytes are on and which side sent them. In
+the `opener-to-peer` direction the first varint of `hex` is the stream type. In the `peer-to-opener` direction
+(bidirectional streams only) the stream type is given as `streamType` and `hex` holds only frames. Stream and
+frame types are named as in §4 and §6.1. With `fin: false`, a partial frame at the end is not an error and is not
+listed. The frame decoder checks HELLO, GOAWAY, END and CUSTODY payloads for being JSON objects (BIND-013) and
+treats REQUEST, RESPONSE, EVENT and DELIVER payloads as opaque.
+
+`bind/negotiate` lists `a2aVersions` in ascending order. `requestA2aVersion` is present only when
+`targetProtocolVersion` is given.
 
 | Requirement | Covered by |
 |---|---|
-| BIND-005 (first frame HELLO), BIND-008, BIND-010, BIND-011, BIND-012 | `bind/frame` |
-| BIND-019, BIND-021 (frame order part) | `bind/stream` |
+| BIND-005 (first frame HELLO), BIND-008, BIND-010, BIND-011, BIND-012, BIND-013, BIND-034 | `bind/frame` |
+| BIND-019 | `bind/stream` |
 | BIND-028, BIND-029, BIND-030 | `bind/negotiate` |
 | BIND-017, BIND-018 | `bind/svc` |
+| BIND-014, BIND-015, BIND-016 | `bind/body` |
 | All others | Harness scenarios (T4, T5). Not written yet: see profile §15. |
 
 ## 17. Examples

@@ -1,0 +1,20 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "error/classify",
+  "description": "Client-side error classification. Input {code, reason?, httpStatus?}. Output {name, retryable}. name is Unknown for a code not in profile §10 (or the two Go codes).",
+  "spec": "profile.md#101-structure",
+  "cases": [
+    {"id":"a2a-code","description":"Classified by JSON-RPC code","requirements":["PROF-052"],"input":{"code":-32001},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","retryable":false}}},
+    {"id":"status-ignored","description":"The HTTP status is never used: code wins","requirements":["PROF-052"],"input":{"code":-32001,"httpStatus":400},"expect":{"result":"accept","output":{"name":"TaskNotFoundError","retryable":false}}},
+    {"id":"status-503-ignored","description":"A 503 with a non-retryable A2A code stays not retryable","requirements":["PROF-052"],"input":{"code":-32002,"httpStatus":503},"expect":{"result":"accept","output":{"name":"TaskNotCancelableError","retryable":false}}},
+    {"id":"go-unauthenticated","description":"Go's -31401","requirements":["PROF-052"],"input":{"code":-31401},"expect":{"result":"accept","output":{"name":"IdentityUntrusted","retryable":false}}},
+    {"id":"go-unauthorised","description":"Go's -31403","requirements":["PROF-052"],"input":{"code":-31403},"expect":{"result":"accept","output":{"name":"CapabilityDenied","retryable":false}}},
+    {"id":"profile-retryable","description":"A retryable profile error","requirements":["PROF-052"],"input":{"code":-30020,"reason":"PEER_UNREACHABLE"},"expect":{"result":"accept","output":{"name":"PeerUnreachable","retryable":true}}},
+    {"id":"profile-not-retryable","description":"A non-retryable profile error","requirements":["PROF-052"],"input":{"code":-30022,"reason":"DELIVERY_EXPIRED"},"expect":{"result":"accept","output":{"name":"DeliveryExpired","retryable":false}}},
+    {"id":"internal","description":"InternalError is retryable","requirements":["PROF-052"],"input":{"code":-32603},"expect":{"result":"accept","output":{"name":"InternalError","retryable":true}}},
+    {"id":"terminal-reason","description":"The refinement reason does not change the error","requirements":["PROF-052"],"input":{"code":-32004,"reason":"TASK_TERMINAL"},"expect":{"result":"accept","output":{"name":"UnsupportedOperationError","retryable":false}}},
+    {"id":"unknown-code","description":"An unknown code is not retryable, whatever the status","requirements":["PROF-052"],"input":{"code":-30099,"httpStatus":503},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}},
+    {"id":"unknown-a2a-range","description":"An unknown code in A2A's range (a future A2A error) is not retryable","requirements":["PROF-052"],"input":{"code":-32010},"expect":{"result":"accept","output":{"name":"Unknown","retryable":false}}}
+  ]
+}

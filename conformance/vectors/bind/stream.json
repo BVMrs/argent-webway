@@ -1,0 +1,28 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "bind/stream",
+  "description": "REQUEST stream grammar (frame types only). Input {op: A2A method, toResponder: [frame names], toRequester: [frame names]}, each list complete up to FIN. Accept a sequence the grammar of binding §8.2 allows, reject others as FrameUnexpected. Whether a RESPONSE on a streaming operation carries an error is not visible here.",
+  "spec": "binding-webway-quic.md#82-stream-grammar",
+  "cases": [
+    {"id":"unary-ok","description":"Unary: REQUEST, then one RESPONSE","requirements":["BIND-019"],"input":{"op":"GetTask","toResponder":["REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"accept"}},
+    {"id":"unary-send","description":"SendMessage is unary","requirements":["BIND-019"],"input":{"op":"SendMessage","toResponder":["REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"accept"}},
+    {"id":"unary-cancel","description":"CancelTask is unary","requirements":["BIND-019"],"input":{"op":"CancelTask","toResponder":["REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"accept"}},
+    {"id":"unary-event","description":"Unary operations carry no EVENT","requirements":["BIND-019"],"input":{"op":"GetTask","toResponder":["REQUEST"],"toRequester":["EVENT","RESPONSE"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"unary-end","description":"Unary operations end with RESPONSE, not END","requirements":["BIND-019"],"input":{"op":"SendMessage","toResponder":["REQUEST"],"toRequester":["END"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"unary-two-responses","description":"Exactly one RESPONSE","requirements":["BIND-019"],"input":{"op":"ListTasks","toResponder":["REQUEST"],"toRequester":["RESPONSE","RESPONSE"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"unary-no-response","description":"A unary stream must carry a RESPONSE","requirements":["BIND-019"],"input":{"op":"GetTask","toResponder":["REQUEST"],"toRequester":[]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"two-requests","description":"Exactly one REQUEST per stream","requirements":["BIND-019"],"input":{"op":"GetTask","toResponder":["REQUEST","REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"no-request","description":"The requester must send a REQUEST","requirements":["BIND-019"],"input":{"op":"GetTask","toResponder":[],"toRequester":["RESPONSE"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"streaming-ok","description":"Streaming: events then END","requirements":["BIND-019"],"input":{"op":"SendStreamingMessage","toResponder":["REQUEST"],"toRequester":["EVENT","EVENT","EVENT","END"]},"expect":{"result":"accept"}},
+    {"id":"streaming-one-event","description":"One event then END (a single Message)","requirements":["BIND-019"],"input":{"op":"SendStreamingMessage","toResponder":["REQUEST"],"toRequester":["EVENT","END"]},"expect":{"result":"accept"}},
+    {"id":"streaming-error-first","description":"Streaming: an error RESPONSE before any event","requirements":["BIND-019"],"input":{"op":"SendStreamingMessage","toResponder":["REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"accept"}},
+    {"id":"streaming-error-later","description":"Streaming: an error RESPONSE after events","requirements":["BIND-019"],"input":{"op":"SubscribeToTask","toResponder":["REQUEST"],"toRequester":["EVENT","EVENT","RESPONSE"]},"expect":{"result":"accept"}},
+    {"id":"streaming-end-only","description":"END without any event","requirements":["BIND-019"],"input":{"op":"SubscribeToTask","toResponder":["REQUEST"],"toRequester":["END"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"streaming-no-end","description":"Events must be followed by END or RESPONSE","requirements":["BIND-019"],"input":{"op":"SubscribeToTask","toResponder":["REQUEST"],"toRequester":["EVENT","EVENT"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"streaming-event-after-end","description":"Nothing after END","requirements":["BIND-019"],"input":{"op":"SendStreamingMessage","toResponder":["REQUEST"],"toRequester":["EVENT","END","EVENT"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"streaming-end-and-response","description":"END and RESPONSE are exclusive","requirements":["BIND-019"],"input":{"op":"SendStreamingMessage","toResponder":["REQUEST"],"toRequester":["EVENT","END","RESPONSE"]},"expect":{"result":"reject","error":"FrameUnexpected"}},
+    {"id":"subscribe-ok","description":"SubscribeToTask is streaming","requirements":["BIND-019"],"input":{"op":"SubscribeToTask","toResponder":["REQUEST"],"toRequester":["EVENT","END"]},"expect":{"result":"accept"}},
+    {"id":"subscribe-as-unary","description":"A single error RESPONSE on SubscribeToTask is allowed","requirements":["BIND-019"],"input":{"op":"SubscribeToTask","toResponder":["REQUEST"],"toRequester":["RESPONSE"]},"expect":{"result":"accept"}}
+  ]
+}

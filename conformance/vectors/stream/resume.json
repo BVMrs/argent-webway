@@ -1,0 +1,20 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "stream/resume",
+  "description": "Responder side of SubscribeToTask. Input {lastSeq, retainedFrom (oldest seq still in the log), terminal, fromSeq (cursor or null)}. Output {snapshotFirst, replay (seqs sent from the log, in order), thenLive (live events follow; false means the stream ends)}.",
+  "spec": "profile.md#72-resuming-from-a-cursor",
+  "cases": [
+    {"id":"no-cursor-active","description":"Cursorless subscribe: snapshot first, then live","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":false,"fromSeq":null},"expect":{"result":"accept","output":{"snapshotFirst":true,"replay":[],"thenLive":true}}},
+    {"id":"no-cursor-terminal","description":"Cursorless subscribe on a terminal task is refused","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":true,"fromSeq":null},"expect":{"result":"reject","error":"UnsupportedOperationError"}},
+    {"id":"cursor-middle","description":"Replay from the cursor, no snapshot, then live","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":false,"fromSeq":3},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[3,4,5],"thenLive":true}}},
+    {"id":"cursor-from-zero","description":"Cursor 0 replays the whole log","requirements":["PROF-027"],"input":{"lastSeq":3,"retainedFrom":0,"terminal":false,"fromSeq":0},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[0,1,2,3],"thenLive":true}}},
+    {"id":"cursor-caught-up","description":"Cursor one past the last seq: nothing to replay, then live","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":false,"fromSeq":6},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[],"thenLive":true}}},
+    {"id":"cursor-ahead","description":"Cursor beyond last seq + 1 is invalid","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":false,"fromSeq":7},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"cursor-terminal","description":"Cursor on a terminal task replays up to the terminal event, then ends","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":true,"fromSeq":3},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[3,4,5],"thenLive":false}}},
+    {"id":"cursor-terminal-caught-up","description":"Cursor past the terminal event: nothing, then end","requirements":["PROF-027"],"input":{"lastSeq":5,"retainedFrom":0,"terminal":true,"fromSeq":6},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[],"thenLive":false}}},
+    {"id":"cursor-retained-edge","description":"Cursor equal to the oldest retained entry replays normally","requirements":["PROF-027"],"input":{"lastSeq":9,"retainedFrom":4,"terminal":false,"fromSeq":4},"expect":{"result":"accept","output":{"snapshotFirst":false,"replay":[4,5,6,7,8,9],"thenLive":true}}},
+    {"id":"cursor-expired-active","description":"Cursor older than retention: snapshot first instead, then live","requirements":["PROF-027"],"input":{"lastSeq":9,"retainedFrom":4,"terminal":false,"fromSeq":2},"expect":{"result":"accept","output":{"snapshotFirst":true,"replay":[],"thenLive":true}}},
+    {"id":"cursor-expired-terminal","description":"Cursor older than retention on a terminal task: snapshot, then end","requirements":["PROF-027"],"input":{"lastSeq":9,"retainedFrom":4,"terminal":true,"fromSeq":2},"expect":{"result":"accept","output":{"snapshotFirst":true,"replay":[],"thenLive":false}}}
+  ]
+}

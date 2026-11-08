@@ -106,27 +106,30 @@ Status of each A2A 1.0 feature in this profile:
 
 | A2A 1.0 feature | On `webway-quic/v0` | At the HTTP edge | Notes |
 |---|---|---|---|
-| `SendMessage` | MUST | MUST | Both blocking and `return_immediately` forms |
-| `SendStreamingMessage` | MUST | MUST | |
-| `GetTask` | MUST | MUST | Scoped to the caller (§9) |
-| `ListTasks` | MUST | MUST | Scoped to the caller (§9) |
-| `CancelTask` | MUST | MUST | §6.3 |
-| `SubscribeToTask` | MUST | MUST | Plus the profile's cursor (§7.2) |
-| Push notification config (Create/Get/List/Delete) | MAY. Otherwise `PushNotificationNotSupportedError` | MAY | Inside the overlay, event delivery to offline requesters is the mailbox (§8.4), not webhooks |
-| `GetExtendedAgentCard` | MAY | MAY | |
-| Agent Card | MUST, signed (§5) | MUST, the same card | |
-| `capabilities.streaming` | MUST be `true` | | |
-| Extensions (§4.6 of A2A) | MUST, with in-band activation (§11.3) | MUST | |
-| `A2A-Version` service parameter | MUST be sent on every request (PROF-002) | MUST | |
-| Messages answered with a `Message` instead of a `Task` | MAY | MAY | No task, so §6 does not apply. Idempotency still does (§6.5). |
-| Multi-tenancy (`tenant`) | MAY | MAY | Routing only, never authorisation (PROF-046) |
+| `SendMessage` | mandatory | mandatory | Both blocking and `return_immediately` forms |
+| `SendStreamingMessage` | mandatory | mandatory | |
+| `GetTask` | mandatory | mandatory | Scoped to the caller (§9) |
+| `ListTasks` | mandatory | mandatory | Scoped to the caller (§9) |
+| `CancelTask` | mandatory | mandatory | §6.3 |
+| `SubscribeToTask` | mandatory | mandatory | Plus the profile's cursor (§7.2) |
+| Push notification config (Create/Get/List/Delete) | optional. Otherwise `PushNotificationNotSupportedError` | optional | Inside the overlay, event delivery to offline requesters is the mailbox (§8.4), not webhooks |
+| `GetExtendedAgentCard` | optional | optional | |
+| Agent Card | mandatory, signed (§5) | mandatory, the same card | |
+| `capabilities.streaming` | mandatory, `true` | | |
+| Extensions (§4.6 of A2A) | mandatory, with in-band activation (§11.3) | mandatory | |
+| `A2A-Version` service parameter | sent on every request (PROF-002) | sent on every request | |
+| Messages answered with a `Message` instead of a `Task` | optional | optional | No task, so §6 does not apply. Idempotency still does (§6.5). |
+| Multi-tenancy (`tenant`) | optional | optional | Routing only, never authorisation (PROF-046) |
 
-- [PROF-002] A node MUST implement every operation marked MUST in the table above, on every interface it
+- [PROF-002] A node MUST implement every operation marked mandatory in the table above, on every interface it
   declares. A node MUST send the `A2A-Version` service parameter with value `1.0` on every A2A request it sends, on
   every binding. It MUST NOT send a minor version higher than the target interface's declared `protocolVersion`.
 - [PROF-003] A node acting as a client MUST select the interface it calls by both `protocolBinding` and
-  `protocolVersion`, never by `protocolBinding` alone. Between two argent-webway agents it MUST prefer the
-  `webway-quic/v0` interface over an HTTP interface of the same agent.
+  `protocolVersion`, never by `protocolBinding` alone. An interface is usable if the client implements its
+  binding and implements an A2A version of the same major that is not above the interface's `protocolVersion`.
+  Among usable interfaces the client MUST choose the `webway-quic/v0` interface if there is one, and otherwise the
+  first usable interface in card order. If none is usable it MUST NOT send the request, and reports
+  `VersionNotSupportedError` locally.
 
 ## 4. Wire hygiene towards stock A2A peers
 
@@ -262,7 +265,7 @@ behaviour A2A 1.0 already prescribes.
 | Operation \ state | submitted | working | input-required | auth-required | terminal |
 |---|---|---|---|---|---|
 | `SendMessage` / `SendStreamingMessage` with this `taskId` | accepted, appended to history; state unchanged unless the agent changes it | same as submitted | accepted; the agent normally moves to `working` | accepted; the agent normally moves to `working` | `UnsupportedOperationError` (A2A), reason `TASK_TERMINAL` |
-| `CancelTask` | MUST move to `canceled` | `canceled`, or `TaskNotCancelableError` if the agent cannot stop | as working | as working | `TaskNotCancelableError` (A2A) |
+| `CancelTask` | moves to `canceled` (PROF-018) | `canceled`, or `TaskNotCancelableError` if the agent cannot stop | as working | as working | `TaskNotCancelableError` (A2A) |
 | `SubscribeToTask` without cursor | snapshot, then live events (A2A) | same | same | same | `UnsupportedOperationError` (A2A), reason `TASK_TERMINAL` |
 | `SubscribeToTask` with cursor (§7.2) | replay from cursor, then live | same | same | same | replay from cursor up to the terminal event, then end |
 | `GetTask` | snapshot | snapshot | snapshot | snapshot | snapshot |
@@ -542,10 +545,11 @@ Errors are JSON-RPC 2.0 error objects, as in the A2A JSON-RPC binding (A2A §9.5
 - [PROF-052] A client MUST classify errors by JSON-RPC `code` and `ErrorInfo.reason`, never by HTTP or gRPC
   status, and MUST also recognise the non-standard codes −31401 (unauthenticated) and −31403 (unauthorised) that
   one stock SDK emits (research §3.8), mapping them to `IdentityUntrusted` and `CapabilityDenied` for retry
-  decisions.
+  decisions. A code it does not know MUST be classified as not retryable.
 
-Retry rule: a client MAY retry an error marked retryable, with backoff and jitter, honouring `retryAfterMs`. It
-MUST NOT retry a non-retryable error with the same envelope. A retry always resends the same envelope (PROF-033).
+- [PROF-073] A client MAY retry an error marked retryable, with backoff and jitter, honouring `retryAfterMs`. It
+  MUST NOT retry a non-retryable error with the same envelope. A retry always resends the same envelope
+  (PROF-033).
 
 ### 10.2 A2A errors, reused
 
@@ -679,8 +683,8 @@ next to the `webway-quic/v0` interface.
   `metadata` under extension URIs. It MAY attach the signed envelope of a response in `metadata` under the
   `envelope/v0` URI for clients that can verify it.
 - [PROF-063] When content from the HTTP edge is forwarded into the overlay (to another node), the forwarding agent
-  signs the envelope with its own key, and the content carries `taint.unverified = true` (PROF-059). The receiving
-  node computes trust `unverified-origin` for it, never `foreign` or higher.
+  MUST sign the envelope with its own key, and the content MUST carry `taint.unverified = true` (PROF-059). The
+  receiving node MUST compute trust `unverified-origin` for it, never `foreign` or higher.
 - [PROF-064] If the edge supports push notifications, it MUST validate webhook URLs when the config is created and
   again at connect time (resolving once and connecting to the validated address), MUST require `https` outside an
   explicit local test mode, MUST NOT follow redirects to another host, and MUST send the config `token` in both
@@ -748,8 +752,9 @@ schemas are specified with the MCP facade (roadmap T12).
   | task `cancelled` | `canceled` |
   | JSON-RPC error before any work, for authorisation or invalid arguments | `rejected` |
 
-The bridge targets MCP 2026-07-28 and MUST NOT rely on MCP sessions. MCP data the bridge adds travels in `_meta`
-under `io.github.bvmrs.argent-webway/`, and signed content crossing MCP is carried as opaque bytes.
+- [PROF-074] MCP bridges and the MCP facade MUST target MCP 2026-07-28 and MUST NOT rely on MCP sessions to carry
+  `contextId`, `taskId` or any other state. MCP data they add MUST travel in `_meta` under
+  `io.github.bvmrs.argent-webway/`, and signed content crossing MCP MUST be carried as opaque bytes.
 
 ## 13. Disposition of the research candidates
 
@@ -790,12 +795,12 @@ document and the binding:
 | R-G3 no existence leak, error codes | Adopted | PROF-047, PROF-052, §10.3 |
 | R-G4 audit everything | Adopted (format in T9) | PROF-049 |
 | R-H1 peer content is data | Adopted | PROF-014, PROF-044 |
-| R-I1 MCP 2026-07-28, no sessions | Adopted | §12.4, §12.5 |
+| R-I1 MCP 2026-07-28, no sessions | Adopted | PROF-074 |
 | R-I2 bridge as MCP client | Adopted | PROF-071 |
 | R-I3 bridge as MCP server | Adopted | PROF-070 |
 | R-I4 explicit state mapping | Adopted, with `isError: true` → `failed` | PROF-072 |
 | R-I5 work without MCP tasks | Adopted | PROF-069 |
-| R-I6 `_meta` prefix, opaque signed bytes | Adopted | §12.5 |
+| R-I6 `_meta` prefix, opaque signed bytes | Adopted | PROF-074 |
 | R-I7 rmcp hardening | Deferred to the MCP facade implementation (T12). It is about one library, not the protocol. | — |
 | R-J1 … R-J4 interop smoke-test inputs | Deferred to the conformance harness (T4) and the HTTP edge (T11) | — |
 
@@ -815,8 +820,14 @@ the vector kinds this document introduces.
 | `error/map` | `{"name": <error name>, "context"?: "task-op"}` | `{"name", "code", "reason", "retryable", "http"?, "grpc"?}` | none |
 | `card/check` | `{"card": <Agent Card JSON>}` | none | any (card does not satisfy §5) |
 | `bridge/mcp-state` | `{"mcp": <outcome>, "isError"?: <bool>}` | `{"state": <A2A state>}` | none |
+| `card/select` | `{"interfaces": [<AgentInterface>…], "bindings": [<binding the client implements>…], "a2aVersions": [<version>…]}` | `{"url", "protocolBinding", "protocolVersion"}` of the chosen interface | `VersionNotSupportedError` |
+| `wire/outbound` | `{"peer": "stock", "type": "Message", "value": <JSON>}` | none | any (the object breaks §4) |
+| `card/verify` | `{"signed": <bool>, "protected"?: <decoded JWS protected header>, "policyRequiresSignature": <bool>, "jkuAllowList"?: [<URL>…]}` | none | any (the card must not be used) |
+| `error/classify` | `{"code": <int>, "reason"?: <string>, "httpStatus"?: <int>}` | `{"name", "retryable"}`; `name` is `Unknown` for a code not in §10 | none |
+| `push/target` | `{"requester": <agent address>, "url": <push config URL>}` | none | `InvalidParamsError` |
 
-The vectors are under `conformance/vectors/` (`task/`, `stream/`, `delivery/`, `error/`, `card/`, `bridge/`).
+The vectors are under `conformance/vectors/` (`task/`, `stream/`, `delivery/`, `error/`, `card/`, `bridge/`,
+`wire/`, `push/`).
 Requirements that need running nodes (durability across a crash, live and deferred paths, authorisation, audit
 records, the bridges) are covered by harness scenarios, starting with the M1 scenario of due diligence §6. The
 table below says which.
@@ -831,6 +842,13 @@ table below says which.
 | PROF-008, PROF-009, PROF-010 (shape), PROF-004, PROF-005 (card part) | `card/check` |
 | PROF-047, PROF-051, PROF-053 | `error/map` |
 | PROF-072 | `bridge/mcp-state` |
+| PROF-002 (version cap), PROF-003 | `card/select`, and `bind/negotiate` of the binding |
+| PROF-004, PROF-005, PROF-006 (messages) | `wire/outbound` |
+| PROF-054 | `bind/svc` of the binding |
+| PROF-055 | `bind/negotiate` of the binding |
+| PROF-011 | `card/verify` |
+| PROF-052 | `error/classify` |
+| PROF-037 | `push/target` |
 | All others | Harness scenarios (T4, T5, T11, T12). Not written yet: see §15. |
 
 ## 15. Open issues

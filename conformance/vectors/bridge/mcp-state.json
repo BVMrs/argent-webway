@@ -1,0 +1,24 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "bridge/mcp-state",
+  "description": "MCP outcome to A2A task state, for a bridge agent that exposes MCP tools as skills. Input {mcp: accepted | call-started | task-working | mrtr-input-required | task-input-required | auth-step-up | call-tool-result | task-completed | jsonrpc-error | task-failed | task-cancelled | jsonrpc-error-before-work, isError?}. Output {state}.",
+  "spec": "profile.md#125-mcp-bridges-to-and-from-other-parties",
+  "cases": [
+    {"id":"accepted","description":"Every accepted request starts submitted (synthesised)","requirements":["PROF-072"],"input":{"mcp":"accepted"},"expect":{"result":"accept","output":{"state":"TASK_STATE_SUBMITTED"}}},
+    {"id":"call-started","description":"A started call is working","requirements":["PROF-072"],"input":{"mcp":"call-started"},"expect":{"result":"accept","output":{"state":"TASK_STATE_WORKING"}}},
+    {"id":"task-working","description":"MCP task working","requirements":["PROF-072"],"input":{"mcp":"task-working"},"expect":{"result":"accept","output":{"state":"TASK_STATE_WORKING"}}},
+    {"id":"mrtr-input-required","description":"MRTR input_required","requirements":["PROF-072"],"input":{"mcp":"mrtr-input-required"},"expect":{"result":"accept","output":{"state":"TASK_STATE_INPUT_REQUIRED"}}},
+    {"id":"task-input-required","description":"MCP task input_required","requirements":["PROF-072"],"input":{"mcp":"task-input-required"},"expect":{"result":"accept","output":{"state":"TASK_STATE_INPUT_REQUIRED"}}},
+    {"id":"auth-step-up","description":"HTTP 401/403 step-up from the MCP server","requirements":["PROF-072"],"input":{"mcp":"auth-step-up"},"expect":{"result":"accept","output":{"state":"TASK_STATE_AUTH_REQUIRED"}}},
+    {"id":"result-ok","description":"CallToolResult without isError","requirements":["PROF-072"],"input":{"mcp":"call-tool-result"},"expect":{"result":"accept","output":{"state":"TASK_STATE_COMPLETED"}}},
+    {"id":"result-ok-explicit","description":"CallToolResult with isError false","requirements":["PROF-072"],"input":{"mcp":"call-tool-result","isError":false},"expect":{"result":"accept","output":{"state":"TASK_STATE_COMPLETED"}}},
+    {"id":"result-is-error","description":"CallToolResult with isError true is failed, not completed","requirements":["PROF-072"],"input":{"mcp":"call-tool-result","isError":true},"expect":{"result":"accept","output":{"state":"TASK_STATE_FAILED"}}},
+    {"id":"task-completed-is-error","description":"MCP task completed carrying an isError result is failed","requirements":["PROF-072"],"input":{"mcp":"task-completed","isError":true},"expect":{"result":"accept","output":{"state":"TASK_STATE_FAILED"}}},
+    {"id":"task-completed","description":"MCP task completed","requirements":["PROF-072"],"input":{"mcp":"task-completed"},"expect":{"result":"accept","output":{"state":"TASK_STATE_COMPLETED"}}},
+    {"id":"jsonrpc-error","description":"JSON-RPC error after work started","requirements":["PROF-072"],"input":{"mcp":"jsonrpc-error"},"expect":{"result":"accept","output":{"state":"TASK_STATE_FAILED"}}},
+    {"id":"task-failed","description":"MCP task failed","requirements":["PROF-072"],"input":{"mcp":"task-failed"},"expect":{"result":"accept","output":{"state":"TASK_STATE_FAILED"}}},
+    {"id":"task-cancelled","description":"MCP task cancelled","requirements":["PROF-072"],"input":{"mcp":"task-cancelled"},"expect":{"result":"accept","output":{"state":"TASK_STATE_CANCELED"}}},
+    {"id":"error-before-work","description":"JSON-RPC error before any work (authorisation, invalid arguments)","requirements":["PROF-072"],"input":{"mcp":"jsonrpc-error-before-work"},"expect":{"result":"accept","output":{"state":"TASK_STATE_REJECTED"}}}
+  ]
+}

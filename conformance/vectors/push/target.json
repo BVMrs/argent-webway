@@ -1,0 +1,16 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "push/target",
+  "description": "Push notification targets accepted on webway-quic/v0. Input {requester (agent address of the requesting agent, from the verified envelope), url (from the push config)}. Accept only the requester's own agent address, compared exactly.",
+  "spec": "profile.md#84-event-delivery-to-an-offline-requester",
+  "cases": [
+    {"id":"own-address","description":"The requesting agent's own address","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a"},"expect":{"result":"accept"}},
+    {"id":"other-agent-same-node","description":"Another agent on the requester's node","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"webway://wwn:k3hb2ytq4q/wwa:aaaaaaaaaa"},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"same-agent-other-node","description":"The requester's agent key on a different node","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"webway://wwn:bbbbbbbbbb/wwa:7tdmx5ka2a"},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"https-webhook","description":"An https webhook","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"https://notify.example.org/a2a"},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"loopback","description":"A loopback URL","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"http://127.0.0.1:8080/notify"},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"case-variant","description":"Addresses are compared exactly","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"webway://wwn:K3HB2YTQ4Q/wwa:7TDMX5KA2A"},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"with-path","description":"Extra path segments are not the agent address","requirements":["PROF-037"],"input":{"requester":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a","url":"webway://wwn:k3hb2ytq4q/wwa:7tdmx5ka2a/x"},"expect":{"result":"reject","error":"InvalidParamsError"}}
+  ]
+}
