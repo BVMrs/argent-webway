@@ -90,7 +90,7 @@ Profile constants:
 | Constant | Value | Meaning |
 |---|---|---|
 | `SKEW` | 300 s | Clock tolerance (`ext/envelope.md`) |
-| `MAX_TTL` | 7 days | Upper bound on `exp − ts` of any envelope |
+| `MAX_TTL` | 7 days | Upper bound on `exp − ts` of a request envelope. Responses and events may reach `MAX_TTL + SKEW` (PROF-076). |
 | `DEFAULT_TTL` | 24 h | Expiry a node uses for a request when its agent does not choose one |
 | `INLINE_MAX` | 64 KiB | Largest Part sent inline. Larger content goes by blob reference (`ext/blob.md`). |
 | `SUBSCRIBER_MIN_BUFFER` | 64 events | Smallest per-subscriber buffer a node may use before evicting (§7.4) |
@@ -258,9 +258,10 @@ agent has determined it can't or won't proceed".
 
 In words: a task is born `submitted`. Nothing returns to `submitted`. Any active state may move to any other
 state. An active state may repeat itself, which is a progress update carrying a new status message. Terminal
-states are final. The table is closed under composition: if a sequence of legal transitions leads from `a` to `b`,
-then `a → b` is itself legal. So a requester that missed events can check a snapshot against the last state it
-recorded with one lookup (PROF-028).
+states are final. Among the rows of existing tasks (every row but `∅`) the table is closed under composition: if a
+sequence of legal transitions leads from `a` to `b`, then `a → b` is itself legal. So a requester that missed
+events can check a snapshot against the last state it recorded with one lookup (PROF-028). A requester that has
+recorded nothing for the task accepts a snapshot in any state.
 
 - [PROF-015] A node MUST record the first state of every task it creates as `submitted`, and MUST emit only the
   transitions marked ✓ in the table above, for tasks it hosts and for proxy tasks it shows its own agents.
@@ -313,17 +314,18 @@ same answer as for a task that does not exist (PROF-047).
 - [PROF-022] A responder node MUST make the new task (or the continuation) and its first log entry durable before
   it sends any response or acknowledgement for the message that caused them. A crash after that point MUST NOT
   lose the task, and a crash before it MUST NOT leave a task the requester was told about.
-- [PROF-023] A node MUST de-duplicate received envelopes on `(from, id)` for as long as `ext/envelope.md`
+- [PROF-023] A node MUST de-duplicate received envelopes on `(from, to, id)` for as long as `ext/envelope.md`
   requires (until at least `exp + SKEW`). For `SendMessage` and `SendStreamingMessage` the envelope `id` MUST
-  equal the request's `message.messageId`, so the key is also `(sender agent, messageId)`. The dedupe entry MUST
+  equal the request's `message.messageId`, so the key is also `(sender agent, recipient agent, messageId)`. The dedupe entry MUST
   be written in the same atomic transaction as the task or event it caused. A duplicate inside that horizon MUST
   NOT be processed again and MUST be answered with the stored original response envelope, byte for byte. If the
   original is still being processed (a blocking `SendMessage`), the duplicate MUST wait for the original's
   response and then get it. For a duplicate streaming request, the "original response" is the task's event log:
   the node replays it from `seq` 0 (the same entries, PROF-020, in envelopes for the new stream) and continues
   live, as a cursor subscribe from 0 would.
-- [PROF-076] A responder MUST give every response envelope an `exp` no earlier than the request's `exp + SKEW`, so
-  that a stored response sent again for a duplicate is still fresh for as long as duplicates can arrive.
+- [PROF-076] A responder MUST give every response envelope an `exp` equal to the request's `exp + SKEW`, so that a
+  stored response sent again for a duplicate is still fresh for as long as duplicates can arrive. Its `exp − ts`
+  is then at most `MAX_TTL + SKEW`, and receivers MUST accept that bound for responses and events.
 
 A2A makes `messageId` deduplication optional (A2A §3.3.1). In this profile it is mandatory, because at-least-once
 delivery with idempotent receivers is how offline peers work (§8).
@@ -357,8 +359,8 @@ the snapshot.
   `InvalidParamsError` (−32602).
 - [PROF-028] A requester MUST de-duplicate received events by `seq` per task and MUST ignore an event whose `seq`
   it has already applied. A `Task` snapshot whose `seq` is greater than the last applied replaces its view of the
-  task and moves its cursor to the snapshot's `seq`, provided its state is the last recorded state or a legal
-  transition from it (§6.2). A snapshot with a lower or equal `seq` MUST be ignored, and one with an illegal state
+  task and moves its cursor to the snapshot's `seq`, provided the requester has recorded no state for the task
+  yet, or the snapshot's state is the last recorded state or a legal transition from it (§6.2). A snapshot with a lower or equal `seq` MUST be ignored, and one with an illegal state
   MUST be handled as PROF-016 says. A gap (an event whose `seq` is more than one above the last applied) MUST NOT
   be applied. On a stream, the requester MUST end that stream and resubscribe from the first missing `seq`. For
   events arriving by deferred delivery, which can be reordered between a mailbox path and a direct path, it MUST
@@ -416,10 +418,13 @@ own `taskId` that never changes, which mirrors the remote task once the remote s
   expose it in the proxy task's metadata under the profile URI, and MUST mirror the remote task's states and
   events into the proxy task once the delivery is `acknowledged`. Mirrored events MUST obey §6.2. The node MUST
   record the remote `taskId` and `contextId` in the proxy task's metadata under the profile URI (`remoteTaskId`,
-  `remoteContextId`), and MUST translate task ids between proxy and remote form in both directions wherever they
-  appear (`taskId`, `referenceTaskIds`), so that the agent sees only proxy ids and the remote sees only its own.
-- [PROF-077] If the remote answers with a `Message` and no task, the requester node MUST append that message to
-  the proxy task's history and move the proxy task to `completed`, with the message as its status message.
+  `remoteContextId`), and MUST translate task and context ids between proxy and remote form in both directions
+  wherever they appear (`taskId`, `contextId`, `referenceTaskIds`), so that the agent sees only proxy ids and the
+  remote sees only its own. Each proxy context maps to at most one remote context per remote agent.
+- [PROF-077] If the remote answers the request that created the proxy task with a `Message` and no task, the
+  requester node MUST append that message to the proxy task's history and move the proxy task to `completed`, with
+  the message as its status message. A `Message` answer to a continuation is appended to the history and changes
+  no state.
 - [PROF-032] Requests and events for a task MUST NOT be re-ordered by the outbox: a node MUST hand envelopes for
   the same task to the network in the order its agent produced them.
 
@@ -428,7 +433,7 @@ own `taskId` that never changes, which mirrors the remote task once the remote s
 | State | Meaning | Proxy task state |
 |---|---|---|
 | `queued` | In the requester node's outbox, never transmitted. Nobody else has it. | `submitted` |
-| `sent` | Transmitted at least once, on a live stream or into a mailbox host's custody (binding §9). The responder may or may not have it. | `submitted` |
+| `sent` | Released for transmission: recorded durably just before the first attempt (live stream or hand-off to a mailbox host, binding §9). The responder may or may not have it, so a cancel is held from here on. | `submitted` |
 | `acknowledged` | The responder's response arrived. The remote task id is known (or the answer was a `Message`). | mirrors the remote task |
 | `refused` | The responder answered with an error that is not retryable (PROF-078 says who may). | `failed`, the error in the status message |
 | `expired` | No response before `exp + SKEW` of the request envelope. | `failed`, reason `DELIVERY_EXPIRED` |
@@ -540,7 +545,7 @@ replay), `ext/capability.md` (identity, capabilities, delegation), `ext/provenan
 
   | Operation | Capability |
   |---|---|
-  | `SendMessage`, `SendStreamingMessage` creating a task | `skill:<id>` for the skill the request names, or `agent:<wwa>#message` if the agent declares no skills |
+  | `SendMessage`, `SendStreamingMessage` creating a task | `skill:<id>` for the skill the request names (PROF-079) |
   | `SendMessage` continuing a task, `GetTask`, `SubscribeToTask` | `task:<id>#read` and, for messages, `task:<id>#message`. The node grants these implicitly to the agent that created the task, with the same holder. |
   | `CancelTask` | `task:<id>#cancel`, implicitly granted to the creator |
   | `ListTasks` | none beyond authentication. Results are only tasks the caller holds `task:<id>#read` for. |
@@ -550,8 +555,9 @@ replay), `ext/capability.md` (identity, capabilities, delegation), `ext/provenan
 
 - [PROF-079] A2A 1.0 messages do not say which skill they invoke, so a request that creates a task on an agent
   with skills MUST name the skill in `SendMessageRequest.metadata` under the profile URI, as `{"skill": "<id>"}`.
-  A request that names no skill is for the agent's only skill if it declares exactly one. Otherwise the node MUST
-  answer `InvalidParamsError`. The named skill decides the capability needed (PROF-042) and is all the agent may
+  A request that names no skill (stock clients never do) is for the agent's default skill: its only skill if it
+  declares one, otherwise the one its owner configured as default. If there is no default the node MUST answer
+  `InvalidParamsError`. The named skill decides the capability needed (PROF-042) and is all the agent may
   do for that task. A requester's message text cannot widen it.
 - [PROF-043] A node MUST NOT rely on a stock peer, or on the A2A SDK it uses, to enforce authorisation, the card's
   `securitySchemes`, or required extensions.
@@ -611,7 +617,7 @@ Each binding carries errors in its own format, as A2A specifies:
   - `metadata.retryable`: `"true"` or `"false"`, as the tables say;
   - `metadata.retryAfterMs`: a decimal string, when the responder knows how long to wait. Optional.
 - [PROF-081] A profile refinement of an A2A error (such as `TASK_TERMINAL`) MUST be a second `ErrorInfo` with the
-  profile domain, never a change to the A2A one.
+  profile domain, placed after the A2A one, never a change to the A2A one.
 - [PROF-052] A client MUST classify an error by its `ErrorInfo` (`domain` and `reason`) on every binding, and also
   by the JSON-RPC `code` where there is one, never by the HTTP or gRPC status alone. It MUST also recognise the
   non-standard JSON-RPC codes −31401 (unauthenticated) and −31403 (unauthorised) that one stock SDK emits
@@ -619,7 +625,8 @@ Each binding carries errors in its own format, as A2A specifies:
   cannot identify MUST be classified as not retryable.
 
 - [PROF-073] A client MAY retry an error marked retryable, with backoff and jitter, honouring `retryAfterMs`. It
-  MUST NOT retry a non-retryable error with the same envelope. A retry always resends the same envelope
+  MUST NOT retry with the same envelope after a non-retryable error from the responder, meaning one signed as
+  PROF-078 requires. Errors from anyone else are per-hop failures, and PROF-078 governs them. A retry always resends the same envelope
   (PROF-033).
 
 ### 10.2 A2A errors, reused
@@ -652,7 +659,7 @@ A2A reserves −32001 to −32099 for itself (A2A §9.5) and JSON-RPC reserves �
 |---|---|---|---|---|---|---|
 | `EnvelopeInvalid` | −30001 | `ENVELOPE_INVALID` | no | Malformed envelope: not I-JSON, wrong signer form, `body_hash` mismatch, missing taint | 400 | `INVALID_ARGUMENT` |
 | `SignatureInvalid` | −30002 | `SIGNATURE_INVALID` | no | The signature does not verify against `from` | 401 | `UNAUTHENTICATED` |
-| `EnvelopeExpired` | −30003 | `ENVELOPE_EXPIRED` | no | `now > exp + SKEW`, or `ts > now + SKEW`, or `exp − ts > MAX_TTL` | 400 | `FAILED_PRECONDITION` |
+| `EnvelopeExpired` | −30003 | `ENVELOPE_EXPIRED` | no | `now > exp + SKEW`, or `ts > now + SKEW`, or `exp − ts` above `MAX_TTL` (requests) or `MAX_TTL + SKEW` (responses, events) | 400 | `FAILED_PRECONDITION` |
 | `RecipientUnknown` | −30004 | `RECIPIENT_UNKNOWN` | no | `to` is not an agent hosted by this node (PROF-041) | 404 | `NOT_FOUND` |
 | `IdentityUntrusted` | −30005 | `IDENTITY_UNTRUSTED` | no | `from` is not certified by a trusted owner (PROF-040) | 401 | `UNAUTHENTICATED` |
 | `CapabilityMissing` | −30010 | `CAPABILITY_MISSING` | no | No capability token where one is needed | 401 | `UNAUTHENTICATED` |
@@ -772,8 +779,10 @@ A bridge agent `wwa:Kb` represents one stock A2A agent. Overlay agents send it e
   its own durable task records, event log and `seq` for every upstream task (§6.5), so that cursors, dedupe and
   deferred delivery work even though the upstream supports none of them. It MUST reconcile with `GetTask` after
   any upstream stream ends without a terminal state (PROF-024).
-- [PROF-066] When an upstream task has a state the bridge cannot represent as a legal transition (PROF-017), or
-  the upstream returns an unknown enum value (PROF-007), the bridge MUST NOT invent a state. It applies PROF-017.
+- [PROF-066] When an upstream reports an illegal transition, the bridge applies PROF-017. When the upstream returns
+  an unknown task state (PROF-007), the bridge MUST NOT guess what it means: it MUST move its own task to `failed`
+  with reason `INVALID_AGENT_RESPONSE` in the status message (legal from any active state), cancel the upstream
+  task if it can, and record an audit anomaly.
 
 ### 12.4 MCP facade (local agent → its own node)
 
@@ -792,8 +801,12 @@ agent sees "delegate to remote agent X" as an MCP tool.
 - [PROF-080] MCP makes a client re-issue a request whose stream broke, and a re-issued call is a new MCP request.
   `webway.message.send` MUST therefore accept an optional client-chosen `messageId`, and the facade MUST use it as
   the A2A `messageId` and envelope `id` (PROF-023), so that a re-issued call with the same `messageId` reaches the
-  same task. The HTTP edge likewise MUST de-duplicate on `(edge principal, messageId)` with the same horizon as
-  PROF-023, and MUST reuse the envelope it first created when it forwards a duplicate into the overlay.
+  same task. Without a `messageId`, a re-issued call is a new message: the facade documents this in the tool
+  description. The HTTP edge likewise MUST de-duplicate on `(edge principal, messageId)` with the same horizon as
+  PROF-023. When it forwards a stock client's message into the overlay, it MUST mint a fresh UUIDv7 `messageId`
+  (and envelope `id`) for each new `(edge principal, messageId)`, so that two principals who choose the same
+  `messageId` never share a dedupe entry, and MUST reuse the envelope it first created when it forwards a
+  duplicate.
 
 Tools the facade offers (names normalised to `[A-Za-z0-9_.-]{1,128}`): `webway.agents.list`,
 `webway.message.send`, `webway.task.get`, `webway.task.wait`, `webway.task.cancel`, `webway.artifact.fetch`. Their
@@ -944,7 +957,8 @@ table below says which.
 5. **Upstreaming.** The cursor (§7.2), the transition table (§6.2) and a skill field on messages (PROF-079) are
    generic and are candidates for the A2A project (roadmap T20).
 6. **What `ext/envelope.md` (T2) must provide** for this profile and the binding: `id` equal to `messageId` for
-   messages (PROF-023), node-signed (`wwn`) error envelopes (binding BIND-020), response `exp` rules (PROF-076), the
+   messages and dedupe on `(from, to, id)` (PROF-023), node-signed (`wwn`) error envelopes (binding BIND-020),
+   response `exp` and the `MAX_TTL + SKEW` bound for responses (PROF-076), the
    field-presence rule of the pinned JSON form (binding §6.3), and `ctx` with `taskId`, `contextId`, `seq`,
    `inReplyTo`.
 7. **Documents on other branches.** [`conventions.md`](conventions.md) and the vector format
