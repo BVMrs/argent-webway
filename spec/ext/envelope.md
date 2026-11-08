@@ -511,7 +511,8 @@ any of steps 1–8.
 **ENV-601** (MAY) A receiver MAY perform steps 1–7 in any order (for example checking `to` and `exp` before the
 signature to save work). When an envelope has several defects, it MAY report the error of any failing step.
 
-Every test vector has exactly one defect, so its expected error does not depend on the order.
+Every test vector has exactly one defect, so its expected error does not depend on the order. In particular, an
+invalid case that does not expect `SignatureInvalid` carries a valid signature wherever one can be checked.
 
 **ENV-602** (MUST) A receiver MUST NOT use any member of an envelope (for authorisation, routing to an agent,
 storage, or display) before the envelope has passed steps 1–7, except to perform those steps and to log the

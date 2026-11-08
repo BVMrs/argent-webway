@@ -33,9 +33,13 @@ Every file except `keys.json` has the same top-level shape:
 - An expected error is `{"type", "code", "reason", "retryable"}`, plus `retryAfter` (seconds) for
   `EnvelopeNotYetValid`. The type, reason and retryable flag must match exactly (ENV-610). The codes are
   provisional (spec §10.1).
-- Every invalid case has **exactly one defect**. Everything else about it is valid, including the signature
-  wherever the defect is not in the signed data. So the expected error does not depend on the order in which an
-  implementation runs the stateless checks (ENV-601).
+- Every invalid case has **exactly one defect**, so the expected error does not depend on the order in which an
+  implementation runs the stateless checks (ENV-601). In particular, whenever `from` and `sig` can be decoded at
+  all, the signature over the (possibly defective) signed header is **valid**. Edited headers are re-signed, and a
+  non-canonical spelling of alice's key (`from-uppercase`, `from-non-canonical-base32`) is signed by alice, so a
+  lax decoder would accept it. The only cases with an invalid signature are those that expect `SignatureInvalid`,
+  and `version-unsupported`, which is never verified under v0 rules (ENV-800). The generator asserts this rule for
+  every case.
 
 ## Files
 

@@ -235,6 +235,51 @@ fn remove(v: &mut Value, key: &str) {
     v.as_object_mut().unwrap().retain(|(k, _)| k != key);
 }
 
+/// Re-signs an edited envelope so that its only defect is the edit (one defect per vector, ENV-601).
+/// Skipped when there is nothing to re-sign with: `from` or `sig` does not decode, or the envelope is not
+/// an object, or `v` names another version (ENV-800: never verified under v0 rules).
+fn resign(fx: &Fx, env: &mut Value) {
+    if env.as_object().is_none() || env.get("v").is_some_and(|v| v.as_str() != Some(VERSION)) {
+        return;
+    }
+    // A lax decode (any case, trailing bits ignored): `from` cases with a non-canonical spelling of alice's
+    // key are signed by alice, so a lax verifier would accept them and the spelling is the only defect.
+    let Some(from) = env.get("from").and_then(|f| f.as_str()).and_then(lax_agent_key) else { return };
+    let Some(Value::String(sig)) = env.get("sig") else { return };
+    if parse_b64url(sig).is_none_or(|b| b.len() != 64) {
+        return;
+    }
+    let key = fx.keys().into_iter().find(|k| k.pk == from).expect("from is a fixture key");
+    let new_sig = key.sk.sign(&verify::signing_input(&env.without(&["sig", "body"]))).to_bytes();
+    set(env, &["sig"], Value::String(b64url(&new_sig)));
+}
+
+/// Decodes a `wwa:` ID the way a lax RFC 4648 decoder would: case-insensitive, unused trailing bits ignored.
+fn lax_agent_key(id: &str) -> Option<[u8; 32]> {
+    let rest = id.strip_prefix("wwa:")?.to_ascii_lowercase();
+    let (mut out, mut buf, mut bits) = (Vec::new(), 0u32, 0u32);
+    for c in rest.bytes() {
+        let v = b"abcdefghijklmnopqrstuvwxyz234567".iter().position(|&x| x == c)? as u32;
+        buf = (buf << 5) | v;
+        bits += 5;
+        if bits >= 8 {
+            out.push((buf >> (bits - 8)) as u8);
+            bits -= 8;
+        }
+        buf &= (1 << bits) - 1;
+    }
+    out.try_into().ok()
+}
+
+/// `Some(valid)` if the signature can be checked at all (object, decodable `from` and 64-byte `sig`).
+fn signature_status(bytes: &[u8]) -> Option<bool> {
+    let env = json::parse(bytes).ok()?;
+    env.as_object()?;
+    let from = lax_agent_key(env.get("from")?.as_str()?)?;
+    let sig = parse_b64url(env.get("sig")?.as_str()?).filter(|b| b.len() == 64)?;
+    Some(verify::check_signature(&from, &sig, &verify::signing_input(&env.without(&["sig", "body"]))).is_ok())
+}
+
 fn s(x: &str) -> Value {
     Value::String(x.into())
 }
@@ -295,6 +340,13 @@ impl Cases {
         let hosts: Vec<[u8; 32]> = rx.hosts.iter().map(|k| k.pk).collect();
         let cx = Ctx { hosts: &hosts, now: rx.now, watermark: rx.watermark, framing_op: rx.framing_op };
         let got = verify::verify(&bytes, &cx);
+        // One defect per case (ENV-601): a case expecting anything but a signature or version error must
+        // carry a valid signature whenever the signature can be checked at all.
+        if let Err(e) = &expect {
+            if !matches!(e.typ, "SignatureInvalid" | "VersionNotSupportedError") && signature_status(&bytes) == Some(false) {
+                panic!("case {id}: expects {e:?} but its signature is invalid too (two defects)");
+            }
+        }
         let mut c = Map::new();
         c.insert("id".into(), json!(id));
         c.insert("requirements".into(), json!(reqs));
@@ -621,6 +673,7 @@ pub fn envelopes(fx: &Fx) -> J {
     let mutate = |cs: &mut Cases, id: &str, reqs: &[&str], desc: &str, f: &dyn Fn(&mut Value), why: Result<(), Reject>| {
         let mut v = good.clone();
         f(&mut v);
+        resign(fx, &mut v);
         let rx = dr(fx);
         cs.add(id, reqs, desc, rx, txt(&v), why);
     };
