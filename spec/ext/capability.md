@@ -19,8 +19,9 @@ model in [`conformance/tools/capgen/`](../../conformance/tools/capgen/) (§12).
 **statements** (JWS over JCS), the owner's nodes, agents and per-node online **issuing keys**. An issuing key is the
 root of **Biscuit** capability tokens. A request carries an **access** token rooted in the *resource owner's*
 issuing key, and, when it acts for someone else (S4), a **mandate** rooted in the *principal's* issuing key. Both
-are bound to the presenting agent through a **holder chain** of third-party blocks, so only the last holder can use
-a token and every re-delegation hop is signed by the hop that made it. Trust in an owner comes only from a
+are bound to the presenting agent through a **holder chain** of third-party blocks, so a token can be used only by
+the agent it was last delegated to (and, from their own copies, by the agents that delegated it), and every
+re-delegation hop is signed by the hop that made it. Trust in an owner comes only from a
 **pin**, made out of band, usually from an **invite**. Revocation uses **signed revocation lists** with sequence
 numbers and a freshness rule that fails closed for long-lived tokens.
 
@@ -191,7 +192,8 @@ statements by this ID.
 A verifier verifies a statement *as* an expected type, with a time `now`, its pins (§4.9) and the verified
 revocation lists it holds (§9).
 
-- [CAP-010] A verifier MUST reject as `StatementInvalid` a statement that is larger than `MAX_STATEMENT_BYTES`, is
+- [CAP-010] A verifier MUST reject as `StatementInvalid` a statement that is larger than `MAX_STATEMENT_BYTES` (as
+  JSON without insignificant whitespace), is
   not a JSON object with exactly the members `protected`, `payload` and `signature` (strings), whose header or
   claims are not I-JSON objects, whose decoded header or claims bytes are not exactly their JCS form, whose header
   has members other than `alg`, `kid` and `typ`, whose `alg` is not `EdDSA`, whose `kid` is not a valid
@@ -205,11 +207,12 @@ revocation lists it holds (§9).
   of a pinned owner (§4.3), or an issuing key whose issuer-cert verifies (§4.5) and has the needed scope, and only
   for the owner named in the claims `owner`. Otherwise the error is `StatementUntrusted`.
 - [CAP-014] A verifier MUST reject as `StatementExpired` a statement with `iat > now + SKEW` or `now > exp`, and as
-  `StatementInvalid` one whose `exp − iat` exceeds the limit for its type (§2.1). A statement signed by an issuing
-  key MUST also lie inside the issuer-cert's validity (`exp` not later than the issuer-cert's `exp`), else
-  `StatementInvalid`.
+  `StatementInvalid` one whose `exp − iat` (for revocation lists `validUntil − iat`) exceeds the limit for its type
+  (§2.1). A statement signed by an issuing key MUST also lie inside the issuer-cert's validity (`exp`, or
+  `validUntil` for a list, not later than the issuer-cert's `exp`), else `StatementInvalid`.
 - [CAP-015] A verifier MUST reject as `StatementRevoked` a statement whose ID, or the ID of any statement in its
-  chain, appears in a verified revocation list of the same owner (§9).
+  chain, appears in a verified revocation list of the same owner (§9), or whose signing issuing key or certified
+  key (`issuer`, `agent`, `node`) is revoked as a key (CAP-175).
 
 ### 4.3 Owner keys, rotation and pre-rotation
 
@@ -226,7 +229,6 @@ Claims of `webway-owner-key+jws`:
 | `key` | The root key this event establishes, as `did:key`. Equal to `iss`. For `seq` 0, equal to `owner`. |
 | `prev` | For `seq` > 0: the statement ID of the previous event. Absent for `seq` 0. |
 | `next` | Optional. `b3:` + base64url(BLAKE3(next root public key, 32 bytes)): the **pre-rotation commitment**. |
-| `compromised` | Optional, `seq` > 0 only. `true` means every earlier root key is treated as compromised. |
 | `iat` | Time of the event. No `exp`: key events do not expire. |
 
 - [CAP-020] A verifier MUST accept a rotation event (`seq` = n+1) only if it is signed by the key it establishes,
@@ -234,10 +236,11 @@ Claims of `webway-owner-key+jws`:
   from `key`. An event that fails any check, or a rotation from an event without `next`, is rejected
   (`StatementUntrusted`) and does not change the pin. A thief of the current root key cannot rotate, because it
   does not know the committed next key.
-- [CAP-021] After a verified rotation, a verifier MUST treat only the new key as the owner's current root key for
-  new statements. Statements signed earlier by an older root key stay valid until their own `exp`, unless the
-  rotation has `compromised: true`, in which case the verifier MUST reject every statement signed by an older root
-  key (`StatementUntrusted`), and the owner must reissue its certificates.
+- [CAP-021] After a verified rotation, a verifier MUST accept statements signed only by the new root key, and MUST
+  reject statements signed by an older root key (`StatementUntrusted`), whatever their `iat`. A signer chooses its
+  own `iat`, so "signed before the rotation" cannot be checked, and a thief of a retired key could backdate. An
+  owner who rotates reissues its node-certs, issuer-certs and root-signed agent-certs with the new key, and
+  publishes them with the rotation event.
 - Owners SHOULD always include `next` and keep the next key offline and separate from the current key. An owner
   without a commitment can only rotate by asking every peer to re-pin out of band.
 - Recovery when the next key is lost or both keys are stolen is out of scope for v0.
@@ -287,7 +290,10 @@ Claims of `webway-issuer-cert+jws`:
   `webway-issuer-cert+jws` (§4.2) for the owner the token's role requires (§6, §7), is valid at `now`, and its
   scope covers the token: for an access token, every `right` in the authority block matches a `resource` pattern;
   for a mandate, `mandate` is present, every `grant` names a target in `targets` (or `targets` is `["*"]`) and a
-  capability matching `capabilities`, and `expires − issued ≤ maxTtl`. Otherwise `CapabilityInvalid`.
+  capability matching `capabilities`, and `expires − issued ≤ maxTtl`. Otherwise `CapabilityInvalid`. In addition,
+  checked in code at request time, the **requested** capability MUST match a `resource` pattern (access) and the
+  verifier's owner and the requested capability MUST be covered by `targets` and `capabilities` (mandate), else
+  `CapabilityDenied`. So a token can never authorise more than its issuing key's scope, whatever its Datalog says.
 - [CAP-031] A verifier MUST accept a mandate only if its `principal` agent has an agent-cert of the mandate's
   owner whose `node` equals the issuer-cert's `node`. An issuing key on node N can speak for the agents certified
   to N, and for no other agents of the owner. Otherwise `CapabilityInvalid`.
@@ -362,6 +368,7 @@ A capability is a string `<kind>:<name>` with an optional `#<operation>`:
 |---|---|---|
 | `skill:<skill-id>` | `SendMessage`, `SendStreamingMessage` (create a task for that skill, or continue it) | this document, the profile |
 | `task:<task-id>#read` | `GetTask`, `SubscribeToTask` | this document |
+| `task:<task-id>#write` | `SendMessage`, `SendStreamingMessage` on that task (add input to it) |
 | `task:<task-id>#cancel` | `CancelTask` | this document |
 | `blob:<hash>#read` | blob fetch | `blob/v0` |
 | `doc:<doc-id>#read`, `doc:<doc-id>#append` | shared-doc sync and append | `shared-doc/v0` |
@@ -414,8 +421,22 @@ A capability is a string `<kind>:<name>` with an optional `#<operation>`:
   request fact.
 - [CAP-104] A verifier MUST reject as `CapabilityInvalid` a token whose authority block does not have exactly one
   each of `webway`, `issuer`, `owner`, `issued`, `expires` and `holder(_, 0)`, and the role's facts (at least one
-  `right` for access, exactly one `principal` and at least one `grant` for a mandate), or in which `issuer` is not
+  `right` for access, exactly one `principal` and at least one `grant` for a mandate), that has a role's facts in
+  the other role (`principal` or `grant` in an access token, `right` in a mandate), or in which `issuer` is not
   the key that signed the authority block.
+- [CAP-105] A verifier MUST reject as `CapabilityInvalid` a token whose authority block contains any **rule**. The
+  authority block's derived facts are visible to the verifier's policies, so a rule such as
+  `right($c) <- capability($c)` or `grant($o, $c) <- resource_owner($o), capability($c)` would grant whatever is
+  requested while the scope check (CAP-030), which looks at facts, passes. Authority blocks hold facts and checks
+  only. Rules in later blocks are harmless: their results are visible only to that block's own checks.
+- [CAP-106] A verifier MUST reject as `CapabilityDenied` a request whose target resource is not the one named in
+  `cap.capability`: for `task:<id>#…`, the request's task ID MUST be `<id>`; for `blob:`, `doc:` and `mailbox:`, the
+  target the defining extension names MUST be `<name>`; for `invite:<id>#redeem`, the request has no task. A
+  `skill:<id>` capability creates a new task; a request on an **existing** task under a `skill:` capability is
+  allowed only if the presenter created that task under the same capability (§6.4). Anyone else continues a task
+  only with `task:<id>#write`.
+- The verifier reads token facts from the decoded blocks (the Biscuit protobuf and its symbol tables), never from
+  printed Datalog source: strings may contain quotes and Datalog syntax.
 
 ### 5.4 Access tokens
 
@@ -435,8 +456,11 @@ check if time($t), $t <= 2026-11-07T13:00:00Z;
 ```
 
 - [CAP-110] A verifier MUST accept an access token only if its `owner` is the verifier's own owner and its issuing
-  key has a valid issuer-cert of that owner whose `resource` scope covers every `right` (CAP-030). Otherwise
-  `CapabilityInvalid`. A token from another owner never grants access here, whatever it says.
+  key has a valid issuer-cert of that owner whose `node` is the verifier's own node and whose `resource` scope
+  covers every `right` (CAP-030). Otherwise `CapabilityInvalid`. A token from another owner never grants access
+  here, whatever it says, and a token minted on another node of the same owner does not either: an issuing key
+  speaks only for its own node's resources (G19), call budgets (CAP-130) and single-use invites (CAP-203) are
+  counted where they are spent, and a compromised node cannot mint access to its owner's other nodes.
 - [CAP-111] A verifier MUST reject as `CapabilityInvalid` a token with `expires − issued` above the role's limit
   (`MAX_ACCESS_TTL`, `MAX_MANDATE_TTL`) or with `issued > now + SKEW`, and as `CapabilityDenied` a token with
   `now > expires`. There is no tolerance on `expires`: access tokens are checked by the owner that issued them,
@@ -470,10 +494,16 @@ The verifier walks the chain in node code, before any Datalog runs:
   the chain; that agent becomes the current holder. If the block has no external key, it MUST NOT assert any
   `holder` fact. The depth MUST NOT exceed `MAX_HOLDER_DEPTH`.
 - [CAP-121] A verifier MUST reject as `CapabilityDenied` a token whose current holder (the last one in the chain)
-  is not the envelope's verified `from`. Earlier holders cannot present the token, even though they once held it.
+  is not the envelope's verified `from`. A copy stolen from a holder, or a token presented by anyone the chain does
+  not end at, is useless.
+- **Delegation is not exclusive.** A holder that delegates keeps its own copy of the shorter token, in which it is
+  still the current holder, and can go on using it, and it can give out several tokens from the same prefix (to K1
+  and to K2). They are separate tokens that share a call counter (§5.6) and the revocation IDs of their common
+  blocks. To take a right away from a delegator, revoke a block it holds (its own holder block, or the authority
+  block); revoking only the block it signed for the delegatee does not stop it from signing an equivalent block
+  again.
 - In v0 every third-party block is a holder block. Gaps and forks inside one token cannot happen: depths are
-  consecutive and each block extends the last holder. A holder MAY give out several tokens from the same prefix
-  (to K1 and to K2); they are separate tokens that share a call counter (§5.6) and revocation IDs.
+  consecutive and each block extends the last holder.
 - Because Biscuit blocks only add checks, each hop's token is at most as wide as the one before. The checks a
   holder adds in its own block are signed by it, so an audit can tell which hop narrowed what.
 
@@ -496,7 +526,8 @@ check if mandate_owner("did:key:z6Mk…A");               // only on behalf of o
   check, and MUST increase the count in the same atomic step as the allowed operation's effect (for example, the
   task creation). Retries and duplicates answered from the dedupe store (`envelope/v0`) do not count again. This is
   the `max_calls` of threat-model PEER-7. All tokens derived from one authority block share the counter, so a
-  holder cannot multiply its budget by forking.
+  holder cannot multiply its budget by forking. When a request is allowed under a mandate, the mandate's counter is
+  increased in the same step. Access tokens are only valid at one node (CAP-110), so per-node counting is exact.
 - Arguments are only what §5.8 exposes. A skill whose arguments are not scalars cannot be constrained by argument
   caveats in v0. Issuers SHOULD then grant narrower skills.
 
@@ -572,20 +603,24 @@ node, pins, issuer-certs of its own owner, held revocation lists, call counters 
 
 The steps run in this order, cheapest first (G15). The first failure decides the error.
 
-0. **Follow-up.** If `cap.access` is absent and the request is a follow-up by the task's creator (§6.4), run
-   only step 2 and step 6 (against the revocation IDs recorded with the task), then allow.
+0. **Follow-up.** If `cap.access` is absent and the request is a token-less follow-up by the task's creator
+   (`GetTask`, `SubscribeToTask`, `CancelTask`, §6.4), run only step 2 and step 6 (against the keys and revocation
+   IDs recorded with the task), then allow.
 1. **Presence.** If the operation needs a token and `cap.access` is absent: `CapabilityMissing`.
 2. **Presenter identity** (CAP-041): the `from` agent has a valid agent-cert of a pinned owner or of the
    verifier's own owner, else `CapabilityDenied`.
-3. **Access token** (CAP-100, CAP-103, CAP-104, CAP-110, CAP-030): decode, check size, parse; read `issuer` and find
-   that key's issuer-cert among the verifier owner's issuer-certs; verify the Biscuit signatures with it; check
-   structure, role `access`, owner, scope. Then the TTL limits (CAP-111).
+3. **Access token** (CAP-100, CAP-103 … CAP-105, CAP-110, CAP-030): decode, check size, parse; read `issuer` and
+   find that key's issuer-cert among the verifier owner's issuer-certs, and verify it (a revoked issuer-cert or
+   issuing key is `CapabilityRevoked` here, any other failure `CapabilityInvalid`); verify the Biscuit signatures
+   with it; check structure, role `access`, owner, node, scope of the rights, then scope of the requested
+   capability (`CapabilityDenied`). Then the TTL limits (CAP-111).
 4. **Holder chain** (CAP-120).
 5. **Expiry and presenter** (CAP-111, CAP-121).
-6. **Revocation** (CAP-170, CAP-171), for the token's revocation IDs and its issuer-cert.
+6. **Revocation** (CAP-170 … CAP-172), for the token's block revocation IDs, then freshness.
 7. **Mandate**, if `cap.mandate` is present: §7.3, steps M1–M6. A mandate that is present and fails is an error
    for the whole request. It is never ignored.
-8. **Operation** (CAP-102). For `invite:<id>#redeem`, an already consumed invite: `InviteConsumed` (CAP-203).
+8. **Operation and resource** (CAP-102, CAP-106). For `invite:<id>#redeem`, an already consumed invite:
+   `InviteConsumed` (CAP-203).
 9. **Datalog** (CAP-101): one authoriser for the access token with the request facts (§5.3), including the mandate
    facts when step 7 verified a mandate, then the local policy, then the allow policy of §5.4. Any failed check
    or a matching deny policy: `CapabilityDenied`.
@@ -602,14 +637,16 @@ the request. On deny, the peer gets only the error name (§2.2).
 
 ### 6.4 Follow-up operations on a task
 
-A task remembers the agent that created it and the authority revocation IDs of the access token (and mandate) that
-created it.
+A task remembers the agent that created it, the capability it was created under, and the issuing keys and
+revocation IDs of the access token (and mandate) that created it.
 
-- [CAP-161] A node MUST allow `GetTask`, `SubscribeToTask`, `CancelTask` and continuing `SendMessage` or
-  `SendStreamingMessage` on a task to the agent that created it without a new token, as long as its agent-cert is
-  still valid and none of the recorded revocation IDs has since been revoked (else `CapabilityRevoked`). Any other
-  agent, and the creator on any other task, needs a token (`task:<id>#…` or the original skill capability) and
-  goes through the full algorithm; without one the error is `CapabilityMissing`.
+- [CAP-161] A node MUST allow `GetTask`, `SubscribeToTask` and `CancelTask` on a task to the agent that created it
+  without a token, as long as its agent-cert is still valid and none of the recorded keys or revocation IDs has
+  since been revoked (else `CapabilityRevoked`). Adding input to a task (`SendMessage`, `SendStreamingMessage` with
+  its task ID) is new skill input, so it MUST go through the full algorithm with a token: the creator presents its
+  skill token again (CAP-106), and its expiry, call limits and argument caveats apply to every message. Any other
+  agent, and the creator on any other task, needs a `task:<id>#…` token. Without a token the error is
+  `CapabilityMissing`.
 
 ## 7. Mandates: acting on behalf of someone (S4)
 
@@ -657,7 +694,8 @@ Steps M1–M6 replace step 7 of §6.2. All failures are `CapabilityInvalid` unle
   CAP-103, CAP-104).
 - **M2.** `cap.mandate.principalCert` verifies as an agent-cert of P for the `principal` agent, on the issuer-cert's
   node (CAP-031).
-- **M3.** The scope covers every `grant` and the TTL (CAP-030, CAP-111). Holder chain (CAP-120).
+- **M3.** The scope covers every `grant` and the TTL (CAP-030, CAP-111), and the request (`CapabilityDenied`).
+  Holder chain (CAP-120).
 - **M4.** Expiry (`CapabilityDenied`), current holder = presenter = the access token's current holder
   (`CapabilityDenied`), revocation (`CapabilityRevoked` or `RevocationStatusUnavailable`).
 - **M5.** A separate authoriser for the mandate with the same request facts (no mandate facts) and the allow
@@ -701,7 +739,7 @@ An invite bootstraps a relationship between owners: who to pin, where to reach t
 |---|---|
 | `iss` | The issuing key (`wwi:`). |
 | `owner` | The inviting owner's identifier, to pin. |
-| `ownerKey` | Optional: the owner's latest owner-key event (§4.3), so the pin includes the pre-rotation commitment. |
+| `ownerKeys` | Optional: the owner's **complete** owner-key event chain, from inception (§4.3). Required when the owner has rotated, so the invitee can verify certs signed by the current root key. Never a single "latest" event: one event cannot be checked against CAP-020. |
 | `issuerCert` | The issuer-cert of `iss`, signed by `owner`'s root key. |
 | `id` | A UUIDv7. |
 | `node` | The inviting node (`wwn:`). |
@@ -720,8 +758,10 @@ trust); that channel is what authenticates the inviting owner to the invitee.
 
 ### 8.2 Modes (G16, ID-4)
 
-- **bound**: the invitee told the inviter its agent key beforehand. Every grant's depth-0 holder is `invitee`.
-  An interceptor of the invite learns the grants but cannot present them.
+- **bound**: the invitee gave the inviter, out of band, its owner identifier and its agent-cert. Every grant's
+  depth-0 holder is `invitee`. An interceptor of the invite learns the grants but cannot present them. Issuing a
+  bound invite is the inviting owner's explicit local action that pins the invitee's owner (CAP-060), so the
+  invitee's requests pass CAP-041 at the inviting node.
 - **redeem**: the inviter does not know the invitee's key yet (a QR code on a screen). `inviteKey` is a fresh key.
   `grants` holds exactly one token: `right("invite:<id>#redeem")` with holder the invite key, and no other right.
   The invitee re-delegates it to its own agent with a holder block signed by the invite key, then calls
@@ -736,16 +776,20 @@ trust); that channel is what authenticates the inviting owner to the invitee.
 ### 8.3 Accepting an invite
 
 - [CAP-201] A node accepting an invite MUST: parse the transport form; verify the statement as
-  `webway-invite+jws` (CAP-010 to CAP-012); verify `issuerCert` against `owner` as if `owner` were pinned, with
+  `webway-invite+jws` (CAP-010 to CAP-012); if `ownerKeys` is present, verify it as a chain from inception
+  (CAP-020) and use its current root key, else use `owner` itself as the root key; verify `issuerCert` against
+  that root key as if `owner` were pinned, with
   `invites: true` and a validity that contains the invite's (else `InviteInvalid`); reject an invite past `exp`
   (`InviteExpired`); verify each agent-cert against the same chain; check that each grant verifies with `iss`, has
   role `access` and `owner` equal to the invite's `owner`, and satisfies CAP-200 (else `InviteInvalid`). In
   `bound` mode, the accepting agent MUST be `invitee` (else `InviteInvalid`).
 - [CAP-202] A node MUST NOT pin `owner`, or store or use the invite's grants, before these checks pass and the
-  local owner confirms (CAP-060). Then it pins `owner` (with `ownerKey` if present), stores the issuer-cert,
-  agent-certs, relays and grants, and, in `redeem` mode, redeems. If `owner` is already pinned, the node MUST NOT
-  replace the pinned owner-key state with an `ownerKey` whose `seq` is not higher (a rollback), and MUST treat a
-  known petname offered for a different owner as a conflict for the owner to resolve, not as an update (CAP-061).
+  local owner confirms (CAP-060). Then it pins `owner` (with the verified `ownerKeys` state), stores the
+  issuer-cert, agent-certs, relays and grants, and, in `redeem` mode, redeems. If `owner` is already pinned, the
+  node MUST adopt `ownerKeys` only if the chain starts with the events it already holds and extends them by
+  verified rotations (CAP-020); a chain that diverges from the held events is rejected (`InviteInvalid`), and an
+  invite whose certs do not verify against the held root key is too. It MUST treat a known petname offered for a
+  different owner as a conflict for the owner to resolve, not as an update (CAP-061).
 
 ### 8.4 Redemption
 
@@ -758,7 +802,9 @@ invitee's owner after confirmation.
   presenter, so its agent-cert is checked against the cert in the body, not a pin), and MUST allow each invite to
   be redeemed **once**: it records the invite `id` as consumed in the same atomic step as issuing the new grants,
   and answers any later redemption with `InviteConsumed`, unless it is a duplicate of the first redemption
-  envelope, which gets the stored original response (`envelope/v0` dedupe).
+  envelope, which gets the stored original response (`envelope/v0` dedupe). The redeemer's owner is trusted only
+  for checking the presenter's own agent-cert: a redemption MUST NOT carry a mandate (`CapabilityInvalid`), and
+  the redeemer's owner is not pinned for anything else until the owner confirms.
 - [CAP-204] If the inviting owner's policy asks for confirmation, the node MUST NOT issue grants before the owner
   confirms, after seeing the redeeming owner and agent. Confirmation is RECOMMENDED for invites shown in public
   places. An interceptor who redeems first gets the grants only if the owner confirms; the real invitee then gets
@@ -770,8 +816,12 @@ invitee's owner after confirmation.
 
 - **Token blocks**, by Biscuit revocation ID (the block's signature, lowercase hex). Revoking a block revokes every
   token containing it: the authority block's ID revokes the token and everything derived from it; a holder block's
-  ID revokes that delegation and what was derived from it after.
+  ID revokes that delegation and what was derived from it after (see §5.5 on why that does not stop the delegator).
 - **Statements**, by statement ID (`b3:…`): issuer-certs, agent-certs, node-certs, invites.
+- **Keys**, by identifier (`wwi:…`, `wwa:…`, `wwn:…`), in root-signed lists only. Revoking a key revokes every
+  statement that certifies it or is signed by it, every token rooted in it, and every request it presents, whatever
+  certificate is shown. This is how an owner stops a compromised issuing key or agent: revoking one certificate's
+  ID would leave an overlapping or renewed certificate for the same key usable.
 
 ### 9.2 Revocation lists
 
@@ -782,7 +832,7 @@ A revocation list is a statement of type `webway-revocation+jws`:
   "iss": "wwi:…", "owner": "did:key:z6Mk…",
   "seq": 42,
   "iat": "2026-11-07T12:00:00Z", "validUntil": "2026-11-08T12:00:00Z",
-  "revoked": ["9f3c…(128 hex chars)", "b3:Qm9…"]
+  "revoked": ["9f3c…(128 hex chars)", "b3:Qm9…", "wwi:…"]
 }
 ```
 
@@ -791,8 +841,9 @@ A revocation list is a statement of type `webway-revocation+jws`:
 - A list signed by an issuing key may revoke tokens rooted in that key and statements that key signed.
   `validUntil − iat` is at most `MAX_LIST_VALIDITY`. The issuing node re-signs it at least daily, even when it does
   not change.
-- A list signed by the owner's root key may revoke any token or statement of the owner, including issuer-certs.
-  `validUntil − iat` is at most `MAX_ISSUER_CERT_TTL`. It is signed rarely (the key is offline).
+- A list signed by the owner's root key may revoke any token, statement or key of the owner. `validUntil − iat`
+  is at most `MAX_ISSUER_CERT_TTL`. The owner re-signs it at least as often (with the monthly renewal of
+  issuer-certs, from the same offline ceremony), because long-lived tokens need a fresh one (CAP-172).
 
 - [CAP-170] A verifier MUST verify a revocation list as `webway-revocation+jws` (§4.2) and keep, per owner and
   signer, only the verified list with the highest `seq`. A list with a lower or equal `seq` than the one held
@@ -801,24 +852,32 @@ A revocation list is a statement of type `webway-revocation+jws`:
 - [CAP-171] A verifier MUST reject as `CapabilityRevoked` a token any of whose block revocation IDs, or whose
   issuer-cert's statement ID, appears in a list it holds from the token's issuing key or the token owner's root
   key, and MUST apply this to lists even after their `validUntil` (a stale list still proves what it lists).
+- [CAP-175] A verifier MUST treat a key listed in a verified root-signed list of its owner as revoked: statements
+  that certify it or are signed by it are `StatementRevoked`, tokens rooted in it and the issuer-certs of that key
+  are `CapabilityRevoked`, and an agent whose key is revoked fails CAP-041 (`CapabilityDenied`). Key entries in
+  lists signed by an issuing key are ignored.
 
 ### 9.3 Freshness (G11 (a))
 
-- [CAP-172] For a token with `expires − issued > REVOCATION_EXEMPT_TTL`, a verifier MUST hold a list from the
-  token's issuing key with `now ≤ validUntil` (a **fresh** list), and otherwise reject with
-  `RevocationStatusUnavailable`. This applies to access tokens and mandates alike. Tokens at or under the exempt TTL
+- [CAP-172] For a token with `expires − issued > REVOCATION_EXEMPT_TTL`, a verifier MUST hold a **fresh** list
+  (`now ≤ validUntil`) from the token's issuing key **and** a fresh root-signed list of the token's owner, and
+  otherwise reject with `RevocationStatusUnavailable`. The root list is needed because a thief of the issuing key
+  can keep signing fresh, empty lists from it. This applies to access tokens and mandates alike. Tokens at or under the exempt TTL
   are still checked against any lists held (CAP-171), but need no fresh one.
 - Consequence: revoking a long-lived token takes effect at a verifier within `MAX_LIST_VALIDITY`, and within
   `REVOCATION_EXEMPT_TTL` for short tokens, which simply expire. A compromised issuing key is stopped by a
-  root-signed list revoking its issuer-cert, or by the issuer-cert's expiry (at most 30 days).
+  root-signed list revoking the key (CAP-175): at once for verifiers that receive the list (fetched or stapled),
+  and for long-lived tokens at the latest when the previous root list stops being fresh. Short tokens it minted
+  stay usable at verifiers that have not seen the list until they expire (at most `REVOCATION_EXEMPT_TTL` after
+  minting), and the issuer-cert expires within 30 days in any case.
 - Issuers SHOULD keep tokens short (1 hour or less, the M1 invite uses 1 hour) and renew them, and SHOULD use long
   tokens only for standing relationships (S1) where the verifier is the issuer's own node.
 
 ### 9.4 Distribution
 
-- The issuing node serves its current list to any peer that asks (a profile operation, T1), and owners publish
-  their root-signed list with their owner directory (T17).
-- **Stapling**: a sender MAY put the latest lists for its tokens' issuers in `cap.revocations`. For a mandate,
+- Every node of an owner serves its owner's current root-signed list, and its issuing key's list, to any peer that
+  asks (a profile operation, T1). Owners also publish the root list with their owner directory (T17).
+- **Stapling**: a sender MAY put the latest lists for its tokens' issuers and owners in `cap.revocations`. For a mandate,
   the holder fetches the principal owner's list from A's node while A is online and staples it at C, so C can
   check a long-lived mandate while A is offline.
 - [CAP-173] A verifier MUST process stapled lists like fetched ones (CAP-170), before step 6 of §6.2.
@@ -826,7 +885,8 @@ A revocation list is a statement of type `webway-revocation+jws`:
 ### 9.5 Effect
 
 - [CAP-174] When a verifier learns of a revocation, it MUST deny every later operation authorised by a revoked
-  block, including follow-ups on tasks it created (CAP-161), and SHOULD cancel running tasks created under it.
+  block or key, including follow-ups on tasks it created (CAP-161), and SHOULD cancel running tasks created under
+  it.
 - Revocation does not un-share. Content already sent stays with the receiver (threat-model G18).
 
 ## 10. Obligations of issuers and senders
@@ -857,13 +917,17 @@ A revocation list is a statement of type `webway-revocation+jws`:
 
 ## 11. Security and privacy considerations
 
-- **Issuing-key compromise** (threat-model ID-7). An attacker on a node can mint access tokens inside the
-  resource scope (no more than the node could already do) and, with a mandate scope, forge mandates for the
-  agents certified to that node. A mandate grants nothing without an access token held by the presenter, so the
-  damage is bounded by what the presenters already hold. Revocation of the issuer-cert by the root key (§9) and the
-  30-day limit end it.
-- **Root-key compromise** (ID-2). With pre-rotation the owner rotates to the committed next key with
-  `compromised: true`, and the thief cannot rotate (CAP-020). Without it, the owner must re-pin out of band.
+- **Issuing-key compromise** (threat-model ID-7). An attacker on a node can mint access tokens for that node's
+  resources inside the resource scope (no more than the node could already do: CAP-110 and CAP-030 keep it off the
+  owner's other nodes and outside the scope, whatever Datalog it writes, CAP-105) and, with a mandate scope, forge
+  mandates for the agents certified to that node, within the mandate scope. A mandate grants nothing without an
+  access token held by the presenter, so that damage is bounded by what the presenters already hold. A root list
+  revoking the key ends it (CAP-175), with the delays of §9.3; the issuer-cert's 30-day limit bounds it if the owner
+  does nothing.
+- **Root-key compromise** (ID-2). With pre-rotation the owner rotates to the committed next key, the thief cannot
+  rotate (CAP-020), and everything the old key signed stops being accepted (CAP-021). Without pre-rotation, the
+  owner must re-pin out of band.
+- **Delegation is not exclusive** (§5.5). Giving a token to K does not take it from the giver.
 - **Privacy** (DLG-7, META-6). A mandate shows C who A is, A's agents and owner, and `origin_task`. Every holder
   sees the whole token. Do not put secrets in tokens (CAP-140). Before sealed envelopes (T15) relays and mailbox
   hosts of the sender's owner see them too.
@@ -889,7 +953,7 @@ and every token and statement in the vectors is a real one made with `biscuit-au
 | `identity/statement` | `{ "now", "typ", "statement", "pins": [ { "owner", "events"? } ], "issuerCert"?, "revocations"? }` | the verified claims |
 | `identity/owner-key` | `{ "pin": { "owner" }, "events": [statement, …] }` (events in `seq` order, from 0) | `{ "key": did, "next": string \| null, "seq": n }` |
 | `capability/authorize` | `{ "now", "verifier", "request", "cap", "state" }`, see below | `{ "holders": [wwa], "mandateHolders"?: [wwa], "principal"?: wwa }`, or `{ "followUp": true }` |
-| `capability/invite` | `{ "now", "invite": string, "acceptingAgent"?: wwa }` | `{ "owner", "node", "mode", "agents": [wwa], "grants": n }` |
+| `capability/invite` | `{ "now", "invite": string, "acceptingAgent"?: wwa }` | `{ "owner", "ownerKey": did, "node", "mode", "agents": [wwa], "grants": n }` |
 | `capability/outbound` | `{ "now", "node": { "owner" }, "task"?: { "originatorOwner", "onward": [mandate] }, "request": { "targetOwner", "capability" }, "policy"?: { "selfPrincipal": [pattern] } }` | `{ "mandate": index \| null, "selfPrincipal"?: true }`; reject `MandateRequired` |
 
 In `identity/statement`, `pins[].events` are owner-key events (§4.3); without them the pin's current root key is
@@ -908,14 +972,15 @@ the owner identifier itself.
     "policy": "optional Datalog, §5.9"
   },
   "request": {
-    "presenter": "wwa:…", "operation": "SendMessage", "taskId": "…", "contextId": "…", "args": { }
+    "presenter": "wwa:…", "operation": "SendMessage", "taskId": "… (an existing task)", "contextId": "…",
+    "resource": "… (blob, doc or mailbox target)", "args": { }
   },
   "cap": { "capability": "…", "access": "…", "mandate": { … }, "onward": [ … ], "revocations": [statement] },
   "state": {
     "calls": { "access": 0, "mandate": 0 },
     "revocations": [statement],
     "consumedInvites": ["…"],
-    "task": { "taskId": "…", "creator": "wwa:…", "authorizedBy": [ { "owner": "did:key:…", "issuer": "wwi:…", "ids": ["hex"] } ] }
+    "task": { "taskId": "…", "creator": "wwa:…", "capability": "skill:…", "authorizedBy": [ { "owner": "did:key:…", "issuer": "wwi:…", "ids": ["hex"] } ] }
   }
 }
 ```
@@ -941,19 +1006,20 @@ checked once by construction.
 | CAP-030, CAP-031 | `capability/authorize` (`scope-*`, `issuer-cert-*`, `mandate-*`) |
 | CAP-040 | `identity/statement` (`agent-cert-*`) |
 | CAP-041 | `capability/authorize` (`presenter-*`) |
-| CAP-100 … CAP-104, CAP-110, CAP-111, CAP-120, CAP-121, CAP-130 | `capability/authorize` |
+| CAP-100 … CAP-106, CAP-110, CAP-111, CAP-120, CAP-121, CAP-130 | `capability/authorize` (incl. `*-rule-widening`, `task-*`, `skill-continue-*`, `string-looks-like-datalog*`) |
 | CAP-160 | `capability/authorize` (`order-*`, `over-attenuated-*`, `*-cannot-widen`) |
 | CAP-161, CAP-174 | `capability/authorize` (`followup-*`); cancelling running tasks (CAP-174 SHOULD) in the harness |
-| CAP-170 … CAP-173 | `capability/authorize` (`revoked-*`, `revocation-*`, `long-lived-*`) |
+| CAP-170 … CAP-173, CAP-175 | `capability/authorize` (`revoked-*`, `revocation-*`, `long-lived-*`), `identity/statement` (`revoked-*`) |
 | CAP-180 … CAP-182 | `capability/authorize` (`mandate-*`, `on-behalf-*`, `onward-*`) |
 | CAP-186 | `capability/outbound` |
 | CAP-200, CAP-201 | `capability/invite` |
+| CAP-202 | `capability/invite` (`owner-keys-*`); pinning only after confirmation in the harness |
 | CAP-203 | `capability/authorize` (`invite-redeem-*`); atomicity in the harness |
-| CAP-003, CAP-050, CAP-060, CAP-061, CAP-140, CAP-150, CAP-151, CAP-185, CAP-187, CAP-190, CAP-202, CAP-204 | **pending**: harness scenarios (T4, T6, T17) |
+| CAP-003, CAP-050, CAP-060, CAP-061, CAP-140, CAP-150, CAP-151, CAP-185, CAP-187, CAP-190, CAP-204 | **pending**: harness scenarios (T4, T6, T17) |
 
 The **pending** requirements are behaviour of a running node (key use, card handling, pinning UX, what reaches
 an agent, what is logged), so no pure-function vector can test them. They need harness scenarios against a node
-(T4, T6). Until those exist, `webway-conformance check` (CONV-004) reports these 12 IDs as untested; see §13.
+(T4, T6). Until those exist, `webway-conformance check` (CONV-004) reports these 11 IDs as untested; see §13.
 
 ## 13. Changes from the due diligence, and open questions
 
@@ -968,6 +1034,14 @@ Changes, all from the threat model:
 4. **Revocation freshness (G11 (a))** with `REVOCATION_EXEMPT_TTL` and fail-closed `RevocationStatusUnavailable`.
 5. **Mandate attachment (G10 (a))** as a sender obligation (CAP-186), with an explicit owner-policy escape.
 6. **`issuer` fact** instead of Biscuit `root_key_id`, and **`calls` counted per authority block** across forks.
+7. **Access tokens are per node** (CAP-110): an issuing key grants access only to its own node's resources.
+8. **Rotation retires the old root key** (CAP-021), and **keys are revocable** in root lists (CAP-175), which long
+   tokens need fresh (CAP-172).
+
+Review notes (first review of this draft): an authority-block rule could widen a token past its scope (now
+CAP-105 and the request-time scope check in CAP-030); a capability did not bind the resource it names (CAP-106);
+token-less follow-ups skipped caveats (CAP-161 narrowed); a single `ownerKey` event in invites could spoof a pin
+(now a full chain, CAP-202); revoking a certificate did not stop a renewed one for the same key (CAP-175).
 
 Open questions for the owner or later tracks:
 
@@ -980,7 +1054,7 @@ Open questions for the owner or later tracks:
   sender's agent-cert (cached per peer, or in the envelope). `envelope/v0` must say which.
 - **Q-CAP-4.** Argument caveats only see top-level scalars of `args`. Richer constraints (paths into nested
   objects) can come later without breaking v0 tokens.
-- **Q-CAP-5.** CONV-004 has no way to mark a `MUST` as "tested by a harness scenario not written yet". The 12
+- **Q-CAP-5.** CONV-004 has no way to mark a `MUST` as "tested by a harness scenario not written yet". The 11
   pending requirements of §12.2 will fail `webway-conformance check` until T4/T6 add scenarios. Options: a
   `pending` marker the checker reports as a warning, or keep the check red for `CAP` until then.
 - **Q-CAP-6.** `arg` facts, `cap.capability` and `cap.onward` add members to the envelope and to the A2A message
