@@ -184,20 +184,15 @@ fn token(input: &Value) -> Option<Outcome> {
     };
     let mut quota = Map::new();
     for (fact, key) in [("quota_envelopes", "envelopes"), ("quota_bytes", "bytes")] {
-        if let Some(occ) = facts.get(fact) {
-            let occ = occ.as_array()?;
-            if occ.len() != 1 {
-                return invalid();
+        match one(fact).map(|t| t.as_slice()) {
+            Some([n]) if n.as_i64().is_some_and(|n| n >= 1) => {
+                quota.insert(key.into(), n.clone());
             }
-            match occ[0].as_array().map(|t| t.as_slice()) {
-                Some([n]) if n.as_i64().is_some_and(|n| n >= 1) => {
-                    quota.insert(key.into(), n.clone());
-                }
-                _ => return invalid(),
-            }
+            _ => return invalid(),
         }
     }
-    if expires - issued > MAX_DEPOSIT_TTL || issuer[0] != s(input, "signedBy")? {
+    let now = ts(input, "now")?;
+    if expires - issued > MAX_DEPOSIT_TTL || issued > now + SKEW || issuer[0] != s(input, "signedBy")? {
         return invalid();
     }
     if b(input, "revoked")? {
@@ -208,6 +203,9 @@ fn token(input: &Value) -> Option<Outcome> {
     if owner[0] != reg_owner || s(input, "issuerChainOwner")? != reg_owner {
         return denied();
     }
+    if !b(input, "issuerRegistered")? || s(input, "issuerNode")? != s(input, "registrationNode")? {
+        return denied();
+    }
     let scope = input.get("issuerScope")?.as_array()?;
     if !scope.iter().filter_map(Value::as_str).any(|p| scope_covers(p, &right[0])) {
         return denied();
@@ -215,7 +213,7 @@ fn token(input: &Value) -> Option<Outcome> {
     if right[0] != format!("mailbox:{}#deposit", s(input, "recipient")?) {
         return denied();
     }
-    if ts(input, "now")? > expires {
+    if now > expires {
         return denied();
     }
     if dkey[0] != s(input, "depositSigner")? {
@@ -259,19 +257,19 @@ fn admit(input: &Value) -> Option<Outcome> {
         return Some(rej("EnvelopeInvalid"));
     }
     // 2
-    let deposit = input.get("deposit")?;
-    if deposit.is_null() {
-        return Some(rej("CapabilityMissing"));
-    }
-    // 3
     let reg = input.get("registration")?;
     let to = s(env, "to")?;
     if reg.is_null() || s(reg, "agent")? != to || now > ts(reg, "leaseUntil")? {
         return Some(rej("RecipientUnknown"));
     }
+    // 3
+    let deposit = input.get("deposit")?;
+    if deposit.is_null() {
+        return Some(rej("CapabilityMissing"));
+    }
     // 4, 5, 6
     let (t, exp) = (ts(env, "ts")?, ts(env, "exp")?);
-    if now > exp + SKEW {
+    if now > exp {
         return Some(rej("EnvelopeExpired"));
     }
     if t > now + SKEW {
@@ -312,9 +310,11 @@ fn admit(input: &Value) -> Option<Outcome> {
     }
     // 12
     let (usage, quota) = (input.get("usage")?, input.get("quota")?);
-    if i(usage, "envelopes")? + 1 > i(quota, "envelopes")? || i(usage, "bytes")? + i(env, "bytes")? > i(quota, "bytes")?
-    {
-        return Some(rej("MailboxFull"));
+    for scope in ["token", "registration"] {
+        let (u, q) = (usage.get(scope)?, quota.get(scope)?);
+        if i(u, "envelopes")? + 1 > i(q, "envelopes")? || i(u, "bytes")? + i(env, "bytes")? > i(q, "bytes")? {
+            return Some(rej("MailboxFull"));
+        }
     }
     // 13
     Some(ok(json!({ "custody": "accepted" })))
@@ -433,8 +433,12 @@ fn path(input: &Value) -> Option<Outcome> {
     if b(input, "direct")? {
         paths.push("direct".to_string());
     }
-    if state == "queued" || state == "pending" {
+    let stored_fallback = state == "stored" && b(input, "fallback")?;
+    if state == "queued" || state == "pending" || stored_fallback {
         for (n, h) in input.get("hosts")?.as_array()?.iter().enumerate() {
+            if stored_fallback && b(h, "custody")? {
+                continue;
+            }
             let operator_ok = matches!(s(h, "operator")?, "sender-owner" | "recipient-owner") || b(h, "allowListed")?;
             let trusted = b(h, "chainValid")? && operator_ok;
             if trusted && b(h, "token")? && !b(h, "failed")? {
@@ -475,9 +479,14 @@ fn order(input: &Value) -> Option<Outcome> {
         }
         let key = e.get("key")?;
         let blocked = !key.is_null()
-            && entries[..n]
-                .iter()
-                .any(|p| p.get("key") == Some(key) && matches!(s(p, "state"), Some("queued" | "pending")));
+            && entries[..n].iter().any(|p| {
+                p.get("key") == Some(key)
+                    && match s(p, "state") {
+                        Some("queued" | "pending") => true,
+                        Some("stored") => b(p, "request") == Some(true),
+                        _ => false,
+                    }
+            });
         if !blocked {
             eligible.push(n);
         }

@@ -114,6 +114,7 @@ Constants of this extension:
 | `LEASE_MAX` | 30 days | Longest registration lease a host grants (§6) |
 | `MAX_DEPOSIT_TTL` | 30 days | Largest `expires − issued` of a deposit token (§4.2). Equal to `MAX_ACCESS_TTL` of `ext/capability.md`. |
 | `MAX_DEPOSIT_AUTH_BYTES` | 12 288 | Largest `DEPOSIT_AUTH` payload (§5) |
+| `DRAIN_IDLE` | 5 s | A host counts as drained when it opens no DELIVER stream for this long after HELLO (§10) |
 | `DEPOSIT_SIG_PREFIX` | ASCII `webway-mailbox-deposit/0` followed by one `0x00` byte | Domain separation for deposit signatures (§5.1) |
 
 ## 3. Declaring mailbox hosts
@@ -156,14 +157,15 @@ sender's owner must be willing to show the content to the operator of the host.
 - [MBX-003] *Pending: T4, T5.* A depositor MUST take a recipient's mailbox hosts only from: the recipient's Agent Card, verified as
   the profile and `ext/capability.md` §4.7 require; an invite from the recipient's owner (`ext/capability.md` §8,
   the `deposit` claim, §4.4 below); or the `cap.mailbox.hosts` of a verified envelope whose `from` is the recipient
-  (§4.3). The most recently verified of these replaces the others. It MUST NOT take hosts from any other source,
+  (§4.3). The one with the latest signed issue time (the card's version or signature time, the invite's `iat`, the
+  envelope's `ts`) replaces the others, so an old signed card cannot roll the list back. It MUST NOT take hosts from any other source,
   in particular not from message text, Parts, artefacts or another agent's envelope.
 - [MBX-004] A node MUST NOT hand an unsealed envelope to a mailbox host unless the host is **content-trusted**: it is
   operated by the sender's owner, or by the recipient's owner, or the sender's owner has listed it (by node key or
   by operating owner) in local policy as trusted with content. A host operated by any other owner MUST NOT be used
   for unsealed envelopes, even if the recipient declares it.
-- [MBX-005] A node MUST establish who operates a mailbox host from the host agent's certificate chain
-  (`ext/capability.md` §4.6, an agent certificate for `hosts[].agent` bound to `hosts[].node`, chaining to
+- [MBX-005] A node MUST establish who operates a mailbox host from the host agent's certificate chain, taken from
+  the host agent's signed Agent Card (fetched from the host node like any card) (`ext/capability.md` §4.6, an agent certificate for `hosts[].agent` bound to `hosts[].node`, chaining to
   `hosts[].owner`), never from the `owner` member alone, and MUST deposit only on a connection whose peer node key
   is `hosts[].node`. If the chain does not verify, or names another owner, the host is not content-trusted and is
   not used.
@@ -206,18 +208,26 @@ key** (`wwi:`) of the recipient's owner, whose issuer certificate has a resource
 | `issued($date)`, `expires($date)` | Validity. Exactly one each. `expires − issued` at most `MAX_DEPOSIT_TTL`. |
 | `right($c)` | Exactly one, `$c` = `"mailbox:<recipient wwa>#deposit"` (capability kind `mailbox:`, `ext/capability.md` §5.2). |
 | `deposit_key($k)` | The holder's deposit public key, base64url as in `depositKey`. Exactly one. |
-| `quota_envelopes($n)`, `quota_bytes($n)` | Optional, at most one each, integers ≥ 1. Most envelopes held at one time for this token at one host, and most bytes (`JCS(envelope)` length). |
+| `quota_envelopes($n)`, `quota_bytes($n)` | Exactly one each, integers ≥ 1. Most envelopes held at one time for this token at one host, and most bytes (`JCS(envelope)` length). |
 
 - [MBX-010] A mailbox host MUST reject as `CapabilityInvalid` a deposit token that has more than one block, lacks
   any fact that the table marks "exactly one", has more than one of any fact, has a fact of the wrong arity or term
-  type, carries a quota fact that is not an integer ≥ 1, has `expires − issued` above `MAX_DEPOSIT_TTL`, has an
+  type, carries a quota fact that is not an integer ≥ 1, has `expires − issued` above `MAX_DEPOSIT_TTL` or `issued`
+  later than the host's time plus `SKEW`, has an
   `issuer` other than the key that signed the block, or exceeds `MAX_TOKEN_BYTES` (`ext/capability.md` §2.1).
-- [MBX-011] A mailbox host MUST reject as `CapabilityDenied` a well-formed deposit token whose `owner` is not the
-  owner of the registration for the envelope's `to` (§6), whose issuer certificate does not chain to that owner
-  with a resource scope covering the `right`, whose `right` is not `mailbox:<to>#deposit` for the envelope's `to`,
-  whose `expires` is earlier than the host's current time (no `SKEW`, as for access tokens), or whose
-  `deposit_key` is not the key that made the deposit signature. A token or issuer certificate listed in a verified
-  revocation list (`ext/capability.md` §9) MUST be rejected as `CapabilityRevoked`.
+- [MBX-011] A mailbox host MUST check revocation first: a token or issuer certificate listed in a verified
+  revocation list (`ext/capability.md` §9) MUST be rejected as `CapabilityRevoked`. It MUST then reject as
+  `CapabilityDenied` a well-formed deposit token whose `owner` is not the
+  owner of the registration for the envelope's `to` (§6); whose `issuer` is not one of the registration's
+  `issuerCerts`, or whose issuer certificate is not valid at the host's time, does not chain to that owner, does
+  not have a resource scope covering the `right`, or is bound to a node other than the registered node (threat-model
+  G19: an issuing key only grants for resources on its own node); whose `right` is not `mailbox:<to>#deposit` for the envelope's `to`,
+  whose `expires` is earlier than the host's current time (no `SKEW`, as for access tokens); or whose
+  `deposit_key` is not the key that made the deposit signature.
+
+Quotas are mandatory so that one token holder cannot fill a mailbox that the recipient shares with every peer. An
+issuer SHOULD set each token's quota well below the registration quota it holds at its hosts (§6), so that a few
+misbehaving peers leave room for the others.
 
 The token has no holder chain and cannot be re-delegated: whoever holds the deposit key's private half is the only
 one who can use it. It authorises nothing else. Deposits never run Datalog; the facts are read from the decoded
@@ -244,8 +254,8 @@ the signed header (kept in audit logs and mailbox indexes) reveals nothing secre
 
 - [MBX-012] *Pending: T4, T5.* A node MUST act on `cap.mailbox` only after the envelope verified, and only if the token's `right` names
   the envelope's `from`. It MUST otherwise ignore the member and record an anomaly. A valid `cap.mailbox` replaces
-  the deposit token and host list the node held for that agent, unless the held token expires later and names the
-  same hosts.
+  the deposit token and host list the node held for that agent, unless the held token expires later, names the
+  same hosts, and is bound to the node's current deposit key.
 - A node SHOULD include `cap.mailbox` in every request to an agent of another node that does not yet hold an
   unexpired token for the sender's agent, and in every response whose request carried none or one that expires
   within a quarter of its lifetime. A requester that may receive deferred responses or events needs to have given
@@ -359,17 +369,17 @@ to take custody. The checks are ordered cheapest first (threat-model G15) and th
 | Step | Check | On failure |
 |---|---|---|
 | 1 | The envelope parses as I-JSON and `to`, `from`, `id`, `ts`, `exp` are readable in the forms of `ext/envelope.md` §3.2 | `EnvelopeInvalid` |
-| 2 | A `DEPOSIT_AUTH` preceded the `DELIVER` | `CapabilityMissing` |
-| 3 | The host has a registration for `to` whose lease has not ended | `RecipientUnknown` |
-| 4 | `now ≤ exp + SKEW` | `EnvelopeExpired` |
+| 2 | The host has a registration for `to` whose lease has not ended | `RecipientUnknown` (binding BIND-023) |
+| 3 | A `DEPOSIT_AUTH` preceded the `DELIVER` | `CapabilityMissing` |
+| 4 | `now ≤ exp` (a host may not deliver after `exp`, MBX-053, so it does not take custody either) | `EnvelopeExpired` |
 | 5 | `ts ≤ now + SKEW` | `EnvelopeNotYetValid` (retryable, `retryAfterMs` until `ts − SKEW`) |
 | 6 | `ts < exp` and `exp − ts ≤ MAX_TTL + SKEW` | `EnvelopeInvalid` |
 | 7 | Deposit token well-formed (MBX-010) | `CapabilityInvalid` |
-| 8 | Deposit token authorises this deposit (MBX-011) | `CapabilityDenied` or `CapabilityRevoked` |
+| 8 | Deposit token is not revoked and authorises this deposit (MBX-011, revocation first) | `CapabilityRevoked`, then `CapabilityDenied` |
 | 9 | Deposit signature verifies (MBX-021) | `CapabilityDenied` |
 | 10 | Envelope steps 1–5 of `ext/envelope.md` §9 pass (format, signature by `from`, `body_hash`) | that step's error (`EnvelopeInvalid`, `SignatureInvalid`) |
 | 11 | No held record or tombstone has the same (`from`, `id`) | same header digest: status **`duplicate`**. Different digest: `EnvelopeInvalid` (id reuse), and an anomaly is recorded. |
-| 12 | Held envelopes for this token stay within its quota facts, and held envelopes for this registration within the registration quota, counting this one | `MailboxFull` (retryable, `retryAfterMs` SHOULD be set) |
+| 12 | Held envelopes for this token stay within its quota facts, and held envelopes for this registration within the registration quota, counting this one (envelopes and bytes, four limits) | `MailboxFull` (retryable, `retryAfterMs` SHOULD be set) |
 | 13 | The envelope is stored durably (binding BIND-023) | status **`accepted`** |
 
 - [MBX-041] A mailbox host MUST NOT take custody of an envelope whose signature or `body_hash` does not verify
@@ -377,9 +387,9 @@ to take custody. The checks are ordered cheapest first (threat-model G15) and th
   a MUST, because a stored forgery would occupy a sender's (`from`, `id`) and later make the genuine envelope look
   like a duplicate.
 - [MBX-042] A duplicate deposit (step 11) MUST NOT count against any quota and MUST NOT create a second held record.
-- [MBX-043] A mailbox host's admission decision MUST NOT depend on `from`, `ctx`, `cap` (other than through steps 1
-  and 10, which only check form and signature) or `prov`. In particular it MUST NOT admit an envelope without a
-  valid deposit token because of who sent it.
+- [MBX-043] A mailbox host's authorisation decision (steps 2, 3, 7–9, 12) MUST NOT depend on `from`, `ctx`, `cap`
+  or `prov`. In particular it MUST NOT admit an envelope without a valid deposit token because of who sent it.
+  Steps 1, 10 and 11 read `from` only to check the envelope's integrity and to deduplicate.
 
 Step 6 accepts up to `MAX_TTL + SKEW` for every `typ` because answers and events may reach that bound (profile
 PROF-076). The recipient applies its own, stricter rule on delivery.
@@ -454,7 +464,7 @@ the attempt count, the next attempt time, and per path whether it failed or gave
 | `pending` | Transmitted at least once. No custody. | `sent` |
 | `stored` | A mailbox host gave custody. The recipient node has not confirmed. | `sent` |
 | `received` | Requests only: the recipient node gave custody of the request. Its answer is still to come. | `sent` |
-| `delivered` | Requests: the signed answer arrived (PROF-078). Other entries: the recipient node gave custody. | `acknowledged` |
+| `delivered` | Requests: the signed `response` arrived (PROF-078). Other entries: the recipient node gave custody. | `acknowledged` |
 | `refused` | The recipient refused it, non-retryably (requests: PROF-078; others: a non-retryable `CUSTODY` `rejected` from the recipient node). | `refused` |
 | `expired` | `now > exp + SKEW` without reaching `delivered` or `refused` | `expired` |
 | `withdrawn` | Requests only: canceled by the local agent while `queued` (PROF-035) | `withdrawn` |
@@ -463,8 +473,9 @@ Events:
 
 - **transmit**: the node starts an attempt on some path (§9.3).
 - **host-custody**: `accepted` or `duplicate` from a mailbox host.
-- **recipient-custody**: `accepted` or `duplicate` from the recipient node (MBX-061).
-- **response**: requests only: a signed `response` or `ack` envelope that answers the request and passes PROF-078.
+- **recipient-custody**: `accepted` or `duplicate` from the recipient node (MBX-061), or, for requests, a signed
+  duplicate `ack` (ENV-531) from the recipient, which proves receipt but carries no answer.
+- **response**: requests only: a signed `response` envelope that answers the request and passes PROF-078.
 - **recipient-refusal**: requests: a signed non-retryable error passing PROF-078. Other entries: a non-retryable
   `CUSTODY` `rejected` from the recipient node.
 - **retryable-error**: anything else that ends an attempt: a `CUSTODY` `rejected` from a host (whatever its code,
@@ -521,12 +532,18 @@ An entry can be transmitted on three kinds of path, tried in this order:
   (an open connection, or a successful dial), and otherwise the recipient's declared hosts in declaration order.
   A host is eligible only if it is content-trusted (MBX-004, MBX-005), the node holds an unexpired deposit token
   for the recipient bound to a deposit key it holds, the host has not failed for this entry, and the entry is
-  `queued` or `pending`. In `stored` and `received` only the direct path is used.
+  `queued` or `pending`, or `stored` past its fallback time at a host that has not given custody (MBX-069). In
+  `received` only the direct path is used.
 - [MBX-064] A `CUSTODY` `rejected` from a host with a non-retryable error marks that host as failed for that entry
   (the next attempt skips it). It MUST NOT change the entry's state beyond `retryable-error` (PROF-078).
 - [MBX-065] While an entry is `stored`, the node MUST keep attempting the direct path, on the schedule of §9.4,
-  until the entry is `delivered`, `refused` or past `exp`. A host may drop what it holds (threat-model MBX-4), and
-  only these direct attempts recover from that.
+  until the entry is `delivered`, `refused` or past `exp`. A host may drop what it holds (threat-model MBX-4); these
+  direct attempts and the fallback deposit of MBX-069 recover from that.
+- [MBX-069] A `stored` entry's **fallback time** is the moment of its first host custody plus half of the time
+  left from then until `exp`. If the entry is still `stored` at its fallback time, the node MUST also deposit it at
+  the next eligible host that has not given custody. A host may hold an envelope and never deliver it, and the
+  recipient node may be reachable only through its hosts (NAT), in which case direct attempts never succeed. A second
+  copy is safe: the recipient deduplicates (PROF-023).
 - [MBX-066] While a request entry is `received`, the node MUST keep attempting the direct path with the delay
   `RETRY_MAX` (before jitter) until it is `delivered`, `refused` or past `exp`. Each attempt is a duplicate for the
   recipient, which then sends its stored answer again (MBX-081). This recovers an answer lost on its way back.
@@ -553,13 +570,14 @@ if next > exp: no further attempt (the entry waits for an answer until exp + SKE
 ### 9.5 Order
 
 - [MBX-068] A node MUST NOT transmit an entry while an earlier entry (in the order the agent or task produced them)
-  with the same recipient and the same order key is `queued` or `pending`. Entries without an order key are not
-  ordered.
+  with the same recipient and the same order key is `queued` or `pending`, or is a request entry in `stored`.
+  Entries without an order key are not ordered.
 
 This is how PROF-032 ("hand envelopes for the same task to the network in the order its agent produced them") is
-met when paths differ: an entry waits until the one before it has reached custody somewhere. Once both are in
-custody they may still arrive out of order (one through a host, one direct). Requests to one task are then ordered
-by the host (MBX-052) or by the agent's own waiting for answers, and events by `seq` (PROF-028).
+met when paths differ. A request waits until the request before it has reached the recipient node itself
+(`received` or later): a host's custody is not enough, because the later request could go direct and be processed
+first. Responses and events only wait for custody somewhere, because events are ordered by `seq` at the requester
+(PROF-028) and a task has one response per request.
 
 ## 10. Recipient node
 
@@ -569,8 +587,9 @@ for freshness. An envelope that waited in a mailbox for longer than `SKEW` but w
 fresh (ENV-302). One past `exp + SKEW` is rejected with `EnvelopeExpired` (ENV-300), even when it was in custody
 in time.
 
-- [MBX-080] A node whose agents declare mailbox hosts MUST, while it is online, keep a connection to each declared
-  host for which it holds a lease, or reconnect within `RETRY_MAX`, and MUST accept the DELIVER streams those
+- [MBX-080] A node MUST, while it is online, keep a connection (or reconnect within `RETRY_MAX`) to every mailbox
+  host at which one of its agents holds an unexpired lease, or held one less than `MAX_TTL + SKEW` ago, whether or
+  not the agent still declares that host, and MUST accept the DELIVER streams those
   hosts open. It MUST answer each `DELIVER` with `CUSTODY` as binding BIND-023 requires: `accepted` only once the
   envelope's effects are durable together with its dedupe entry (ENV-503), `duplicate` for a duplicate, `rejected`
   with the verification or processing error otherwise.
@@ -592,7 +611,8 @@ The signed `seq` (PROF-020, PROF-021) is the single source of truth, and the cur
 
 - [MBX-090] *Pending: T4, T5.* A requester node MUST store, for each proxy task, the highest `seq` it has applied, durably and in the
   same transaction as the applied event, so that a restart neither re-applies nor skips an event.
-- [MBX-091] After a requester node restarts or reconnects, and once it has drained its own mailbox hosts (MBX-080),
+- [MBX-091] After a requester node restarts or reconnects, and once its own mailbox hosts are drained (each host
+  has opened no DELIVER stream for `DRAIN_IDLE` after its HELLO; a host that cannot be reached is skipped),
   it MUST, for each proxy task whose delivery is `acknowledged` and whose remote task it has not seen in a terminal
   state, send `SubscribeToTask` with `webway-from-seq` equal to the applied `seq` plus one, as soon as the responder
   node is reachable. Until then it keeps the proxy task as it is (`stale: true`, profile §8.5).
@@ -610,13 +630,13 @@ retryability as registered there:
 |---|---|---|---|
 | `CUSTODY` from a host | `EnvelopeInvalid` | no | Step 1, 6, 10 or 11 (id reuse) of §7 |
 | | `SignatureInvalid` | no | Step 10 |
-| | `EnvelopeExpired` | no | Step 4 |
+| | `EnvelopeExpired` | no | Step 4: `now > exp` |
 | | `EnvelopeNotYetValid` | yes | Step 5 |
-| | `CapabilityMissing` | no | Step 2: no `DEPOSIT_AUTH` |
+| | `CapabilityMissing` | no | Step 3: no `DEPOSIT_AUTH` |
 | | `CapabilityInvalid` | no | Step 7 (MBX-010) |
 | | `CapabilityDenied` | no | Steps 8, 9 (MBX-011, MBX-021) |
 | | `CapabilityRevoked` | no | Step 8 |
-| | `RecipientUnknown` | no | Step 3: no registration or the lease ended |
+| | `RecipientUnknown` | no | Step 2: no registration or the lease ended |
 | | `MailboxFull` | yes | Step 12: a quota is reached. `retryAfterMs` SHOULD say when space is expected. |
 | `#Register` | `CapabilityMissing`, `CapabilityDenied`, `CapabilityRevoked` | no | Authorisation (MBX-030) |
 | | `IdentityUntrusted` | no | `agentCert` does not certify `from` or does not verify |
@@ -645,8 +665,9 @@ Errors a host reports go to the depositor only, as `CUSTODY` (unsigned, per hop,
 - A **major** revision (`…/ext/mailbox/v1`) is needed to change admission, the state machines, or the meaning of
   any existing member. It gets a new URI, a new token marker (`webway("mailbox/v1", …)`), a new signature prefix,
   and a new frame type, so a v0 host can never accept a v1 deposit by mistake (PROF-057: no silent fallback).
-- Sealed envelopes (T15) will change what a host can read but not admission, which already ignores `from`, `ctx`
-  and `prov` (MBX-043). They are expected as a minor revision plus an `envelope` change.
+- Sealed envelopes (T15) will change what a host can read. Authorisation already ignores `from`, `ctx` and `prov`
+  (MBX-043), but steps 10 and 11 read `from` to verify and deduplicate, so sealing `from` needs those two steps
+  redefined (open issue 7). That is expected to need a major revision.
 
 ## 14. Conformance
 
@@ -658,15 +679,15 @@ Test vectors are in `conformance/vectors/mailbox/`, in the format `webway-vector
 | Kind | Input | Output on `accept` | Rejections |
 |---|---|---|---|
 | `mailbox/card` | `{"params": <card extension params>}` | `{"hosts": <int>}` | any (MBX-001) |
-| `mailbox/token` | `{"blocks": <int>, "facts": {<fact name>: [<term array>…]}, "signedBy": <wwi>, "now", "recipient": <wwa>, "registrationOwner": <did>, "issuerChainOwner": <did>, "issuerScope": [<capability pattern>…], "depositSigner": <base64url key>, "revoked": <bool>}` | `{"quota": {"envelopes"?, "bytes"?}}` | `CapabilityInvalid`, `CapabilityDenied`, `CapabilityRevoked` |
+| `mailbox/token` | `{"blocks": <int>, "facts": {<fact name>: [<term array>…]}, "signedBy": <wwi>, "now", "recipient": <wwa>, "registrationOwner": <did>, "issuerChainOwner": <did>, "issuerScope": [<capability pattern>…], "issuerRegistered": <bool: issuer is in the registration's issuerCerts and its certificate is valid now>, "issuerNode": <wwn>, "registrationNode": <wwn>, "depositSigner": <base64url key>, "revoked": <bool>}` | `{"quota": {"envelopes"?, "bytes"?}}` | `CapabilityInvalid`, `CapabilityDenied`, `CapabilityRevoked` |
 | `mailbox/deposit-sig` | `{"depositKey": <base64url>, "headerDigest": <hex>, "sig": <base64url>}` | `{"signingInput": <hex>}` | `CapabilityDenied` |
-| `mailbox/admit` | `{"now", "registration": {"agent", "leaseUntil"} or null, "envelope": {"parsed", "to", "from", "id", "ts", "exp", "digest", "bytes", "verify": "ok" \| "signature" \| "body-hash" \| "format"}, "deposit": {"token": "ok" \| "invalid" \| "denied" \| "revoked", "sigValid"} or null, "held": [{"from", "id", "digest"}…], "usage": {"envelopes", "bytes"}, "quota": {"envelopes", "bytes"}}` | `{"custody": "accepted" \| "duplicate"}` | the error of the failing step (§7) |
+| `mailbox/admit` | `{"now", "registration": {"agent", "leaseUntil"} or null, "envelope": {"parsed", "to", "from", "id", "ts", "exp", "digest", "bytes", "verify": "ok" \| "signature" \| "body-hash" \| "format"}, "deposit": {"token": "ok" \| "invalid" \| "denied" \| "revoked", "sigValid"} or null, "held": [{"from", "id", "digest"}…], "usage": {"token": {"envelopes", "bytes"}, "registration": {…}}, "quota": {"token": {…}, "registration": {…}}}` | `{"custody": "accepted" \| "duplicate"}` | the error of the failing step (§7) |
 | `mailbox/register` | `{"now", "leaseUntil", "capability": "ok" \| "missing" \| "denied" \| "revoked", "certifiesFrom": <bool>}` | `{"leaseUntil"}` | `CapabilityMissing`, `CapabilityDenied`, `CapabilityRevoked`, `IdentityUntrusted`, `InvalidParamsError` |
 | `mailbox/host-step` | `{"state", "event"}` (§8) | `{"state"}` | any (illegal) |
 | `mailbox/outbox-step` | `{"request": <bool>, "state", "event"}` (§9.2) | `{"state"}` | any (illegal) |
-| `mailbox/path` | `{"state", "direct": <bool>, "hosts": [{"operator": "sender-owner" \| "recipient-owner" \| "other", "allowListed", "chainValid", "token", "failed"}…]}` | `{"paths": ["direct" \| "host:<i>"…]}` | none |
+| `mailbox/path` | `{"state", "direct": <bool>, "fallback": <bool: a stored entry is past its fallback time>, "hosts": [{"operator": "sender-owner" \| "recipient-owner" \| "other", "allowListed", "chainValid", "token", "failed", "custody"}…]}` | `{"paths": ["direct" \| "host:<i>"…]}` | none |
 | `mailbox/backoff` | `{"attempt": <n ≥ 1>, "r": <[0,1)>, "now", "exp", "retryAfterMs"?}` | `{"next": <timestamp> or null}` | none |
-| `mailbox/order` | `{"entries": [{"key": <string or null>, "state"}…]}` | `{"eligible": [<index>…]}` | none |
+| `mailbox/order` | `{"entries": [{"key": <string or null>, "request": <bool>, "state"}…]}` | `{"eligible": [<index>…]}` | none |
 | `mailbox/timing` | `{"role": "outbox" \| "host" \| "recipient", "now", "ts", "exp"}` | `{"action": "attempt" \| "await" \| "expire" \| "deliver" \| "stop" \| "accept"}` | `EnvelopeExpired`, `EnvelopeNotYetValid` (recipient) |
 | `mailbox/reconnect` | `{"delivery": <profile delivery state>, "remoteTerminal": <bool>, "applied": <int>, "responderReachable": <bool>}` | `{"action": "none" \| "wait" \| "subscribe", "fromSeq"?}` | none |
 
@@ -685,7 +706,7 @@ Coverage:
 | MBX-030, MBX-031 | `mailbox/register` |
 | MBX-050, MBX-053 | `mailbox/host-step`, `mailbox/timing` |
 | MBX-061, MBX-062, MBX-070 | `mailbox/outbox-step`, `mailbox/timing` |
-| MBX-004, MBX-005, MBX-063, MBX-064, MBX-065, MBX-066 | `mailbox/path` |
+| MBX-004, MBX-005, MBX-063, MBX-064, MBX-065, MBX-066, MBX-069 | `mailbox/path` |
 | MBX-067 | `mailbox/backoff` |
 | MBX-068 | `mailbox/order` |
 | MBX-091 | `mailbox/reconnect` |
@@ -701,11 +722,11 @@ vectors against it; `cargo run -- adapter` is a stdio adapter (CONV-006) for the
 |---|---|---|
 | MBX-1 host alters or forges | Hosts store and forward the envelope unchanged (ENV-700) and must verify it before custody (MBX-041). The recipient verifies again. | None |
 | MBX-2 host reads bodies | Only content-trusted hosts get unsealed envelopes (MBX-004), and who operates a host is checked from certificates (MBX-005). Host declarations come only from the recipient (MBX-003). | The host's operator sees content and metadata until T15. |
-| MBX-3, META-2, G12 host reads headers | Not solved: v0 headers are clear. Admission already ignores `from`, `ctx` and `prov` (MBX-043), so T15 can seal them without changing §7. | A deposit key is a stable pseudonym per sending agent. |
-| MBX-4, G3 host claims delivery | Hosts never report delivery (MBX-054). Only recipient custody on the recipient node's own connection, or the signed answer, moves an entry to `delivered` (MBX-061). Senders keep trying direct while `stored` (MBX-065). | A host can delay up to `exp`. The sender sees `sent` and then `expired`, never a false `delivered`. |
+| MBX-3, META-2, G12 host reads headers | Not solved: v0 headers are clear. Authorisation already ignores `from`, `ctx` and `prov` (MBX-043); integrity and dedupe at the host still read `from` (open issue 7). | A deposit key is a stable pseudonym per sending agent. |
+| MBX-4, G3 host claims delivery | Hosts never report delivery (MBX-054). Only recipient custody on the recipient node's own connection, or the signed answer, moves an entry to `delivered` (MBX-061). Senders keep trying direct while `stored` (MBX-065) and deposit at a second host at the fallback time (MBX-069). | A host can delay up to `exp`. The sender sees `sent` and then `expired`, never a false `delivered`. |
 | MBX-5, RPL-8 host replays | Recipient dedupe (PROF-023, ENV-510). A replayed request gets the stored answer only over the sender's or its host's connection (ENV-531), and is re-sent only to the request's `from` (MBX-081). | None |
 | MBX-6 host reorders or withholds events | Per-task `seq`, held out-of-order events, cursor resubscribe (PROF-028, MBX-091), events kept in the log (MBX-082). | Withholding delays, never loses, while the responder is reachable. |
-| MBX-7, DOS-4, G4 mailbox flooding | Deposit tokens issued by the recipient's owner, bound to a deposit key, with quotas per token and per registration (§4, §7). Duplicates cost no quota (MBX-042). | A token holder can fill its own quota. An intercepted invite gives its quota to the interceptor (ID-4). |
+| MBX-7, DOS-4, G4 mailbox flooding | Deposit tokens issued by the recipient's owner, bound to a deposit key, with mandatory quotas per token and a quota per registration (§4, §7). Duplicates cost no quota (MBX-042). | A token holder can fill its own quota, for up to `MAX_TTL`. If the issuer's per-token quotas add up to more than the registration quota, several holders together can fill the mailbox. An intercepted invite gives its quota to the interceptor (ID-4). |
 | REL-3 selective relay DoS | Several hosts, direct retries, jittered backoff (§9). | As in the threat model. |
 | G15 resource limits | Ordered checks, cheapest first, before hashing the body (§7). `MAX_DEPOSIT_AUTH_BYTES`, `MAX_HOSTS`, `LEASE_MAX`, `MAX_DEPOSIT_TTL`. Reasons go to the audit log only. | Per-node connection limits are the binding's. |
 | Prompt injection (§4.7.4) | Nothing in this extension reads content. Taint travels in the signed `prov` and is unchanged by storage. Host lists and tokens never come from content (MBX-003, MBX-013). | — |
@@ -730,7 +751,20 @@ A host learns, per recipient, who deposits (by deposit key), when and how much, 
 5. **Host-to-host forwarding** (a host relaying to another host) is not defined. A recipient that changes hosts
    re-registers and declares the new host; envelopes held at the old host are delivered when the node connects to
    it, or expire.
-6. **Documents on other branches.** `profile.md`, `binding-webway-quic.md` (issue #5), `ext/envelope.md` (#3),
+6. **Invites carry a deposit credential.** `ext/capability.md` CAP-200 says an invite carries no bearer
+   capability except for its own redemption, while its own §8.1 and MBX-014 put a deposit token and its key in the
+   invite. CAP-200 should name the deposit credential as the one exception (bounded by its quota), or the token
+   should be issued at redemption.
+7. **Sealing and the host's integrity checks.** Steps 10 and 11 of §7 verify the signature by `from` and
+   deduplicate on (`from`, `id`). With `from` sealed (G12), a host could only deduplicate on the sealed blob's hash
+   and leave verification to the recipient, which reopens the dedupe-squatting attack that MBX-041 closes. To settle
+   with T15.
+8. **ENV-531 and BIND-025.** ENV-531 lets a receiver send the stored answer to a duplicate that came through "a
+   mailbox host delivering for the receiver's owner"; BIND-025 forbids answering on that stream. This document
+   follows BIND-025 (MBX-081). ENV-531 should be aligned.
+9. **No `#Unregister`.** A recipient ends a registration by letting the lease run out (short leases, renewed,
+   MBX-032). MBX-080 keeps it connected to the old host until everything held there has expired.
+10. **Documents on other branches.** `profile.md`, `binding-webway-quic.md` (issue #5), `ext/envelope.md` (#3),
    `ext/capability.md` (#4), `docs/threat-model.md` (#6), `conventions.md` and the vector format (#7). Links
    resolve once those land.
 
