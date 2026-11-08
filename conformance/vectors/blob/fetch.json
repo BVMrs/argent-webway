@@ -2,7 +2,7 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "blob/fetch",
-  "description": "Provider decision for one Fetch whose envelope has passed envelope/v0 verification. Input {\"provider\": {\"node\", \"agents\"}, \"connectionPeer\": wwn, \"bindings\": {wwa: wwn} (agent-certs the provider holds), \"envelope\": {\"from\", \"to\", \"ts\", \"exp\", \"cap\"?: {\"capability\"?}, \"body\"}, \"authorization\": \"allow\" or the capability/v0 error for this request, \"store\": {hash: {\"size\", \"blocks\"?}} (absent blocks = whole blob)}. Output {\"hash\", \"size\", \"ranges\"} of the reply. Identifiers are syntactically valid test values, not real keys.",
+  "description": "Provider decision for one Fetch whose envelope has passed envelope/v0 verification. Input {\"provider\": {\"node\", \"agents\"}, \"connectionPeer\": wwn, \"bindings\": {wwa: wwn} (agent-certs the provider holds), \"envelope\": {\"from\", \"to\", \"ts\", \"exp\", \"cap\"?: {\"capability\"?}, \"body\"}, \"authorization\": \"allow\" or the error of the capability/v0 token checks (CAP-160 steps 1-7 and 9; the operation and resource check of step 8 is part of this kind), \"store\": {hash: {\"size\", \"blocks\"?}} (absent blocks = whole blob)}. Output {\"hash\", \"size\", \"ranges\"} of the reply. Identifiers are syntactically valid test values, not real keys.",
   "spec": "ext/blob.md#73-provider-procedure",
   "cases": [
     {
@@ -1986,6 +1986,134 @@
       "expect": {
         "result": "reject",
         "error": "InvalidParamsError"
+      }
+    },
+    {
+      "id": "token-before-resource",
+      "description": "Invalid token and a capability for another blob: the token check comes first (CAP-160)",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2#read"
+          }
+        },
+        "authorization": "CapabilityInvalid",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityInvalid"
+      }
+    },
+    {
+      "id": "ttl-before-binding",
+      "description": "TTL too long and relayed: the TTL check comes first",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-08T12:00:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EnvelopeInvalid"
       }
     },
     {

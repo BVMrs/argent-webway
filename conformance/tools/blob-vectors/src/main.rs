@@ -143,7 +143,11 @@ mod tests {
                 reqs.push((id, must, b.contains("*Pending:")));
             } else {
                 let body = strip_code(&b);
-                assert!(!body.contains("MUST"), "MUST block without a requirement ID: {}", b.trim());
+                assert!(
+                    !(body.contains("MUST") || body.contains("SHALL") || body.contains("REQUIRED")),
+                    "MUST block without a requirement ID: {}",
+                    b.trim()
+                );
             }
         }
         reqs

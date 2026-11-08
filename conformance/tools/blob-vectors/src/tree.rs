@@ -124,17 +124,21 @@ pub enum VerifyError {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Verified {
-    /// Blocks verified, in order, as canonical ranges.
+    /// Blocks verified before the stream ended or failed, as canonical ranges. They stay
+    /// verified whatever comes after them (BLOB-021, BLOB-022).
     pub blocks: Ranges,
     /// Whether every block of `ranges` was verified.
     pub complete: bool,
+    /// Why verification stopped early, if it did not just run out of bytes.
+    pub failure: Option<VerifyError>,
 }
 
 /// Verify an encoding of `ranges` against `hash`, assuming the blob has `size` bytes.
 ///
-/// A stream that ends early is not an error: the blocks verified so far are returned and
-/// `complete` is false. Data that does not match is `Corrupt`, extra bytes are `TrailingBytes`.
-pub fn verify(hash: &[u8; 32], size: u64, ranges: &Ranges, enc: &[u8]) -> Result<Verified, VerifyError> {
+/// A stream that ends early is not an error here: the blocks verified so far are returned and
+/// `complete` is false. Data that does not match stops at `Corrupt`, extra bytes after the
+/// complete encoding are `TrailingBytes`. In both cases the blocks verified before are returned.
+pub fn verify(hash: &[u8; 32], size: u64, ranges: &Ranges, enc: &[u8]) -> Verified {
     struct St<'a> {
         size: u64,
         ranges: &'a Ranges,
@@ -176,12 +180,12 @@ pub fn verify(hash: &[u8; 32], size: u64, ranges: &Ranges, enc: &[u8]) -> Result
         walk(st, mid, hi, r, false)
     }
     let mut st = St { size, ranges, enc, pos: 0, got: vec![], cut: false };
-    walk(&mut st, 0, blocks(size), *hash, true)?;
-    if !st.cut && st.pos != enc.len() {
-        return Err(VerifyError::TrailingBytes);
+    let mut failure = walk(&mut st, 0, blocks(size), *hash, true).err();
+    if failure.is_none() && !st.cut && st.pos != enc.len() {
+        failure = Some(VerifyError::TrailingBytes);
     }
     let want: u64 = ranges.iter().map(|&(a, b)| b - a).sum();
-    Ok(Verified { complete: st.got.len() as u64 == want, blocks: to_ranges(&st.got) })
+    Verified { complete: st.got.len() as u64 == want, blocks: to_ranges(&st.got), failure }
 }
 
 /// Canonical ranges from a sorted list of block indices.
@@ -287,11 +291,11 @@ mod tests {
         for r in [vec![(0, n)], vec![(3, 4)], vec![(0, 1), (5, 7), (12, 13)]] {
             let e = encode(&d, &r);
             assert_eq!(e.len() as u64, encoded_len(d.len() as u64, &r));
-            let v = verify(&h, d.len() as u64, &r, &e).unwrap();
-            assert!(v.complete);
+            let v = verify(&h, d.len() as u64, &r, &e);
+            assert!(v.complete && v.failure.is_none());
             assert_eq!(v.blocks, r);
-            let cut = verify(&h, d.len() as u64, &r, &e[..e.len() - 1]).unwrap();
-            assert!(!cut.complete);
+            let cut = verify(&h, d.len() as u64, &r, &e[..e.len() - 1]);
+            assert!(!cut.complete && cut.failure.is_none());
         }
     }
 

@@ -96,7 +96,7 @@ Constants:
 | `MAX_RANGES` | 64 | Most ranges in one Fetch request. |
 | `MAX_FETCH_TTL` | 600 s | Largest `exp − ts` of a Fetch request envelope. |
 | `MAX_BLOB_SIZE` | 2^53 − 1 bytes | Largest size a reference can state. Nodes set a much lower local limit (§12). |
-| `STALL_TIMEOUT` | 30 s (default) | A fetcher abandons a BLOB stream that makes no progress for this long. |
+| `STALL_TIMEOUT` | 30 s (default) | A fetcher abandons a BLOB stream on which the next parent pair or block (at most 16 KiB) does not complete within this time. This is a deadline per item, so a provider cannot hold a stream open by dripping a byte at a time. |
 
 Errors this extension uses, all already registered by the profile (§10.3 there) or by `capability/v0`, plus four
 **local** results that never go on the wire. Details in §13.
@@ -121,9 +121,12 @@ A Part's **content bytes** are what the hash covers when a Part goes by referenc
 | `url` | not converted: the URL is already a reference and is small | — |
 
 - [BLOB-002] *Pending: T8.* A sender that replaces a Part's content by a reference MUST hash the content bytes of
-  the table above and MUST set the reference Part's `mediaType` as the table says. A receiver that turns fetched
-  bytes back into a `text` or `data` Part for a local agent MUST reject bytes that are not valid UTF-8 (for
-  `text`) or not I-JSON (for `data`) and MUST then hand the content over as `raw` with the declared media type.
+  the table above and MUST set the reference Part's `mediaType` as the table says. A receiver hands fetched content
+  to its agent as bytes with the declared media type. It MAY present them as text only if they are valid UTF-8,
+  and as structured data only if they are I-JSON, and MUST otherwise hand them over as bytes.
+
+A receiver cannot tell whether a referenced `application/json` blob was a `data` Part or a `raw` Part at the
+sender, and does not need to: in both cases the content is the same bytes with the same media type.
 
 ## 4. References
 
@@ -140,7 +143,7 @@ provider   = "wwn:" 52BASE32 "/" "wwa:" 52BASE32 ; node, then the agent at that 
 ```
 
 `BASE32` is the lowercase RFC 4648 alphabet without padding, as in `capability/v0` §3: the 52 characters encode
-32 bytes and the four unused bits are zero. `size` is REQUIRED, `providers` is OPTIONAL.
+32 bytes and the four unused bits are zero. A reference must have `size`, and may omit `providers`.
 
 - [BLOB-010] A node MUST parse a reference by the grammar above and reject, as `BlobRefInvalid`: another scheme or
   hash algorithm, a hash not in canonical form, a missing or non-canonical `size` (sign, leading zero, above
@@ -150,8 +153,9 @@ provider   = "wwn:" 52BASE32 "/" "wwa:" 52BASE32 ; node, then the agent at that 
   MUST NOT fetch anything for a reference that does not parse. It hands the Part to its agent as the opaque URL
   it is, with the Part's provenance.
 
-A reference without `providers` is valid. The fetcher then needs another source: a copy it already holds, or a
-node of its own owner that it knows holds one (§7.2).
+A reference without `providers` is valid. It is useful only to an agent that is already entitled to the blob
+(BLOB-015), for example because it produced it or received a grant for it earlier. Then its node may use its
+own copy. For anyone else it resolves to nothing, exactly as if the blob did not exist.
 
 ### 4.2 The reference Part
 
@@ -159,10 +163,12 @@ A by-reference Part is an A2A 1.0 `Part` whose `url` is the reference. Its `medi
 content; both are claims of the sender, carried as data (§9).
 
 - [BLOB-011] *Pending: T8.* A sender MUST send by reference every Part whose content bytes (§3) exceed
-  `INLINE_MAX`, and MUST NOT put such content inline. It MAY send smaller content by reference.
-- [BLOB-012] *Pending: T8.* The `size` of a reference MUST be the exact length of the blob. A sender MUST NOT
-  emit a reference to a blob that no listed provider can serve to the recipient at the time of sending: a sender
-  that lists its own node MUST hold the complete, verified blob there.
+  `INLINE_MAX`, and MUST NOT put such content inline. It MAY send smaller content by reference. If an envelope
+  would still exceed `MAX_ENVELOPE_BYTES` (`envelope/v0`), the sender MUST move further Parts, largest first, to
+  references until it fits.
+- [BLOB-012] *Pending: T8.* The `size` of a reference MUST be the exact length of the blob, and every provider it
+  lists MUST be able to serve the complete blob to the recipient when the envelope is sent. A sender that lists
+  its own node MUST hold the complete, verified blob there.
 
 The reference is inside a Part, so it is covered by the envelope signature and by the Part's taint (`prov`, `envelope/v0`
 §3.6). An intermediary cannot swap the hash or the provider list.
@@ -192,10 +198,17 @@ that carries them; they are handed to the recipient for later Fetches, like `onw
 - [BLOB-013] *Pending: T8.* For every provider listed in a reference it sends, a sender MUST include in the same
   envelope's `cap.grants` a grant whose `capability` is `blob:<hash>#read` for that reference's hash, whose
   `provider` is that provider, and whose token's current holder is the envelope's `to` agent. A sender MUST NOT
-  list a provider it has no such grant for.
+  list a provider it has no such grant for. This applies to every envelope that carries a reference, including
+  later answers that repeat it (`GetTask`, `SubscribeToTask`, `ListTasks`): each carries grants for its own
+  recipient, minted when it is sent.
 - [BLOB-014] *Pending: T8.* A node MUST take grants only from `cap.grants` of an envelope that passed `envelope/v0`
   verification, MUST store each one only for the agent that is its holder (the envelope's `to`), and MUST present
   it only in Fetch requests signed by that agent. It MUST NOT give a grant to an agent's model context.
+
+**Grant lifetime and renewal.** A grant SHOULD stay valid at least until the referencing envelope's `exp` plus
+the time the recipient needs to fetch. An envelope can wait in a mailbox for up to `MAX_TTL`. A recipient whose
+grant has expired gets a fresh one by asking for the task again (`GetTask`), because BLOB-013 applies to that
+answer too. There is no separate renewal operation in v0.
 
 `capability/v0` must take this member over as written here ([open question 1](#17-open-questions)), as it did for
 `onward`.
@@ -238,8 +251,9 @@ reply (§7.4), so it knows the shape of the walk and every length in it. The enc
 `64 · (n − 1) + size` bytes.
 
 - [BLOB-020] A provider MUST send, as the data of a Fetch reply, exactly the encoding of the reply's `ranges` for
-  the blob, as defined above. This is byte for byte the output of `bao-tree`'s `encode_ranges` with 16 KiB chunk
-  groups for the same ranges.
+  the blob, as defined above. Effective ranges (§5.3) always lie inside the blob, and for such ranges this is
+  byte for byte the output of `bao-tree`'s `encode_ranges` / `encode_ranges_validated` with 16 KiB chunk groups.
+  `bao-tree`'s own rule for ranges past the end differs in corner cases and is not used.
 
 ### 5.3 Ranges
 
@@ -266,14 +280,17 @@ tree level (at most 39 for `MAX_BLOB_SIZE`).
   stores as verified, forwards or serves any byte of it. On the first mismatch it MUST stop reading that stream,
   discard everything after the last verified block, and treat the stream as `BlobCorrupt` (§13). Blocks verified
   before the mismatch stay verified.
-- [BLOB-022] A fetcher MUST treat bytes that arrive after the complete encoding as a stream error `ProtocolError`
-  (binding §11.2). The blocks it verified stay verified.
+- [BLOB-022] A fetcher MUST treat bytes that arrive after the complete encoding, and a FIN from the provider
+  before the encoding is complete, as a stream error `ProtocolError` (binding §11.2). It MUST record the anomaly
+  (BLOB-061) and MUST NOT fetch the same blob from that provider again, so that the fetch does not loop. The blocks
+  it verified stay verified.
 - [BLOB-024] A fetcher MUST check that a reply's `size` equals the `size` of the reference it is fetching for, and
   MUST treat a difference as `BlobSizeMismatch` and not use that reply. It MUST NOT consider a blob complete, or
   its size proven, before it has verified the blob's last block.
 
-A stream that ends early (connection lost, provider stopped) is not corruption: the verified blocks are kept and
-the rest is fetched again (§7.5).
+A stream that is **reset** or whose connection is lost before the end is not a failure of the provider: the
+verified blocks are kept and the rest is fetched again (§7.5). A provider that **closes** the stream early has
+broken the grammar (BLOB-030), and BLOB-022 applies.
 
 **Why the size needs the last block.** BLAKE3 does not hash the length separately: the tree shape encodes it, and
 only the last block pins it down. A provider that lies about `size` makes the fetcher walk the wrong tree. The
@@ -281,7 +298,8 @@ fetcher detects this at the first node where the claimed tree and the true one d
 block. Blocks it verified before that point are correct whatever the size, because each block's CV binds its
 position (BLAKE3's chunk counter) and the root flag. BLOB-024 adds the reference's signed `size` as a cross-check
 before any data flows. The vectors show the three cases: a smaller size fails at the last block, a size with more
-blocks fails where the shapes diverge, and a larger size with the same number of blocks never completes.
+blocks fails where the shapes diverge, and a larger size with the same number of blocks ends in a FIN inside the
+last block (`ProtocolError`, so the provider is not asked again).
 
 ## 6. The BLOB stream
 
@@ -294,7 +312,7 @@ This extension assigns three frame types from the extension range (binding §6.1
 | Type | Name | Allowed on | Payload |
 |---|---|---|---|
 | `0x20` | FETCH | BLOB, fetcher → provider | Signed envelope, `typ: request`, `op: …/ext/blob/v0#Fetch` (§7.1) |
-| `0x21` | FETCH_REPLY | BLOB, provider → fetcher | Signed envelope, `typ: response` (§7.4) or `typ: error` |
+| `0x21` | FETCH_REPLY | BLOB, provider → fetcher | Signed envelope, `typ: response` (§7.4), `typ: error`, or `typ: ack` (duplicate) |
 | `0x22` | BLOB_DATA | BLOB, provider → fetcher | Bytes of the encoding (§5.2). Not JSON. |
 
 Stream grammar:
@@ -303,10 +321,19 @@ Stream grammar:
 fetcher → provider:  FETCH  FIN
 provider → fetcher:  FETCH_REPLY(response)  BLOB_DATA*  FIN     total BLOB_DATA payload = encoding length
                    | FETCH_REPLY(error)  FIN
+                   | FETCH_REPLY(ack)    FIN                    duplicate FETCH (BLOB-037)
 ```
 
+Who signs the FETCH_REPLY follows the binding's rule for REQUEST streams (BIND-009, BIND-013, profile PROF-078).
+The request's `to` agent signs replies and the errors it decides. The provider's **node** (`from` = its `wwn:`
+identity) signs errors that no hosted agent can sign: a `to` that is not hosted, and a FETCH payload that does
+not parse or whose `id` cannot be read. In the last case the error has no `ctx.inReplyTo`, and the fetcher
+matches it by the stream, which carries one request. Node-signed errors for failures at or before the signature check are binding-level
+errors in the sense of ENV-621: they say only which node refused, and the fetcher treats them as per-hop
+(ENV-622).
+
 - [BLOB-030] *Pending: T8.* A node MUST follow this grammar: one FETCH per stream, one FETCH_REPLY, then BLOB_DATA
-  frames whose payloads concatenate to exactly the encoding, then FIN. A frame of these types on another stream type
+  frames whose payloads concatenate to exactly the encoding (none after an error or ack), then FIN. A frame of these types on another stream type
   or in the other direction is a connection error `FrameUnexpected` (binding BIND-012). A fetcher MUST NOT open a
   BLOB stream to a node that did not list `…/ext/blob/v0` in its HELLO `features`, and a node that did not list it
   MUST reset a BLOB stream with `StreamTypeUnknown`.
@@ -330,47 +357,56 @@ wants by resetting the stream with `RequestCancelled`.
 }
 ```
 
-Body members: `hash` (REQUIRED), `ranges` (OPTIONAL, §5.3). The body carries no Parts, so `prov` is absent.
+The body has `hash` and, optionally, `ranges` (§5.3). It carries no Parts, so `prov` is absent.
 
 - [BLOB-031] A Fetch request MUST have `typ: request`, `op: …/ext/blob/v0#Fetch`, `to` the provider's agent,
   `cap.capability` equal to `blob:` + the body's `hash` + `#read`, `cap.access` the grant (or another token for that
   capability), a body whose `hash` is in canonical form (BLOB-001) and whose `ranges`, if present, has 1 to
   `MAX_RANGES` pairs of integers `0 ≤ start < end ≤ 2^53 − 1`, in ascending order, with a gap between consecutive
-  pairs, and `exp − ts ≤ MAX_FETCH_TTL`. A provider MUST answer a body that breaks this with `InvalidParamsError`,
-  an `exp − ts` above `MAX_FETCH_TTL` with `EnvelopeInvalid` (reason `ttl-too-long`), a missing `cap.capability`
-  with `CapabilityMissing`, and a `cap.capability` that is not exactly this string with `CapabilityDenied`
-  (`capability/v0` CAP-106). It MUST ignore body members it does not know. A fetcher MUST use a new envelope `id`
-  for every Fetch, including retries and resumes.
+  pairs, and `exp − ts ≤ MAX_FETCH_TTL`. A provider MUST check `exp − ts` as an operation-specific header check
+  of envelope verification, before the envelope is recorded for dedupe, and answer a violation with
+  `EnvelopeInvalid` (reason `ttl-too-long`). It MUST answer a body that breaks this with `InvalidParamsError`, a
+  missing `cap.capability` with `CapabilityMissing`, and a `cap.capability` that is not exactly this string with
+  `CapabilityDenied` at the operation and resource step of the `capability/v0` algorithm (CAP-106, step 8 of
+  CAP-160, so token errors of earlier steps come first). It MUST ignore body members it does not know. A fetcher
+  MUST use a new envelope `id` for every Fetch, including retries and resumes.
 
-A Fetch is a read with no side effect, so retrying with a new `id` is safe, and the short `MAX_FETCH_TTL` keeps the
-provider's dedupe entries for Fetches short-lived.
+A Fetch is a read with no side effect and is not part of the profile's delivery state machine (profile §8.3): the
+rule that a retry resends the same envelope (PROF-033, PROF-073) does not apply to it. Retrying with a new `id` is
+safe, and the short `MAX_FETCH_TTL` keeps the provider's dedupe entries for Fetches short-lived.
 
 ### 7.2 Choosing providers
 
-A fetcher may learn of providers from the reference and, for nodes of its own owner, from local knowledge. It
-contacts a provider only if it can check who that provider is and holds a grant for it, so a sender cannot make it
-dial arbitrary nodes (threat model ART-5, G14).
+A fetcher gets a blob from its own store, if its agent is entitled to it (BLOB-015), or from providers listed in
+the reference. It contacts a provider only if it can check who the provider is, the provider's owner already has
+a part in this content, and it holds a grant for it. So a sender cannot make it dial arbitrary nodes (threat model
+ART-5, G14).
 
-- [BLOB-041] A fetcher MUST contact a provider listed in a reference only if (a) it holds a verified agent-cert for
-  the provider's agent that names the listed node, (b) that cert's owner is the fetcher's own owner or an owner it
-  has pinned (`capability/v0` §4.9), and (c) the fetching agent holds a grant for that provider (BLOB-014). It MUST
-  skip every other listed provider without contacting it.
+- [BLOB-041] A fetcher MUST contact a provider listed in a reference only if all of these hold:
+  (a) it holds a verified agent-cert for the provider's agent that names the listed node;
+  (b) that cert's owner is the fetcher's own owner or an owner it has pinned (`capability/v0` §4.9);
+  (c) that owner is the fetcher's own owner, the verified owner of the sender of the referencing envelope, or in
+  the referencing Part's `taint.owners`, so it is an owner that already had a part in this content (G14);
+  (d) the fetching agent holds a grant for that provider (BLOB-014).
+  It MUST skip every other listed provider without contacting it.
+- A fetcher SHOULD also check, before dialling, that the grant's authority block names an issuing key certified by
+  that owner for that node (CAP-110), when it holds that issuer-cert.
 
 Among the eligible providers the fetcher may choose any order (latency, cost, same owner first) and may fetch
 different ranges from different providers at the same time: every block verifies against the same hash wherever
-it came from. Nodes of the fetcher's own owner that hold the blob may be used with tokens of the fetcher's own
-owner, outside the reference.
+it came from. Fetching from other nodes of the fetcher's own owner that are not listed needs a token minted by
+that node's issuing key (CAP-110), which v0 does not define a way to get ([open question 7](#17-open-questions)).
 
 ### 7.3 Provider procedure
 
 A provider runs these steps for each FETCH, in order, and answers with the first failure:
 
-1. **Envelope.** `envelope/v0` verification (signature, freshness, `to` hosted here, dedupe). A duplicate gets the
-   envelope layer's duplicate answer and no data (BLOB-037).
+1. **Envelope.** `envelope/v0` verification (signature, freshness, `to` hosted here), including the `exp − ts`
+   check of BLOB-031 before dedupe. A duplicate gets an `ack` and no data (BLOB-037).
 2. **Connection binding.** `from` is bound to the node at the other end of this connection (BLOB-032).
-3. **Request form.** BLOB-031: TTL, then body, then `cap.capability`.
-4. **Authorisation.** The full `capability/v0` algorithm for `cap.capability` with the body's hash as the
-   resource (BLOB-033).
+3. **Body.** BLOB-031.
+4. **Authorisation.** The full `capability/v0` algorithm, in its own order, for `cap.capability` with the body's
+   hash as the resource (BLOB-033). The match of `cap.capability` with the hash is its step 8.
 5. **Lookup.** Only now does the provider look in its store (BLOB-034, BLOB-042).
 6. **Reply** (§7.4), then data.
 
@@ -386,17 +422,20 @@ A provider runs these steps for each FETCH, in order, and answers with the first
   intersected with the blocks it holds (possibly empty), and then send their encoding.
 
 The order matters. A guessed hash (for example of a well-known file) gets the same `CapabilityMissing` or
-`CapabilityDenied` whether or not the provider has it, so the provider is not an existence oracle. A token for a
-hash is only minted by someone who already knew the content, so `BlobNotFound` after authorisation tells the
-requester nothing new.
+`CapabilityDenied` whether or not the provider has it, so the provider is not an existence oracle. A grant is
+minted or relayed only for an agent that is itself entitled to the blob (BLOB-015), so `BlobNotFound` after
+authorisation only tells the holder of a grant that the copy it was promised is gone.
 
-- [BLOB-035] *Pending: T8.* The reply envelope MUST be signed by the request's `to` agent, with `ctx.inReplyTo`
-  the request's `id`. A fetcher MUST accept a reply only on the stream of its request and only if it verifies and
-  is signed by that agent.
+- [BLOB-035] *Pending: T8.* A `response` reply MUST be signed by the request's `to` agent, with `ctx.inReplyTo`
+  the request's `id`. A fetcher MUST accept a reply only on the stream of its request, only if it verifies, and only
+  if it is signed by that agent or by the node it is bound to, which MUST be the node authenticated on the
+  connection. It MUST NOT use data that follows a reply it did not accept.
 - [BLOB-036] *Pending: T8.* A provider MUST NOT send a parent pair or block it has not itself verified against the
   blob hash (on receipt, or when it created the blob). A corrupted disk at one provider then cannot reach fetchers
   as valid-looking data, and the provider learns of corruption first.
-- [BLOB-037] *Pending: T8.* A provider MUST NOT send blob data in answer to a duplicate FETCH envelope.
+- [BLOB-037] *Pending: T8.* A provider MUST answer a duplicate FETCH envelope with an `ack` FETCH_REPLY (the
+  bodiless duplicate answer of `envelope/v0` §8.4) and FIN, and MUST NOT send blob data for it. Fetch replies are
+  never stored as answers for duplicates, because the data that follows them is not part of the envelope.
 
 ### 7.4 The reply
 
@@ -461,6 +500,20 @@ serve one blob, each one checks a token rooted in its own owner, and a fetcher n
 - **Fetcher re-shares.** A node that fetched a blob holds a verified copy and can serve it as a provider in its own
   right, minting grants rooted in its own owner when its agent forwards the reference (§9 for taint).
 
+**Entitlement.** A node's store is shared by its agents and deduplicated, so "the node holds H" must never mean
+"any agent here may read H", or knowing a hash would be enough after all. The node keeps, per agent, the hashes the
+agent is **entitled** to: blobs the agent produced, and blobs for which the agent received a verified grant
+(BLOB-014). An entitlement does not expire with the grant, because the agent already had access to the content.
+
+- [BLOB-015] A node MUST use a blob from its own store for an agent, hand it to the agent, or mint or relay a grant
+  for it on that agent's behalf, only if that agent is entitled to the blob. Otherwise it MUST behave exactly as
+  if the blob were not in its store, including in timing as far as practical, and resolve the reference only
+  through eligible providers (BLOB-041).
+
+BLOB-015 is what stops a foreign peer from sending a provider-less reference to a hash it guessed or overheard
+and having the receiving node serve its own copy to the targeted agent. It also stops a prompt-injected agent
+from making its node grant outsiders access to blobs that other agents on the node produced.
+
 **Recommended grant content.** `right("blob:blake3:<hex>#read")`, an expiry that covers the time the recipient
 may need to fetch (the referencing envelope's `exp` plus a margin, at most `MAX_ACCESS_TTL`), and optionally
 `max_calls`. A grant longer than `REVOCATION_EXEMPT_TTL` (1 hour) needs fresh revocation lists at the provider
@@ -516,9 +569,10 @@ provider to the hash and ranges, and anyone can re-check the data against the ha
 Stock A2A peers cannot fetch over the overlay and cannot verify bao.
 
 - [BLOB-080] *Pending: T8.* When an HTTP edge passes a by-reference Part to a stock A2A client, it MUST replace the
-  `webway-blob:` URL with an `https` URL on the edge that names the hash and carries no credential, and MUST serve
-  that URL only to edge principals (profile PROF-061) that local policy allows to read the blob, with the same
-  authentication as the edge's A2A endpoint. It SHOULD support HTTP Range requests and SHOULD send the hash (`"blake3:<hex>"`) as the `ETag`, so
+  `webway-blob:` URL with an `https` URL on the edge that names the hash and carries no credential. It MUST serve
+  that URL only to the edge principal (profile PROF-061) whose task scope (PROF-046) received the Part, with the
+  same authentication as the edge's A2A endpoint, and MUST give the same answer (404) for a hash it does not hold
+  and a hash that principal may not read. It SHOULD support HTTP Range requests and SHOULD send the hash (`"blake3:<hex>"`) as the `ETag`, so
   clients that can compute BLAKE3 may check the whole download.
 - [BLOB-081] *Pending: T8.* An HTTP edge MUST NOT fetch a URL supplied by a stock client unless local policy
   explicitly allows that host (SSRF). Content a stock client sends inline above `INLINE_MAX` that the edge stores as
@@ -536,7 +590,8 @@ Verification catches wrong bytes, not wasted effort (threat model ART-4, G15).
 
 - [BLOB-070] *Pending: T8.* A fetcher MUST have a local maximum blob size and MUST NOT contact any provider for a
   reference whose `size` exceeds it; the local agent gets `BlobTooLarge`. It MUST bound the number of concurrent
-  fetches per node and per provider, and MUST abandon a stream that makes no progress for `STALL_TIMEOUT`.
+  fetches per node and per provider, and MUST abandon a stream on which the next parent pair or block does not
+  complete within `STALL_TIMEOUT` (a deadline per item, so a slow drip is cut too).
 - [BLOB-071] *Pending: T8.* A provider MUST bound concurrent BLOB streams per peer node and bytes served per peer
   per unit of time, and answer excess with `RateLimited` (retryable) rather than queueing without bound. It MUST
   verify the Fetch envelope's signature before doing anything more expensive (binding BIND-033).
@@ -549,7 +604,7 @@ signed `error` envelope:
 | Error | Retryable | When |
 |---|---|---|
 | `EnvelopeInvalid` | no | Envelope failure, or `exp − ts > MAX_FETCH_TTL` (reason `ttl-too-long`) |
-| `RecipientUnknown` | no | `to` is not an agent of this node |
+| `RecipientUnknown` | no | `to` is not an agent of this node (signed by the node, §6) |
 | `IdentityUntrusted` | no | `from` not bound to the connection's node (BLOB-032) |
 | `InvalidParamsError` (A2A −32602) | no | Malformed body: hash form, ranges (BLOB-031) |
 | `CapabilityMissing`, `CapabilityInvalid`, `CapabilityDenied`, `CapabilityRevoked` | no | `capability/v0` |
@@ -561,7 +616,10 @@ signed `error` envelope:
 The profile's description of `BlobNotFound` ("or the caller may not read it") is narrowed here: an unauthorised
 caller gets the `capability/v0` error (BLOB-033).
 
-Stream-level failures use the binding's transport codes: `ProtocolError` (grammar, trailing bytes),
+`envelope/v0` names the wrong-recipient case `EnvelopeInvalid` (reason `wrong-recipient`) while the profile has
+`RecipientUnknown` (PROF-041). This document follows the profile; the two drafts need to agree.
+
+Stream-level failures use the binding's transport codes: `ProtocolError` (grammar, trailing bytes, early FIN),
 `FrameUnexpected`, `RequestCancelled`, `ExcessiveLoad`.
 
 **Local results** (to the local agent, in vectors and in audit records; never sent to a peer):
@@ -576,8 +634,10 @@ Stream-level failures use the binding's transport codes: `ProtocolError` (gramma
 ## 14. Versioning
 
 - The extension URI ends in `/v0`. A node that implements it lists it in its Agent Card and in HELLO `features`.
-  `cap.grants` and the reference URL work without per-request activation (profile §11.3): a reference is a plain
-  A2A URL, and `cap` members are header data that `envelope/v0` already signs and carries (ENV-002).
+  Nothing in this extension uses per-request activation (profile §11.3, PROF-056): a reference is a plain A2A URL,
+  `cap.grants` is header data that `envelope/v0` already signs and carries (ENV-002), and the Fetch operation runs
+  on a BLOB stream that is enabled by HELLO `features`, not by `a2a-extensions`. A Fetch carries no
+  `a2a-extensions` service parameter.
 - [BLOB-090] *Pending: T8.* A sender MUST NOT send a by-reference Part to an agent whose card does not list
   `…/ext/blob/v0`. If the content cannot go inline either, the send fails locally with
   `ContentTypeNotSupportedError`.
@@ -594,21 +654,29 @@ Stream-level failures use the binding's transport codes: `ProtocolError` (gramma
   (ART-1). Providers, relays and caches are trusted for availability only. A blob's hash proves *which* bytes, not
   *who wrote them* or whether they are safe: that is the referencing envelope's signature and the Part's taint.
 - **Knowing the hash is not enough** (ART-2). Authorisation runs before lookup and its answer does not depend on
-  the store (BLOB-033), so a provider confirms nothing to someone guessing hashes of known files. Grants are
-  holder-bound, short-lived by default, and not in any Part or URL.
+  the store (BLOB-033), so a provider confirms nothing to someone guessing hashes of known files. Inside a node,
+  the shared store is gated per agent by entitlement (BLOB-015), so a provider-less reference to an overheard hash
+  resolves to nothing, and an agent cannot grant others access to blobs it was never entitled to. Grants are
+  holder-bound, short-lived by default, and not in any Part or URL. At the HTTP edge the blob URL is tied to the
+  task scope that received it (BLOB-080).
 - **Provenance cannot be laundered through a cache** (ART-3). Trust comes from the referencing Part only, and
   deduplicated storage keeps provenance per reference (BLOB-050, BLOB-051).
-- **No dialling on command** (ART-5, G14). A fetcher contacts only providers certified by an owner it already
-  trusts and for which it holds a grant (BLOB-041). A provider list cannot make it connect to arbitrary NodeIds.
+- **No dialling on command** (ART-5, G14). A fetcher contacts only providers certified to the listed node by an owner
+  it has pinned, that already has a part in this content (sender, taint, or the fetcher's own owner), and for which
+  it holds a grant (BLOB-041). A provider list cannot make it connect to arbitrary NodeIds, or to a pinned owner
+  that has nothing to do with the content.
 - **Fetches are not relayed** (BLOB-032). The `from` agent must be bound to the connection's node, so a captured
   Fetch envelope is useless to anyone else, and the provider's dedupe stops replays on the same connection.
 - **Size lies and slow drips** (ART-4). The signed reference `size` is checked against the reply before data flows
   (BLOB-024), a lie is caught at the latest at the last block, local size limits apply before any connection
-  (BLOB-070), and stalls are cut (`STALL_TIMEOUT`). A sender and provider that lie together about the size can make
-  a fetch never complete; the fetcher's retry limit bounds the cost.
+  (BLOB-070), and a per-item deadline cuts both stalls and slow drips (`STALL_TIMEOUT`). A sender and provider that
+  lie together about the size get an early FIN, which is `ProtocolError`, and that provider is not asked again
+  (BLOB-022).
 - **Second-preimage and collision resistance** of BLAKE3 (128-bit collision security at 256-bit output) is what all
-  of this rests on. The encoding uses BLAKE3's own tree with root and non-root domain separation, so a parent pair
-  cannot be passed off as data or the other way round.
+  of this rests on. The encoding uses BLAKE3's own tree. BLAKE3 compresses chunks and parent nodes with different
+  flags (`CHUNK_START`/`CHUNK_END` versus `PARENT`) and binds each chunk to its position by the chunk counter, so a
+  parent pair cannot be passed off as data, data cannot be moved to another offset, and the `ROOT` flag stops a
+  subtree from posing as a whole blob.
 - **Confidentiality.** Blob bytes are protected per hop by QUIC TLS. A provider learns who fetches which hash and
   when (META-7). Blob content is not encrypted end to end in v0; a sender that uses a third-party provider gives
   that provider the content ([open question 4](#17-open-questions)).
@@ -633,10 +701,10 @@ names; these kinds check no signatures.
 | `blob/ref` | `{ "url" }` | `{ "hash", "size", "providers": [ "wwn:…/wwa:…" ] }` | `BlobRefInvalid` |
 | `blob/ranges` | `{ "ranges": any JSON, "size" }` | `{ "effective": [[start, end], …] }` | `InvalidParamsError` |
 | `blob/encode` | `{ "data", "ranges" }` | `{ "hash", "ranges" (effective), "length", "encodingHash", "hex"? (≤ 512 bytes) }` | — |
-| `blob/verify` | `{ "hash", "size", "ranges", "data", "mutate"?: { "flip": offset } \| { "truncate": length } \| { "append": hex } }`. The stream is the honest encoding of `data` for `ranges`, then `mutate`. | `{ "verified", "missing", "complete" }` | `BlobCorrupt`, `ProtocolError` |
-| `blob/fetch` | `{ "provider": { "node", "agents" }, "connectionPeer", "bindings": { wwa: wwn }, "envelope": { "from", "to", "ts", "exp", "cap"?, "body" }, "authorization": "allow" or a `capability/v0` error, "store": { hash: { "size", "blocks"? } } }` | `{ "hash", "size", "ranges" }` | the errors of §7.3 |
+| `blob/verify` | `{ "hash", "size", "ranges", "data", "mutate"?: { "flip": offset } \| { "truncate": length } \| { "append": hex }, "end"?: "fin" \| "reset" }`. The stream is the honest encoding of `data` for `ranges`, then `mutate`; `end` says whether the provider closed it (default) or it was reset. | `{ "verified", "missing", "complete", "failure": null \| "BlobCorrupt" \| "ProtocolError" }`. `verified` is what the fetcher keeps, also on failure; `complete` means every block of `ranges` verified (not the whole blob). | — |
+| `blob/fetch` | `{ "provider": { "node", "agents" }, "connectionPeer", "bindings": { wwa: wwn }, "envelope": { "from", "to", "ts", "exp", "cap"?, "body" }, "authorization": "allow" or the error of the `capability/v0` token checks (CAP-160 steps 1–7 and 9), "store": { hash: { "size", "blocks"? } } }`. The step-8 match of `cap.capability` with the hash is done by the kind. | `{ "hash", "size", "ranges" }` | the errors of §7.3 |
 | `blob/provenance` | `{ "receiverOwner", "reference": { "senderOwner", "taint" }, "providerOwner", "otherReferences": [taint] }` | `{ "trust", "taint" }` | `EnvelopeInvalid` |
-| `blob/providers` | `{ "fetcherOwner", "pins", "reference", "agentCerts": { wwa: { "owner", "node" } }, "grants": [provider] }` | `{ "contact": [provider] }` in reference order | `BlobRefInvalid` |
+| `blob/providers` | `{ "fetcherOwner", "pins", "senderOwner", "taintOwners", "reference", "agentCerts": { wwa: { "owner", "node" } }, "grants": [provider], "local": { "held", "entitled" } }` | `{ "local": bool, "contact": [provider] }` in reference order | `BlobRefInvalid` |
 
 `blob/fetch` takes the result of `capability/v0` authorisation as an input, so it tests where that result is used
 (order, independence from the store) without Biscuit tokens. Real `blob:` tokens belong in the
@@ -655,18 +723,20 @@ verdict by hand and the generator refuses to write one the model disagrees with.
 | BLOB-001 | `blob/hash` (incl. values of the official BLAKE3 vectors for lengths 0, 1, 1024, 1025, 102400) |
 | BLOB-010 | `blob/ref`, `blob/providers` (`bad-reference`) |
 | BLOB-020 | `blob/encode` |
+| BLOB-015 | `blob/providers` (`local-*`) |
 | BLOB-021, BLOB-022, BLOB-024 | `blob/verify` |
 | BLOB-023 | `blob/ranges`, `blob/fetch` (`past-end`, `size-probe`) |
 | BLOB-031 … BLOB-034 | `blob/fetch`, `blob/ranges` |
-| BLOB-040 | `blob/verify` (`cut`, `cut-empty`, `resume`) |
+| BLOB-040 | `blob/verify` (`cut`, `cut-empty`, `resume`, `short-fin`) |
 | BLOB-041 | `blob/providers` |
 | BLOB-042 | `blob/fetch` (`partial-*`) |
 | BLOB-050, BLOB-051 | `blob/provenance` |
 | BLOB-002, BLOB-011 … BLOB-014, BLOB-030, BLOB-035 … BLOB-037, BLOB-043, BLOB-052, BLOB-053, BLOB-060, BLOB-061, BLOB-070, BLOB-071, BLOB-080, BLOB-081, BLOB-090 | **pending**: harness scenarios against a running node (T8 implementation, M1 step 5) |
 
 The pending requirements are behaviour of a node (what it sends, stores, logs, or gives an agent), which no
-pure-function vector can test. Each carries the `*Pending: T8.*` marker of change 0001 (proposed in the
-`capability/v0` draft).
+pure-function vector can test. Each carries the `*Pending: T8.*` marker of change 0001, which is proposed in the
+`capability/v0` draft. Until 0001 is accepted, `conventions.md` (CONV-004) counts these 19 IDs as untested
+([open question 8](#17-open-questions)).
 
 ## 17. Open questions
 
@@ -687,6 +757,15 @@ pure-function vector can test. Each carries the `*Pending: T8.*` marker of chang
    extended) is possible with the same tree but not specified.
 6. **Range granularity.** Ranges are whole 16 KiB blocks. `iroh-blobs` can also serve sub-block chunk ranges with
    extra internal pairs. Byte-exact range reads are rarely needed by agents, so v0 leaves them out.
+7. **Fetching from own-owner nodes not in the reference.** A fetcher could use a copy on another node of its own
+   owner, but CAP-110 means only that node's issuing key can mint the token, and v0 defines no owner-internal way
+   to ask for one. It also has to respect entitlement (BLOB-015) across nodes.
+8. **Pending marker and frame registry.** This document depends on change 0001 (`*Pending:*` markers) and takes
+   frame types `0x20`–`0x22` from the range the binding shares among all extensions. The binding should keep a
+   registry of extension frame types so that `shared-doc/v0` cannot collide.
+9. **Durable dedupe for reads.** `envelope/v0` dedupe entries are durable writes. For Fetches, which are short-lived
+   reads bound to one connection, an in-memory entry until `exp + SKEW` would be enough. The envelope draft should
+   say whether an operation may opt out of durability.
 
 ---
 
@@ -735,7 +814,10 @@ pure-function vector can test. Each carries the `*Pending: T8.*` marker of chang
 5. **Ranges in 16 KiB blocks**, and the effective-range rule for size probes.
 6. **Authorisation before lookup**, so a provider is not an existence oracle.
 7. **Taint from the referencing Part only** (ART-3), and per reference under deduplication.
-8. **Provider eligibility** (G14 for blobs): only certified providers of trusted owners with a grant are dialled.
+8. **Provider eligibility** (G14 for blobs): only certified providers of pinned owners that already have a part
+   in the content, and for which the agent holds a grant, are dialled.
+9. **Per-agent entitlement** to blobs in a node's shared, deduplicated store, so that "knowing the hash is not
+   enough" also holds inside a node.
 
 [RFC 8785]: https://www.rfc-editor.org/rfc/rfc8785
 [blake3-paper]: https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf

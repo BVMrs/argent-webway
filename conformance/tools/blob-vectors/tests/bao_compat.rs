@@ -71,8 +71,8 @@ fn bao_tree_accepts_ours_and_rejects_a_flip() {
                 "bao-tree accepted a flipped byte, size {size}"
             );
             assert_eq!(
-                tree::verify(&tree::hash(&data), size, &r, &bad),
-                Err(tree::VerifyError::Corrupt),
+                tree::verify(&tree::hash(&data), size, &r, &bad).failure,
+                Some(tree::VerifyError::Corrupt),
                 "model accepted a flipped byte, size {size}"
             );
         }

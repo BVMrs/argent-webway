@@ -307,70 +307,103 @@ fn verify_file() -> File {
         "verify.json",
         "blob/verify",
         "ext/blob.md#54-verification",
-        "Verify a Fetch reply stream. Input {\"hash\", \"size\" (from the reply), \"ranges\" (the reply's ranges), \
-         \"data\": {\"pattern\": n}, \"mutate\"?: {\"flip\": byte offset} | {\"truncate\": length} | {\"append\": hex}}. \
-         The stream is the honest encoding of data for ranges, then mutate applied to it. Output {\"verified\": ranges, \
-         \"missing\": ranges, \"complete\": bool}. A stream that ends early is accepted with what was verified. \
-         Reject BlobCorrupt (data does not match) or ProtocolError (bytes after the end).",
+        "What a fetcher has after one reply stream. Input {\"hash\", \"size\" (from the reply), \"ranges\" (the reply's \
+         ranges), \"data\": {\"pattern\": n}, \"mutate\"?: {\"flip\": byte offset} | {\"truncate\": length} | {\"append\": \
+         hex}, \"end\"?: \"fin\" (default: the provider closed the stream) | \"reset\" (stream reset or connection lost)}. \
+         The stream is the honest encoding of data for ranges, then mutate applied to it. Output {\"verified\": blocks \
+         kept, \"missing\": blocks of ranges not verified, \"complete\": every block of ranges verified, \"failure\": null | \
+         \"BlobCorrupt\" | \"ProtocolError\"}. BlobCorrupt: data did not match. ProtocolError: bytes after the end, or a \
+         clean FIN before it. A reset before the end is not a failure: the rest is fetched again.",
     );
     let s = 100_000u64;
     let hh = h(s);
     let all = json!([[0, 7]]);
-    let v = |hash: &str, size: u64, ranges: &Value, n: u64, m: Value| {
+    let v = |hash: &str, size: u64, ranges: &Value, n: u64, m: Value, end: &str| {
         let mut x = json!({ "hash": hash, "size": size, "ranges": ranges, "data": { "pattern": n } });
         if !m.is_null() {
             x["mutate"] = m;
         }
+        if end != "fin" {
+            x["end"] = json!(end);
+        }
         x
     };
-    let out = |ver: Value, mis: Value, c: bool| json!({ "verified": ver, "missing": mis, "complete": c });
-    f.case("whole", "Whole blob", &["BLOB-021"], v(&hh, s, &all, s, Value::Null), AcceptWith(out(json!([[0, 7]]), json!([]), true)));
-    f.case("scattered", "Two ranges", &["BLOB-021"], v(&hh, s, &json!([[1, 2], [4, 6]]), s, Value::Null), AcceptWith(out(json!([[1, 2], [4, 6]]), json!([]), true)));
-    f.case("empty-blob", "Empty blob, empty stream", &["BLOB-021"], v(&h(0), 0, &json!([[0, 1]]), 0, Value::Null), AcceptWith(out(json!([[0, 1]]), json!([]), true)));
-    f.case("single-block", "Blob of one block", &["BLOB-021"], v(&h(300), 300, &json!([[0, 1]]), 300, Value::Null), AcceptWith(out(json!([[0, 1]]), json!([]), true)));
-    f.case("last-block-proves-size", "The last block alone verifies, which proves the size", &["BLOB-024"], v(&hh, s, &json!([[6, 7]]), s, Value::Null), AcceptWith(out(json!([[6, 7]]), json!([]), true)));
+    let out = |ver: Value, mis: Value, c: bool, fail: Value| json!({ "verified": ver, "missing": mis, "complete": c, "failure": fail });
+    let ok = |ver: Value| out(ver, json!([]), true, Value::Null);
+    let n = Value::Null;
+    let r21 = &["BLOB-021"];
+    f.case("whole", "Whole blob", r21, v(&hh, s, &all, s, n.clone(), "fin"), AcceptWith(ok(json!([[0, 7]]))));
+    f.case("scattered", "Two ranges", r21, v(&hh, s, &json!([[1, 2], [4, 6]]), s, n.clone(), "fin"), AcceptWith(ok(json!([[1, 2], [4, 6]]))));
+    f.case("empty-blob", "Empty blob, empty stream", r21, v(&h(0), 0, &json!([[0, 1]]), 0, n.clone(), "fin"), AcceptWith(ok(json!([[0, 1]]))));
+    f.case("single-block", "Blob of one block", r21, v(&h(300), 300, &json!([[0, 1]]), 300, n.clone(), "fin"), AcceptWith(ok(json!([[0, 1]]))));
+    f.case("last-block-proves-size", "The last block alone verifies, which proves the size", &["BLOB-024"], v(&hh, s, &json!([[6, 7]]), s, n.clone(), "fin"), AcceptWith(ok(json!([[6, 7]]))));
     // Encoding of [[0,7]] for 100000 bytes: root pair, pair 0..4, pair 0..2, block 0, block 1, …
     let cut = 64 * 3 + 16384 * 2 + 100;
     f.case(
         "cut",
-        "Stream ends inside block 2: blocks 0 and 1 are kept",
+        "Connection lost inside block 2: blocks 0 and 1 are kept, no failure",
         &["BLOB-021", "BLOB-040"],
-        v(&hh, s, &all, s, json!({ "truncate": cut })),
-        AcceptWith(out(json!([[0, 2]]), json!([[2, 7]]), false)),
+        v(&hh, s, &all, s, json!({ "truncate": cut }), "reset"),
+        AcceptWith(out(json!([[0, 2]]), json!([[2, 7]]), false, n.clone())),
     );
-    f.case("cut-empty", "Nothing arrived", &["BLOB-040"], v(&hh, s, &all, s, json!({ "truncate": 0 })), AcceptWith(out(json!([]), json!([[0, 7]]), false)));
+    f.case("cut-empty", "Reset before any data", &["BLOB-040"], v(&hh, s, &all, s, json!({ "truncate": 0 }), "reset"), AcceptWith(out(json!([]), json!([[0, 7]]), false, n.clone())));
     f.case(
         "resume",
         "The missing ranges of the cut case, fetched again (possibly from another provider)",
         &["BLOB-040"],
-        v(&hh, s, &json!([[2, 7]]), s, Value::Null),
-        AcceptWith(out(json!([[2, 7]]), json!([]), true)),
+        v(&hh, s, &json!([[2, 7]]), s, n.clone(), "fin"),
+        AcceptWith(ok(json!([[2, 7]]))),
     );
-    let c = &["BLOB-021"];
-    f.case("flip-root-pair", "First parent pair altered", c, v(&hh, s, &all, s, json!({ "flip": 0 })), Reject("BlobCorrupt"));
-    f.case("flip-inner-pair", "Inner parent pair altered", c, v(&hh, s, &all, s, json!({ "flip": 64 + 40 })), Reject("BlobCorrupt"));
-    f.case("flip-block", "Data of block 1 altered", c, v(&hh, s, &all, s, json!({ "flip": 64 * 3 + 16384 + 5 })), Reject("BlobCorrupt"));
+    f.case(
+        "short-fin",
+        "Provider closes the stream inside block 2: blocks 0 and 1 kept, ProtocolError",
+        &["BLOB-022", "BLOB-040"],
+        v(&hh, s, &all, s, json!({ "truncate": cut }), "fin"),
+        AcceptWith(out(json!([[0, 2]]), json!([[2, 7]]), false, json!("ProtocolError"))),
+    );
+    let bad = |ver: Value, mis: Value| out(ver, mis, false, json!("BlobCorrupt"));
+    f.case("flip-root-pair", "First parent pair altered: nothing verified", r21, v(&hh, s, &all, s, json!({ "flip": 0 }), "fin"), AcceptWith(bad(json!([]), json!([[0, 7]]))));
+    f.case("flip-inner-pair", "Pair of node 0..4 altered", r21, v(&hh, s, &all, s, json!({ "flip": 64 + 40 }), "fin"), AcceptWith(bad(json!([]), json!([[0, 7]]))));
+    f.case(
+        "flip-block",
+        "Data of block 1 altered: block 0 is kept, the rest is discarded",
+        r21,
+        v(&hh, s, &all, s, json!({ "flip": 64 * 3 + 16384 + 5 }), "fin"),
+        AcceptWith(bad(json!([[0, 1]]), json!([[1, 7]]))),
+    );
     let len = tree::encoded_len(s, &vec![(0, 7)]);
-    f.case("flip-last-byte", "Last byte altered", c, v(&hh, s, &all, s, json!({ "flip": len - 1 })), Reject("BlobCorrupt"));
-    f.case("wrong-hash", "Reply for another blob", c, v(&h(s + 1), s, &all, s, Value::Null), Reject("BlobCorrupt"));
-    f.case("wrong-hash-single-block", "Single-block blob, other hash", c, v(&h(301), 300, &json!([[0, 1]]), 300, Value::Null), Reject("BlobCorrupt"));
-    f.case("trailing", "Bytes after the end", &["BLOB-022"], v(&hh, s, &all, s, json!({ "append": "00" })), Reject("ProtocolError"));
+    f.case("flip-last-byte", "Last byte altered: blocks 0-5 kept", r21, v(&hh, s, &all, s, json!({ "flip": len - 1 }), "fin"), AcceptWith(bad(json!([[0, 6]]), json!([[6, 7]]))));
+    f.case("wrong-hash", "Reply for another blob", r21, v(&h(s + 1), s, &all, s, n.clone(), "fin"), AcceptWith(bad(json!([]), json!([[0, 7]]))));
+    f.case("wrong-hash-single-block", "Single-block blob, other hash", r21, v(&h(301), 300, &json!([[0, 1]]), 300, n.clone(), "fin"), AcceptWith(bad(json!([]), json!([[0, 1]]))));
+    f.case(
+        "trailing",
+        "Bytes after the end: everything verified is kept, ProtocolError",
+        &["BLOB-022"],
+        v(&hh, s, &all, s, json!({ "append": "00" }), "fin"),
+        AcceptWith(out(json!([[0, 7]]), json!([]), true, json!("ProtocolError"))),
+    );
     let z = &["BLOB-024"];
-    f.case("size-smaller", "Reply claims 99000 bytes (same block count): the last block fails", z, v(&hh, 99_000, &all, s, Value::Null), Reject("BlobCorrupt"));
-    f.case("size-larger-more-blocks", "Reply claims 140000 bytes (9 blocks): the tree shape breaks", z, v(&hh, 140_000, &json!([[0, 9]]), s, Value::Null), Reject("BlobCorrupt"));
+    f.case("size-smaller", "Reply claims 99000 bytes (same block count): the last block fails", z, v(&hh, 99_000, &all, s, n.clone(), "fin"), AcceptWith(bad(json!([[0, 6]]), json!([[6, 7]]))));
+    f.case(
+        "size-larger-more-blocks",
+        "Reply claims 140000 bytes (9 blocks): fails where the tree shapes diverge",
+        z,
+        v(&hh, 140_000, &json!([[0, 9]]), s, n.clone(), "fin"),
+        AcceptWith(bad(json!([]), json!([[0, 9]]))),
+    );
     f.case(
         "size-larger-same-blocks",
-        "Reply claims 110000 bytes (same 7 blocks): blocks 0-5 verify, block 6 can never complete",
+        "Reply claims 110000 bytes (same 7 blocks): blocks 0-5 verify, the provider's FIN comes inside block 6",
         z,
-        v(&hh, 110_000, &all, s, Value::Null),
-        AcceptWith(out(json!([[0, 6]]), json!([[6, 7]]), false)),
+        v(&hh, 110_000, &all, s, n.clone(), "fin"),
+        AcceptWith(out(json!([[0, 6]]), json!([[6, 7]]), false, json!("ProtocolError"))),
     );
     f.case(
         "size-single-block",
-        "Single-block blob, reply claims one byte more: the block never completes",
+        "Single-block blob, reply claims one byte more: FIN before the block completes",
         z,
-        v(&h(300), 301, &json!([[0, 1]]), 300, Value::Null),
-        AcceptWith(out(json!([]), json!([[0, 1]]), false)),
+        v(&h(300), 301, &json!([[0, 1]]), 300, n.clone(), "fin"),
+        AcceptWith(out(json!([]), json!([[0, 1]]), false, json!("ProtocolError"))),
     );
     f
 }
@@ -383,7 +416,8 @@ fn fetch_file() -> File {
         "Provider decision for one Fetch whose envelope has passed envelope/v0 verification. Input {\"provider\": \
          {\"node\", \"agents\"}, \"connectionPeer\": wwn, \"bindings\": {wwa: wwn} (agent-certs the provider holds), \
          \"envelope\": {\"from\", \"to\", \"ts\", \"exp\", \"cap\"?: {\"capability\"?}, \"body\"}, \"authorization\": \
-         \"allow\" or the capability/v0 error for this request, \"store\": {hash: {\"size\", \"blocks\"?}} (absent \
+         \"allow\" or the error of the capability/v0 token checks (CAP-160 steps 1-7 and 9; the operation and resource check of step 8 is \
+         part of this kind), \"store\": {hash: {\"size\", \"blocks\"?}} (absent \
          blocks = whole blob)}. Output {\"hash\", \"size\", \"ranges\"} of the reply. Identifiers are syntactically \
          valid test values, not real keys.",
     );
@@ -481,6 +515,19 @@ fn fetch_file() -> File {
     f.case("ranges-adjacent", "Non-canonical ranges", b, base(&h1, req(&h1, Some(json!([[0, 1], [1, 2]]))), cap(&h1), "allow"), Reject("InvalidParamsError"));
     f.case("ranges-empty", "Empty ranges", b, base(&h1, req(&h1, Some(json!([]))), cap(&h1), "allow"), Reject("InvalidParamsError"));
     f.case(
+        "token-before-resource",
+        "Invalid token and a capability for another blob: the token check comes first (CAP-160)",
+        &["BLOB-033"],
+        base(&h1, req(&h1, None), cap(&h4), "CapabilityInvalid"),
+        Reject("CapabilityInvalid"),
+    );
+    f.case("ttl-before-binding", "TTL too long and relayed: the TTL check comes first", &["BLOB-031"], {
+        let mut x = base(&h1, req(&h1, None), cap(&h1), "allow");
+        x["envelope"]["exp"] = json!("2026-11-08T12:00:00Z");
+        x["envelope"]["from"] = json!(agent("other"));
+        x
+    }, Reject("EnvelopeInvalid"));
+    f.case(
         "params-before-authz",
         "Invalid body and denied token: the body check comes first",
         &["BLOB-031", "BLOB-033"],
@@ -545,38 +592,70 @@ fn providers_file() -> File {
         "providers.json",
         "blob/providers",
         "ext/blob.md#72-choosing-providers",
-        "Which providers listed in a reference a fetcher may contact. Input {\"fetcherOwner\", \"pins\": [owner], \
+        "Where a fetcher may get a referenced blob. Input {\"fetcherOwner\", \"pins\": [owner], \"senderOwner\" (verified \
+         owner of the envelope that carried the reference), \"taintOwners\" (the referencing Part's taint.owners), \
          \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \
-         \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant)}. Output {\"contact\": \
-         [provider]} in reference order. Reject BlobRefInvalid.",
+         \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant), \"local\": {\"held\", \
+         \"entitled\"} (the fetcher's node holds the blob; the fetching agent is entitled to it)}. Output {\"local\": use \
+         the local copy, \"contact\": [provider] in reference order}. Reject BlobRefInvalid.",
     );
-    let (a, b, c) = (owner("A"), owner("B"), owner("C"));
+    let (a, b, c, d) = (owner("A"), owner("B"), owner("C"), owner("D"));
     let hh = h(100_000);
     let pb = provider("beta", "tester");
     let pc = provider("gamma", "mirror");
     let pa = provider("alpha2", "cache");
+    let pd = provider("delta", "bystander");
     let certs = json!({
         agent("tester"): { "owner": b, "node": node("beta") },
         agent("mirror"): { "owner": c, "node": node("gamma") },
         agent("cache"): { "owner": a, "node": node("alpha2") },
+        agent("bystander"): { "owner": d, "node": node("delta") },
     });
-    let x = |pins: Vec<&String>, ps: Vec<&String>, grants: Vec<&String>, certs: &Value| {
+    let x = |pins: Vec<&String>, taint: Vec<&String>, ps: Vec<&String>, grants: Vec<&String>, certs: &Value, local: Value| {
         let ps: Vec<String> = ps.into_iter().cloned().collect();
-        json!({ "fetcherOwner": a, "pins": pins, "reference": url(&hh, 100_000, &ps), "agentCerts": certs, "grants": grants })
+        json!({
+            "fetcherOwner": a, "pins": pins, "senderOwner": b, "taintOwners": taint,
+            "reference": url(&hh, 100_000, &ps), "agentCerts": certs, "grants": grants, "local": local
+        })
     };
+    let no = json!({ "held": false, "entitled": false });
+    let none = |l: bool| json!({ "local": l, "contact": [] });
     let r = &["BLOB-041"];
-    f.case("granted-pinned", "Provider of a pinned owner with a grant", r, x(vec![&b], vec![&pb], vec![&pb], &certs), AcceptWith(json!({ "contact": [pb] })));
-    f.case("no-grant", "Provider without a grant is skipped", r, x(vec![&b], vec![&pb], vec![], &certs), AcceptWith(json!({ "contact": [] })));
-    f.case("unpinned-owner", "Granted provider of an owner the fetcher has not pinned is never contacted", r, x(vec![&b], vec![&pc, &pb], vec![&pc, &pb], &certs), AcceptWith(json!({ "contact": [pb] })));
-    f.case("pinned-third-owner", "Third owner, pinned and granted", r, x(vec![&b, &c], vec![&pb, &pc], vec![&pb, &pc], &certs), AcceptWith(json!({ "contact": [pb, pc] })));
-    f.case("own-owner", "Provider of the fetcher's own owner with a grant", r, x(vec![&b], vec![&pa, &pb], vec![&pa, &pb], &certs), AcceptWith(json!({ "contact": [pa, pb] })));
-    f.case("order-kept", "Reference order is kept", r, x(vec![&b, &c], vec![&pc, &pb], vec![&pb, &pc], &certs), AcceptWith(json!({ "contact": [pc, pb] })));
+    f.case("granted-sender", "The sender's own provider with a grant", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pb] })));
+    f.case("no-grant", "Provider without a grant is skipped", r, x(vec![&b], vec![&b], vec![&pb], vec![], &certs, no.clone()), AcceptWith(none(false)));
+    f.case("unpinned-owner", "Granted provider of an owner the fetcher has not pinned is never contacted", r, x(vec![&b], vec![&b, &c], vec![&pc, &pb], vec![&pc, &pb], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pb] })));
+    f.case("pinned-taint-owner", "Third owner C, pinned, in the Part's taint, granted", r, x(vec![&b, &c], vec![&b, &c], vec![&pb, &pc], vec![&pb, &pc], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pb, pc] })));
+    f.case(
+        "pinned-unrelated-owner",
+        "Owner D is pinned but has nothing to do with this content: not contacted (G14)",
+        r,
+        x(vec![&b, &d], vec![&b], vec![&pd, &pb], vec![&pd, &pb], &certs, no.clone()),
+        AcceptWith(json!({ "local": false, "contact": [pb] })),
+    );
+    f.case("own-owner", "Provider of the fetcher's own owner with a grant", r, x(vec![&b], vec![&b], vec![&pa, &pb], vec![&pa, &pb], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pa, pb] })));
+    f.case("order-kept", "Reference order is kept", r, x(vec![&b, &c], vec![&c, &b], vec![&pc, &pb], vec![&pb, &pc], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pc, pb] })));
     let mut moved = certs.clone();
     moved[agent("tester")]["node"] = json!(node("elsewhere"));
-    f.case("agent-on-other-node", "The agent is certified to another node than the one listed", r, x(vec![&b], vec![&pb], vec![&pb], &moved), AcceptWith(json!({ "contact": [] })));
-    f.case("no-cert", "No verified agent-cert for the provider's agent", r, x(vec![&b], vec![&pb], vec![&pb], &json!({})), AcceptWith(json!({ "contact": [] })));
+    f.case("agent-on-other-node", "The agent is certified to another node than the one listed", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &moved, no.clone()), AcceptWith(none(false)));
+    f.case("no-cert", "No verified agent-cert for the provider's agent", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &json!({}), no.clone()), AcceptWith(none(false)));
+    let e = &["BLOB-015"];
+    f.case(
+        "local-not-entitled",
+        "The node holds the blob but the agent is not entitled to it: the local copy is not used",
+        e,
+        x(vec![&b], vec![&b], vec![], vec![], &certs, json!({ "held": true, "entitled": false })),
+        AcceptWith(none(false)),
+    );
+    f.case(
+        "local-entitled",
+        "The agent holds a grant for this hash: the local copy is used",
+        e,
+        x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, json!({ "held": true, "entitled": true })),
+        AcceptWith(json!({ "local": true, "contact": [pb] })),
+    );
     f.case("bad-reference", "Malformed reference", &["BLOB-010"], json!({
-        "fetcherOwner": a, "pins": [b], "reference": format!("webway-blob:{hh}?size=01"), "agentCerts": certs, "grants": []
+        "fetcherOwner": a, "pins": [b], "senderOwner": b, "taintOwners": [b], "reference": format!("webway-blob:{hh}?size=01"),
+        "agentCerts": certs, "grants": [], "local": no
     }), Reject("BlobRefInvalid"));
     f
 }

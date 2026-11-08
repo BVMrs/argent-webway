@@ -2,7 +2,7 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "blob/verify",
-  "description": "Verify a Fetch reply stream. Input {\"hash\", \"size\" (from the reply), \"ranges\" (the reply's ranges), \"data\": {\"pattern\": n}, \"mutate\"?: {\"flip\": byte offset} | {\"truncate\": length} | {\"append\": hex}}. The stream is the honest encoding of data for ranges, then mutate applied to it. Output {\"verified\": ranges, \"missing\": ranges, \"complete\": bool}. A stream that ends early is accepted with what was verified. Reject BlobCorrupt (data does not match) or ProtocolError (bytes after the end).",
+  "description": "What a fetcher has after one reply stream. Input {\"hash\", \"size\" (from the reply), \"ranges\" (the reply's ranges), \"data\": {\"pattern\": n}, \"mutate\"?: {\"flip\": byte offset} | {\"truncate\": length} | {\"append\": hex}, \"end\"?: \"fin\" (default: the provider closed the stream) | \"reset\" (stream reset or connection lost)}. The stream is the honest encoding of data for ranges, then mutate applied to it. Output {\"verified\": blocks kept, \"missing\": blocks of ranges not verified, \"complete\": every block of ranges verified, \"failure\": null | \"BlobCorrupt\" | \"ProtocolError\"}. BlobCorrupt: data did not match. ProtocolError: bytes after the end, or a clean FIN before it. A reset before the end is not a failure: the rest is fetched again.",
   "spec": "ext/blob.md#54-verification",
   "cases": [
     {
@@ -34,7 +34,8 @@
             ]
           ],
           "missing": [],
-          "complete": true
+          "complete": true,
+          "failure": null
         }
       }
     },
@@ -75,7 +76,8 @@
             ]
           ],
           "missing": [],
-          "complete": true
+          "complete": true,
+          "failure": null
         }
       }
     },
@@ -108,7 +110,8 @@
             ]
           ],
           "missing": [],
-          "complete": true
+          "complete": true,
+          "failure": null
         }
       }
     },
@@ -141,7 +144,8 @@
             ]
           ],
           "missing": [],
-          "complete": true
+          "complete": true,
+          "failure": null
         }
       }
     },
@@ -174,15 +178,132 @@
             ]
           ],
           "missing": [],
-          "complete": true
+          "complete": true,
+          "failure": null
         }
       }
     },
     {
       "id": "cut",
-      "description": "Stream ends inside block 2: blocks 0 and 1 are kept",
+      "description": "Connection lost inside block 2: blocks 0 and 1 are kept, no failure",
       "requirements": [
         "BLOB-021",
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "truncate": 33060
+        },
+        "end": "reset"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              2
+            ]
+          ],
+          "missing": [
+            [
+              2,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": null
+        }
+      }
+    },
+    {
+      "id": "cut-empty",
+      "description": "Reset before any data",
+      "requirements": [
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "truncate": 0
+        },
+        "end": "reset"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": null
+        }
+      }
+    },
+    {
+      "id": "resume",
+      "description": "The missing ranges of the cut case, fetched again (possibly from another provider)",
+      "requirements": [
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            2,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              2,
+              7
+            ]
+          ],
+          "missing": [],
+          "complete": true,
+          "failure": null
+        }
+      }
+    },
+    {
+      "id": "short-fin",
+      "description": "Provider closes the stream inside block 2: blocks 0 and 1 kept, ProtocolError",
+      "requirements": [
+        "BLOB-022",
         "BLOB-040"
       ],
       "input": {
@@ -216,82 +337,14 @@
               7
             ]
           ],
-          "complete": false
-        }
-      }
-    },
-    {
-      "id": "cut-empty",
-      "description": "Nothing arrived",
-      "requirements": [
-        "BLOB-040"
-      ],
-      "input": {
-        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
-        "size": 100000,
-        "ranges": [
-          [
-            0,
-            7
-          ]
-        ],
-        "data": {
-          "pattern": 100000
-        },
-        "mutate": {
-          "truncate": 0
-        }
-      },
-      "expect": {
-        "result": "accept",
-        "output": {
-          "verified": [],
-          "missing": [
-            [
-              0,
-              7
-            ]
-          ],
-          "complete": false
-        }
-      }
-    },
-    {
-      "id": "resume",
-      "description": "The missing ranges of the cut case, fetched again (possibly from another provider)",
-      "requirements": [
-        "BLOB-040"
-      ],
-      "input": {
-        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
-        "size": 100000,
-        "ranges": [
-          [
-            2,
-            7
-          ]
-        ],
-        "data": {
-          "pattern": 100000
-        }
-      },
-      "expect": {
-        "result": "accept",
-        "output": {
-          "verified": [
-            [
-              2,
-              7
-            ]
-          ],
-          "missing": [],
-          "complete": true
+          "complete": false,
+          "failure": "ProtocolError"
         }
       }
     },
     {
       "id": "flip-root-pair",
-      "description": "First parent pair altered",
+      "description": "First parent pair altered: nothing verified",
       "requirements": [
         "BLOB-021"
       ],
@@ -312,13 +365,23 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "flip-inner-pair",
-      "description": "Inner parent pair altered",
+      "description": "Pair of node 0..4 altered",
       "requirements": [
         "BLOB-021"
       ],
@@ -339,13 +402,23 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "flip-block",
-      "description": "Data of block 1 altered",
+      "description": "Data of block 1 altered: block 0 is kept, the rest is discarded",
       "requirements": [
         "BLOB-021"
       ],
@@ -366,13 +439,28 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              1
+            ]
+          ],
+          "missing": [
+            [
+              1,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "flip-last-byte",
-      "description": "Last byte altered",
+      "description": "Last byte altered: blocks 0-5 kept",
       "requirements": [
         "BLOB-021"
       ],
@@ -393,8 +481,23 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              6
+            ]
+          ],
+          "missing": [
+            [
+              6,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
@@ -417,8 +520,18 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
@@ -441,13 +554,23 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              1
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "trailing",
-      "description": "Bytes after the end",
+      "description": "Bytes after the end: everything verified is kept, ProtocolError",
       "requirements": [
         "BLOB-022"
       ],
@@ -468,8 +591,18 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "ProtocolError"
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              7
+            ]
+          ],
+          "missing": [],
+          "complete": true,
+          "failure": "ProtocolError"
+        }
       }
     },
     {
@@ -492,13 +625,28 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              6
+            ]
+          ],
+          "missing": [
+            [
+              6,
+              7
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "size-larger-more-blocks",
-      "description": "Reply claims 140000 bytes (9 blocks): the tree shape breaks",
+      "description": "Reply claims 140000 bytes (9 blocks): fails where the tree shapes diverge",
       "requirements": [
         "BLOB-024"
       ],
@@ -516,13 +664,23 @@
         }
       },
       "expect": {
-        "result": "reject",
-        "error": "BlobCorrupt"
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              9
+            ]
+          ],
+          "complete": false,
+          "failure": "BlobCorrupt"
+        }
       }
     },
     {
       "id": "size-larger-same-blocks",
-      "description": "Reply claims 110000 bytes (same 7 blocks): blocks 0-5 verify, block 6 can never complete",
+      "description": "Reply claims 110000 bytes (same 7 blocks): blocks 0-5 verify, the provider's FIN comes inside block 6",
       "requirements": [
         "BLOB-024"
       ],
@@ -554,13 +712,14 @@
               7
             ]
           ],
-          "complete": false
+          "complete": false,
+          "failure": "ProtocolError"
         }
       }
     },
     {
       "id": "size-single-block",
-      "description": "Single-block blob, reply claims one byte more: the block never completes",
+      "description": "Single-block blob, reply claims one byte more: FIN before the block completes",
       "requirements": [
         "BLOB-024"
       ],
@@ -587,7 +746,8 @@
               1
             ]
           ],
-          "complete": false
+          "complete": false,
+          "failure": "ProtocolError"
         }
       }
     }

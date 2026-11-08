@@ -100,7 +100,7 @@ pub fn parse_ref(url: &str) -> Option<BlobRef> {
                 }
                 providers = Some(out);
             }
-            _ => {} // unknown parameters are ignored (BLOB-012)
+            _ => {} // unknown parameters are ignored (BLOB-010)
         }
     }
     Some(BlobRef { hash, size: size?, providers: providers.unwrap_or_default() })
@@ -204,19 +204,24 @@ pub fn verify_stream(input: &Value) -> Vec<u8> {
     enc
 }
 
+/// What a fetcher has after reading one reply stream. `end` says how the stream ended: `fin`
+/// (the provider closed it) or `reset` (reset or connection lost). A clean FIN before the end of
+/// the encoding is a protocol violation by the provider; a reset is a cut to resume (§5.4).
 pub fn verify(input: &Value) -> Out {
     let hash = parse_hash(input["hash"].as_str().unwrap()).unwrap();
     let size = input["size"].as_u64().unwrap();
     let r = parse_ranges(&input["ranges"]).unwrap();
+    let end = input["end"].as_str().unwrap_or("fin");
     let enc = verify_stream(input);
-    match tree::verify(&hash, size, &r, &enc) {
-        Ok(v) => {
-            let missing = tree::subtract(&r, &v.blocks);
-            Ok(json!({ "verified": ranges_json(&v.blocks), "missing": ranges_json(&missing), "complete": v.complete }))
-        }
-        Err(tree::VerifyError::Corrupt) => Err("BlobCorrupt"),
-        Err(tree::VerifyError::TrailingBytes) => Err("ProtocolError"),
-    }
+    let v = tree::verify(&hash, size, &r, &enc);
+    let failure = match v.failure {
+        Some(tree::VerifyError::Corrupt) => json!("BlobCorrupt"),
+        Some(tree::VerifyError::TrailingBytes) => json!("ProtocolError"),
+        None if !v.complete && end == "fin" => json!("ProtocolError"),
+        None => Value::Null,
+    };
+    let missing = tree::subtract(&r, &v.blocks);
+    Ok(json!({ "verified": ranges_json(&v.blocks), "missing": ranges_json(&missing), "complete": v.complete, "failure": failure }))
 }
 
 // ---------- time ----------
@@ -245,42 +250,41 @@ pub fn fetch(input: &Value) -> Out {
     let env = &input["envelope"];
     let from = env["from"].as_str().unwrap();
     let to = env["to"].as_str().unwrap();
-    // 1. Recipient.
+    // 1. Recipient (profile PROF-041).
     if !prov["agents"].as_array().unwrap().iter().any(|a| a == to) {
         return Err("RecipientUnknown");
     }
-    // 2. The requester's agent is bound to the node at the other end of this connection.
-    if input["bindings"][from].as_str() != input["connectionPeer"].as_str() {
-        return Err("IdentityUntrusted");
-    }
-    // 3. Short-lived request.
+    // 2. Short-lived request: an op-specific header check, before dedupe (BLOB-031).
     if epoch(env["exp"].as_str().unwrap()) - epoch(env["ts"].as_str().unwrap()) > MAX_FETCH_TTL {
         return Err("EnvelopeInvalid");
     }
-    // 4. Body.
+    // 3. The requester's agent is bound to the node at the other end of this connection.
+    if input["bindings"][from].as_str() != input["connectionPeer"].as_str() {
+        return Err("IdentityUntrusted");
+    }
+    // 4. Body. Unknown body members are ignored (BLOB-031).
     let body = &env["body"];
-    // Unknown body members are ignored (BLOB-031).
     let hash = body["hash"].as_str().and_then(parse_hash).ok_or("InvalidParamsError")?;
     let req = match body.get("ranges") {
         None => vec![(0, MAX_SAFE)],
         Some(v) => parse_ranges(v).ok_or("InvalidParamsError")?,
     };
-    // 5. The capability names this blob.
+    // 5. capability/v0 in its own order (CAP-160): presence, then the token checks, then the
+    //    operation and resource check (step 8, CAP-106), then Datalog. All before any lookup.
     let Some(cap) = env["cap"]["capability"].as_str() else { return Err("CapabilityMissing") };
-    if cap != format!("blob:{}#read", hash_str(&hash)) {
-        return Err("CapabilityDenied");
-    }
-    // 6. capability/v0 authorisation (its result is an input here), before any lookup.
-    match input["authorization"].as_str().unwrap() {
-        "allow" => {}
+    let authz = input["authorization"].as_str().unwrap();
+    match authz {
+        "allow" | "CapabilityDenied" => {}
         "CapabilityMissing" => return Err("CapabilityMissing"),
         "CapabilityInvalid" => return Err("CapabilityInvalid"),
-        "CapabilityDenied" => return Err("CapabilityDenied"),
         "CapabilityRevoked" => return Err("CapabilityRevoked"),
         "RevocationStatusUnavailable" => return Err("RevocationStatusUnavailable"),
         other => panic!("unknown authorization result {other}"),
     }
-    // 7. Lookup. A partial copy counts only once its last block is verified (BLOB-042).
+    if cap != format!("blob:{}#read", hash_str(&hash)) || authz == "CapabilityDenied" {
+        return Err("CapabilityDenied");
+    }
+    // 6. Lookup. A partial copy counts only once its last block is verified (BLOB-042).
     let Some(held) = input["store"].get(hash_str(&hash)) else { return Err("BlobNotFound") };
     let size = held["size"].as_u64().unwrap();
     let n = tree::blocks(size);
@@ -303,7 +307,7 @@ fn rank(l: &str) -> usize {
     LEVELS.iter().position(|x| *x == l).unwrap()
 }
 
-/// Taint and trust of fetched content (BLOB-060): from the referencing Part and its envelope's
+/// Taint and trust of fetched content (BLOB-050): from the referencing Part and its envelope's
 /// verified sender only. The provider and other references to the same hash play no part.
 pub fn provenance(input: &Value) -> Out {
     let me = input["receiverOwner"].as_str().unwrap();
@@ -327,13 +331,21 @@ pub fn provenance(input: &Value) -> Out {
 
 // ---------- blob/providers ----------
 
-/// Which listed providers a fetcher may contact (BLOB-041), in the order of the reference.
+/// Where a fetcher may get a referenced blob (BLOB-015, BLOB-041): its own store only if the
+/// fetching agent is entitled to the blob, and listed providers only if they are certified to the
+/// listed node by an owner that is the fetcher's own, the sender's, or in the Part's taint (and
+/// pinned or the fetcher's own), and the agent holds a grant for them. Reference order is kept.
 pub fn providers(input: &Value) -> Out {
     let url = input["reference"].as_str().unwrap();
     let r = parse_ref(url).ok_or("BlobRefInvalid")?;
+    let strs = |k: &str| -> Vec<&str> { input[k].as_array().unwrap().iter().map(|v| v.as_str().unwrap()).collect() };
     let me = input["fetcherOwner"].as_str().unwrap();
-    let pins: Vec<&str> = input["pins"].as_array().unwrap().iter().map(|v| v.as_str().unwrap()).collect();
-    let grants: Vec<&str> = input["grants"].as_array().unwrap().iter().map(|v| v.as_str().unwrap()).collect();
+    let sender = input["senderOwner"].as_str().unwrap();
+    let pins = strs("pins");
+    let taint = strs("taintOwners");
+    let grants = strs("grants");
+    let local = &input["local"];
+    let use_local = local["held"].as_bool().unwrap_or(false) && local["entitled"].as_bool().unwrap_or(false);
     let mut out = vec![];
     for p in &r.providers {
         let (node, agent) = parse_provider(p).unwrap();
@@ -345,12 +357,15 @@ pub fn providers(input: &Value) -> Out {
         if owner != me && !pins.contains(&owner) {
             continue;
         }
+        if owner != me && owner != sender && !taint.contains(&owner) {
+            continue;
+        }
         if !grants.contains(&p.as_str()) {
             continue;
         }
         out.push(p.clone());
     }
-    Ok(json!({ "contact": out }))
+    Ok(json!({ "local": use_local, "contact": out }))
 }
 
 pub fn run(kind: &str, input: &Value) -> Option<Out> {

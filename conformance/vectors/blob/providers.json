@@ -2,18 +2,22 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "blob/providers",
-  "description": "Which providers listed in a reference a fetcher may contact. Input {\"fetcherOwner\", \"pins\": [owner], \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant)}. Output {\"contact\": [provider]} in reference order. Reject BlobRefInvalid.",
+  "description": "Where a fetcher may get a referenced blob. Input {\"fetcherOwner\", \"pins\": [owner], \"senderOwner\" (verified owner of the envelope that carried the reference), \"taintOwners\" (the referencing Part's taint.owners), \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant), \"local\": {\"held\", \"entitled\"} (the fetcher's node holds the blob; the fetching agent is entitled to it)}. Output {\"local\": use the local copy, \"contact\": [provider] in reference order}. Reject BlobRefInvalid.",
   "spec": "ext/blob.md#72-choosing-providers",
   "cases": [
     {
-      "id": "granted-pinned",
-      "description": "Provider of a pinned owner with a grant",
+      "id": "granted-sender",
+      "description": "The sender's own provider with a grant",
       "requirements": [
         "BLOB-041"
       ],
       "input": {
         "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
         "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
@@ -29,15 +33,24 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": [
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
           ]
@@ -55,6 +68,10 @@
         "pins": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {
           "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
@@ -68,13 +85,22 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
-        "grants": []
+        "grants": [],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": []
         }
       }
@@ -90,6 +116,11 @@
         "pins": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {
           "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
@@ -103,16 +134,25 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa",
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": [
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
           ]
@@ -120,14 +160,19 @@
       }
     },
     {
-      "id": "pinned-third-owner",
-      "description": "Third owner, pinned and granted",
+      "id": "pinned-taint-owner",
+      "description": "Third owner C, pinned, in the Part's taint, granted",
       "requirements": [
         "BLOB-041"
       ],
       "input": {
         "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
         "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
           "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
         ],
@@ -144,19 +189,82 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
           "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": [
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
             "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pinned-unrelated-owner",
+      "description": "Owner D is pinned but has nothing to do with this content: not contacted (G14)",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta/wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
+          }
+        },
+        "grants": [
+          "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta/wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala",
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "local": false,
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
           ]
         }
       }
@@ -172,6 +280,10 @@
         "pins": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {
           "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
@@ -185,16 +297,25 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq",
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": [
             "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq",
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
@@ -214,6 +335,11 @@
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
           "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {
           "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
@@ -227,16 +353,25 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
           "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": [
             "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa",
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
@@ -255,6 +390,10 @@
         "pins": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {
           "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
@@ -268,15 +407,24 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
         "grants": [
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": []
         }
       }
@@ -292,16 +440,125 @@
         "pins": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
         "agentCerts": {},
         "grants": [
           "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
-        ]
+        ],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "accept",
         "output": {
+          "local": false,
           "contact": []
+        }
+      }
+    },
+    {
+      "id": "local-not-entitled",
+      "description": "The node holds the blob but the agent is not entitled to it: the local copy is not used",
+      "requirements": [
+        "BLOB-015"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
+          }
+        },
+        "grants": [],
+        "local": {
+          "held": true,
+          "entitled": false
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "local": false,
+          "contact": []
+        }
+      }
+    },
+    {
+      "id": "local-entitled",
+      "description": "The agent holds a grant for this hash: the local copy is used",
+      "requirements": [
+        "BLOB-015"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ],
+        "local": {
+          "held": true,
+          "entitled": true
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "local": true,
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
         }
       }
     },
@@ -314,6 +571,10 @@
       "input": {
         "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
         "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
           "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
         ],
         "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=01",
@@ -329,9 +590,17 @@
           "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
             "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
             "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
           }
         },
-        "grants": []
+        "grants": [],
+        "local": {
+          "held": false,
+          "entitled": false
+        }
       },
       "expect": {
         "result": "reject",
