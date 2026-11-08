@@ -407,16 +407,16 @@ pub fn envelopes(fx: &Fx) -> J {
     }
     {
         let mut e = fx.send_message("numbers");
-        e.body["metadata"] = json!({"ratio": 0.1, "big": 1e21, "small": 1e-7, "neg": -1.5, "int": 42, "u64": "18446744073709551615"});
+        e.body["metadata"] = json!({"ratio": 0.1, "big": 9007199254740991.0, "small": 1e-7, "neg": -1.5, "int": 42, "u64": "18446744073709551615"});
         let signed = fx.sign(&e);
         let t = compact(&signed)
             .replace("\"ratio\":0.1", "\"ratio\":1.0E-1")
-            .replace("\"big\":1e+21", "\"big\":1E21")
+            .replace("\"big\":9007199254740991", "\"big\":9.007199254740991E15")
             .replace("\"small\":1e-7", "\"small\":0.00000010")
             .replace("\"int\":42", "\"int\":4.2e1");
-        assert!(t.contains("1.0E-1") && t.contains("0.00000010") && t.contains("4.2e1"));
+        assert!(t.contains("1.0E-1") && t.contains("0.00000010") && t.contains("4.2e1") && t.contains("E15"));
         cs.add("valid-number-spellings", &["ENV-110", "ENV-100"],
-            "Body numbers spelled differently from their JCS form (1.0E-1, 0.00000010, 4.2e1, 1E21) canonicalise to what was signed. A 64-bit value travels as a string.",
+            "Body numbers spelled differently from their JCS form (1.0E-1, 0.00000010, 4.2e1, and 9.007199254740991E15 = 2^53 − 1) canonicalise to what was signed. A 64-bit value travels as a string.",
             dr(fx), Input::Text(t), Ok(()));
     }
     {
@@ -773,6 +773,8 @@ pub fn envelopes(fx: &Fx) -> J {
         gt.replacen("\"role\":\"ROLE_USER\"", "\"role\":\"ROLE_USER\",\"\\u0072ole\":\"ROLE_AGENT\"", 1), inv("duplicate-key"));
     text(&mut cs, "unsafe-integer-in-body", "A plain integer 9007199254740993 (2^53 + 1) in body metadata.",
         gt.replacen("\"message\":{", "\"metadata\":{\"n\":9007199254740993},\"message\":{", 1), inv("unsafe-integer"));
+    text(&mut cs, "unsafe-integer-exponent-in-body", "1e16 in body metadata: an unsafe integral value, whatever its spelling.",
+        gt.replacen("\"message\":{", "\"metadata\":{\"n\":1e16},\"message\":{", 1), inv("unsafe-integer"));
     text(&mut cs, "number-overflow-in-body", "1e400 in body metadata.",
         gt.replacen("\"message\":{", "\"metadata\":{\"n\":1e400},\"message\":{", 1), inv("number-out-of-range"));
     text(&mut cs, "lone-surrogate", "A lone high-surrogate escape in a Part's text.",
@@ -1091,10 +1093,15 @@ pub fn jcs_cases() -> J {
     add("whitespace-and-nesting", "Insignificant whitespace removed, nested objects sorted.",
         t("{ \"b\" : [ 1 , { \"z\":true, \"a\":null } ] ,\n\t\"a\" : { } , \"c\":[ ] }"), Ok(r#"{"a":{},"b":[1,{"a":null,"z":true}],"c":[]}"#));
     add("numbers-es6", "Numbers serialised as ECMAScript Number.prototype.toString.",
-        t("[1.0, -0, 1e21, 1e20, 1E-7, 0.000001, 123.4560, 5e-324, 1.7976931348623157e308, 9007199254740991, -9007199254740991, 0.1, 100e-2, 2e0, 0.30000000000000004, 4.5e-10]"),
-        Ok("[1,0,1e+21,100000000000000000000,1e-7,0.000001,123.456,5e-324,1.7976931348623157e+308,9007199254740991,-9007199254740991,0.1,1,2,0.30000000000000004,4.5e-10]"));
-    add("number-large-with-fraction", "9007199254740993.0 has a fraction part, so it is not an unsafe-integer token; it rounds to the double 9007199254740992.",
-        t("[9007199254740993.0]"), Ok("[9007199254740992]"));
+        t("[1.0, -0, 1E-7, 0.000001, 123.4560, 5e-324, 9007199254740991, -9007199254740991, 9.007199254740991e15, 0.1, 100e-2, 2e0, 0.30000000000000004, 4.5e-10, 1e15, 123456789012345.67]"),
+        Ok("[1,0,1e-7,0.000001,123.456,5e-324,9007199254740991,-9007199254740991,9007199254740991,0.1,1,2,0.30000000000000004,4.5e-10,1000000000000000,123456789012345.67]"));
+    add("number-safe-after-rounding", "9007199254740991.4 rounds to the double 2^53 − 1, which is safe.", t("[9007199254740991.4]"), Ok("[9007199254740991]"));
+    add("unsafe-integer-with-fraction", "9007199254740993.0 is written with a fraction but its value (the double 2^53) is integral and unsafe. The rule is on the value, not the spelling.",
+        t("[9007199254740993.0]"), Err("unsafe-integer"));
+    add("unsafe-integer-exponent", "1e16 is an unsafe integral value written with an exponent. Its JCS form 10000000000000000 would otherwise be rejected on re-parse.",
+        t("[1e16]"), Err("unsafe-integer"));
+    add("unsafe-integer-large-double", "1e21 and up: every double ≥ 2^53 is integral, so all are unsafe. Large numbers belong in strings.",
+        t("[1.7976931348623157e308]"), Err("unsafe-integer"));
     add("number-underflow", "1e-400 underflows to 0 (only overflow is rejected).", t("[1e-400]"), Ok("[0]"));
     add("string-escapes", "Only \", \\ and control characters are escaped; \\/ and \\u0041 are unescaped; U+007F is emitted raw.",
         t(r#"["\u0041\u00e9\/\b\f\n\r\t\u001f\u007f\"\\"]"#), Ok("[\"Aé/\\b\\f\\n\\r\\t\\u001f\u{7f}\\\"\\\\\"]"));

@@ -102,6 +102,8 @@ impl ParseError {
 }
 
 pub const MAX_DEPTH: usize = 64;
+/// 2^53 − 1.
+pub const MAX_SAFE_INTEGER: f64 = 9007199254740991.0;
 
 pub fn parse(bytes: &[u8]) -> Result<Value, ParseError> {
     let text = std::str::from_utf8(bytes).map_err(|_| ParseError::InvalidUnicode)?;
@@ -214,7 +216,6 @@ impl<'a> Parser<'a> {
         if self.peek() == Some(b'-') {
             self.i += 1;
         }
-        let int_start = self.i;
         match self.peek() {
             Some(b'0') => self.i += 1,
             Some(b'1'..=b'9') => {
@@ -224,10 +225,7 @@ impl<'a> Parser<'a> {
             }
             _ => return Err(ParseError::NotJson),
         }
-        let int_digits = &self.text[int_start..self.i];
-        let mut integer_form = true;
         if self.peek() == Some(b'.') {
-            integer_form = false;
             self.i += 1;
             if !matches!(self.peek(), Some(b'0'..=b'9')) {
                 return Err(ParseError::NotJson);
@@ -237,7 +235,6 @@ impl<'a> Parser<'a> {
             }
         }
         if matches!(self.peek(), Some(b'e' | b'E')) {
-            integer_form = false;
             self.i += 1;
             if matches!(self.peek(), Some(b'+' | b'-')) {
                 self.i += 1;
@@ -249,18 +246,16 @@ impl<'a> Parser<'a> {
                 self.i += 1;
             }
         }
-        if integer_form {
-            // |n| > 2^53 - 1 written as a plain integer: must have been a string (ENV-100).
-            const MAX_SAFE: &str = "9007199254740991";
-            if int_digits.len() > MAX_SAFE.len()
-                || (int_digits.len() == MAX_SAFE.len() && int_digits > MAX_SAFE)
-            {
-                return Err(ParseError::UnsafeInteger);
-            }
-        }
         let v: f64 = self.text[start..self.i].parse().map_err(|_| ParseError::NotJson)?;
         if !v.is_finite() {
             return Err(ParseError::NumberOutOfRange);
+        }
+        // ENV-100 is a rule on the parsed value, not the spelling: an integral value beyond
+        // ±(2^53 − 1) is rejected however it is written (9007199254740992, 1e16, 9007199254740993.0).
+        // Every double of magnitude ≥ 2^53 is integral, so this is |v| > MAX_SAFE_INTEGER. Because JCS
+        // output re-parses to the same value, parse(jcs(parse(x))) succeeds whenever parse(x) does.
+        if v.abs() > MAX_SAFE_INTEGER {
+            return Err(ParseError::UnsafeInteger);
         }
         Ok(Value::Number(v))
     }
@@ -509,6 +504,38 @@ mod tests {
         assert_eq!(keys, ["\r", "1", "\u{80}", "\u{f6}", "\u{20ac}", "\u{1f600}", "\u{fb33}"]);
     }
 
+    /// parse(jcs(parse(x))) succeeds whenever parse(x) does, and JCS is idempotent.
+    #[test]
+    fn jcs_output_reparses() {
+        let mut corpus: Vec<String> = [
+            "[1.0, -0, 1e-7, 0.000001, 5e-324, 9007199254740991, -9007199254740991, 0.1, 4.5e-10]",
+            "[9007199254740991.4, 9007199254740990.5, 1e15, 123456789012345.67, 1e-400, 2.2250738585072014e-308]",
+            r#"{"\u20ac":1,"\ud83d\ude00":"x\u0000\u001f\"\\","a":[[],{}]}"#,
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+        // Pseudo-random doubles across the whole exponent range (xorshift, fixed seed).
+        let mut x: u64 = 0x9e37_79b9_7f4a_7c15;
+        for _ in 0..20_000 {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            let v = f64::from_bits(x);
+            if v.is_finite() {
+                corpus.push(format!("[{v:e}]"));
+                corpus.push(format!("[{v}]"));
+            }
+        }
+        for text in &corpus {
+            if let Ok(v) = parse(text.as_bytes()) {
+                let canon = jcs(&v);
+                let again = parse(canon.as_bytes()).unwrap_or_else(|e| panic!("{text} -> {canon} -> {e:?}"));
+                assert_eq!(jcs(&again), canon, "JCS is idempotent for {text}");
+            }
+        }
+    }
+
     #[test]
     fn parse_errors() {
         assert_eq!(parse(br#"{"a":1,"a":2}"#), Err(ParseError::DuplicateKey));
@@ -516,6 +543,9 @@ mod tests {
         assert_eq!(parse(br#"[9007199254740992]"#), Err(ParseError::UnsafeInteger));
         assert_eq!(parse(br#"[1e400]"#), Err(ParseError::NumberOutOfRange));
         assert_eq!(parse(b"[\xff]"), Err(ParseError::InvalidUnicode));
-        assert!(parse(br#"[9007199254740991, -9007199254740991, 1e300]"#).is_ok());
+        assert!(parse(br#"[9007199254740991, -9007199254740991, 9.007199254740991e15, 1e-300]"#).is_ok());
+        for spelled in ["[1e16]", "[9007199254740993.0]", "[1e20]", "[123456789012345678e2]", "[1e300]", "[-9.007199254740992e15]"] {
+            assert_eq!(parse(spelled.as_bytes()), Err(ParseError::UnsafeInteger), "{spelled}");
+        }
     }
 }

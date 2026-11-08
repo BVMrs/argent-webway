@@ -91,22 +91,22 @@
         "ENV-110",
         "ENV-100"
       ],
-      "description": "Body numbers spelled differently from their JCS form (1.0E-1, 0.00000010, 4.2e1, 1E21) canonicalise to what was signed. A 64-bit value travels as a string.",
+      "description": "Body numbers spelled differently from their JCS form (1.0E-1, 0.00000010, 4.2e1, and 9.007199254740991E15 = 2^53 − 1) canonicalise to what was signed. A 64-bit value travels as a string.",
       "receiver": {
         "hosts": [
           "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
         ],
         "now": "2026-11-07T12:00:10Z"
       },
-      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:2b7eeeb9225d4a7ec927cf618946b8378e72d214983909518042d992ea7ae49b\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]},\"metadata\":{\"ratio\":1.0E-1,\"big\":1E21,\"small\":0.00000010,\"neg\":-1.5,\"int\":4.2e1,\"u64\":\"18446744073709551615\"}},\"sig\":\"bg7dcYFyWR9Bwe0-z8pMeDaHY-TXqNYgJrGyVEEqOwjxiO06azslH826NCgX0-f6gjN6VBHm5s-9UW2rT0_5AA\"}",
+      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:ec4a80cb49a61f734a4ba93524c38a26340a87c36ffa1fa067da2ad772ff6080\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]},\"metadata\":{\"ratio\":1.0E-1,\"big\":9.007199254740991E15,\"small\":0.00000010,\"neg\":-1.5,\"int\":4.2e1,\"u64\":\"18446744073709551615\"}},\"sig\":\"qvIg1sD21Uzt7TCZs5XDDnOjoVvv_mKRyvZTcKfN1VK9_--NHXrE3bMeyYr4yJ-K7mmPHW8iFF0jyFP_6wyQCQ\"}",
       "expect": {
         "result": "accept",
         "from": "wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma",
         "id": "01a1b5e1-3e00-741a-9fd6-3229cc14f1a2",
-        "body_hash": "blake3:2b7eeeb9225d4a7ec927cf618946b8378e72d214983909518042d992ea7ae49b",
-        "signed_header_jcs": "{\"body_hash\":\"blake3:2b7eeeb9225d4a7ec927cf618946b8378e72d214983909518042d992ea7ae49b\",\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"ctx\":{\"contextId\":\"ctx-0001\"},\"exp\":\"2026-11-07T13:00:00Z\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"op\":\"SendMessage\",\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"ts\":\"2026-11-07T12:00:00Z\",\"typ\":\"request\",\"v\":\"webway-envelope/0\"}",
-        "signing_input_hex": "7765627761792d656e76656c6f70652f30007b22626f64795f68617368223a22626c616b65333a32623765656562393232356434613765633932376366363138393436623833373865373264323134393833393039353138303432643939326561376165343962222c22636170223a7b22616363657373223a226447567a6443316859324e6c63334d74644739725a573474626d39304c574574596d6c7a593356706441227d2c22637478223a7b22636f6e746578744964223a226374782d30303031227d2c22657870223a22323032362d31312d30375431333a30303a30305a222c2266726f6d223a227777613a35367336783361666264336873766c7979756f65366a3578747172327a656377616d76796233326564686a64653561737a776d61222c226964223a2230316131623565312d336530302d373431612d396664362d333232396363313466316132222c226f70223a2253656e644d657373616765222c2270726f76223a7b227061727473223a7b222f6d6573736167652f70617274732f30223a7b227461696e74223a7b226f776e657273223a5b226469643a6b65793a7a364d6b723864445338557a33364248644155586e6278524a564762514c397a73693968795a41313947646e3435687a225d2c22756e7665726966696564223a66616c73657d7d7d7d2c22746f223a227777613a6d66707767657578326f7662717471696b3477646f6667363536716e326e61736173757667326f6d33766e657076726870687a71222c227473223a22323032362d31312d30375431323a30303a30305a222c22747970223a2272657175657374222c2276223a227765627761792d656e76656c6f70652f30227d",
-        "header_digest": "blake3:48f3ec009406d2d7301bdaa58f8e880c579750d73ff41b9da3fee38cd0ac4891"
+        "body_hash": "blake3:ec4a80cb49a61f734a4ba93524c38a26340a87c36ffa1fa067da2ad772ff6080",
+        "signed_header_jcs": "{\"body_hash\":\"blake3:ec4a80cb49a61f734a4ba93524c38a26340a87c36ffa1fa067da2ad772ff6080\",\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"ctx\":{\"contextId\":\"ctx-0001\"},\"exp\":\"2026-11-07T13:00:00Z\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-3e00-741a-9fd6-3229cc14f1a2\",\"op\":\"SendMessage\",\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"ts\":\"2026-11-07T12:00:00Z\",\"typ\":\"request\",\"v\":\"webway-envelope/0\"}",
+        "signing_input_hex": "7765627761792d656e76656c6f70652f30007b22626f64795f68617368223a22626c616b65333a65633461383063623439613631663733346134626139333532346333386132363334306138376333366666613166613036376461326164373732666636303830222c22636170223a7b22616363657373223a226447567a6443316859324e6c63334d74644739725a573474626d39304c574574596d6c7a593356706441227d2c22637478223a7b22636f6e746578744964223a226374782d30303031227d2c22657870223a22323032362d31312d30375431333a30303a30305a222c2266726f6d223a227777613a35367336783361666264336873766c7979756f65366a3578747172327a656377616d76796233326564686a64653561737a776d61222c226964223a2230316131623565312d336530302d373431612d396664362d333232396363313466316132222c226f70223a2253656e644d657373616765222c2270726f76223a7b227061727473223a7b222f6d6573736167652f70617274732f30223a7b227461696e74223a7b226f776e657273223a5b226469643a6b65793a7a364d6b723864445338557a33364248644155586e6278524a564762514c397a73693968795a41313947646e3435687a225d2c22756e7665726966696564223a66616c73657d7d7d7d2c22746f223a227777613a6d66707767657578326f7662717471696b3477646f6667363536716e326e61736173757667326f6d33766e657076726870687a71222c227473223a22323032362d31312d30375431323a30303a30305a222c22747970223a2272657175657374222c2276223a227765627761792d656e76656c6f70652f30227d",
+        "header_digest": "blake3:851e9996d3655b8a77c05eba653dee6c96f655b2abad75232eb080773605888e"
       }
     },
     {
@@ -1771,6 +1771,29 @@
         "now": "2026-11-07T12:00:10Z"
       },
       "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-7e8f-bfcf-327eb911b2c3\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:96b43c8602bfdfd38541c01d51bab6167d3874d02231c34ec99f1c0080decc8d\",\"body\":{\"metadata\":{\"n\":9007199254740993},\"message\":{\"messageId\":\"01a1b5e1-3e00-7e8f-bfcf-327eb911b2c3\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"r8QbqUshwogLR4O7XjyEYH_F1ITJKoIOifUO-atuYM_uTstPON1xC_6nSWUFv8M5qx4-TUvV_xGRdEyGIqWbCA\"}",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "unsafe-integer-exponent-in-body",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "1e16 in body metadata: an unsafe integral value, whatever its spelling.",
+      "receiver": {
+        "hosts": [
+          "wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq"
+        ],
+        "now": "2026-11-07T12:00:10Z"
+      },
+      "input": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-7e8f-bfcf-327eb911b2c3\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:96b43c8602bfdfd38541c01d51bab6167d3874d02231c34ec99f1c0080decc8d\",\"body\":{\"metadata\":{\"n\":1e16},\"message\":{\"messageId\":\"01a1b5e1-3e00-7e8f-bfcf-327eb911b2c3\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"r8QbqUshwogLR4O7XjyEYH_F1ITJKoIOifUO-atuYM_uTstPON1xC_6nSWUFv8M5qx4-TUvV_xGRdEyGIqWbCA\"}",
       "expect": {
         "result": "reject",
         "error": {

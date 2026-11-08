@@ -254,10 +254,17 @@ with the reason given, input that:
 - contains invalid UTF-8, or a string escape that denotes a lone surrogate (`invalid-unicode`),
 - contains an object with two members of the same name after unescaping, at any depth (`duplicate-key`),
 - contains a number that, parsed as an IEEE 754 double, overflows to infinity (`number-out-of-range`),
-- contains a number with no fractional part and no exponent whose magnitude exceeds 2^53 − 1 (`unsafe-integer`).
+- contains a number whose parsed double value is an integer of magnitude greater than 2^53 − 1, however it is
+  spelled (`9007199254740992`, `1e16` and `9007199254740993.0` are all rejected) (`unsafe-integer`).
 
 Values that can carry larger integers (proto `int64`, `uint64` and the fixed variants) are JSON strings, as the
 proto3 JSON mapping already requires. `ctx.seq` is capped at 2^53 − 1, so it stays a number.
+
+The `unsafe-integer` rule is on the value, not the spelling, so it is preserved by canonicalisation: every double
+of magnitude 2^53 or more is an integer, so any accepted number is below 2^53 in magnitude, and its JCS form parses
+again to the same value. `parse(JCS(parse(x)))` therefore succeeds whenever `parse(x)` does. That is what lets an
+intermediary re-serialise an envelope (ENV-700), and a binary binding carry JCS bytes (ENV-111), without turning a
+valid envelope into an invalid one.
 
 **ENV-101** (MUST) A receiver MUST reject an envelope whose JCS serialisation is longer than `MAX_ENVELOPE_BYTES`
 (`too-large`) or whose JSON nesting depth exceeds `MAX_DEPTH` (`too-deep`). It MAY reject received input longer
@@ -268,8 +275,8 @@ than twice `MAX_ENVELOPE_BYTES` before parsing it.
 `JCS(x)` is defined by [RFC 8785]: object members sorted by the UTF-16 code units of their names, no insignificant
 whitespace, strings escaped minimally (only `"`, `\`, and control characters U+0000–U+001F, using `\b \t \n \f \r`
 where they exist and `\u00xx` with lowercase hex otherwise), non-ASCII characters emitted as UTF-8, and numbers
-serialised as ECMAScript `Number.prototype.toString` does (so `1.0` → `1`, `-0` → `0`, `1e21` → `1e+21`,
-`0.0000001` → `1e-7`).
+serialised as ECMAScript `Number.prototype.toString` does (so `1.0` → `1`, `-0` → `0`, `9.007199254740991e15` →
+`9007199254740991`, `0.0000001` → `1e-7`).
 
 **ENV-110** (MUST) Signers and verifiers MUST compute the signing input ([§5.1](#51-signing-input)) and `body_hash`
 over `JCS` of the **parsed generic JSON value**, never over the bytes as received. A verifier MUST NOT decode

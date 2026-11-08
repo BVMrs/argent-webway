@@ -44,23 +44,74 @@
         "ENV-111"
       ],
       "description": "Numbers serialised as ECMAScript Number.prototype.toString.",
-      "input": "[1.0, -0, 1e21, 1e20, 1E-7, 0.000001, 123.4560, 5e-324, 1.7976931348623157e308, 9007199254740991, -9007199254740991, 0.1, 100e-2, 2e0, 0.30000000000000004, 4.5e-10]",
+      "input": "[1.0, -0, 1E-7, 0.000001, 123.4560, 5e-324, 9007199254740991, -9007199254740991, 9.007199254740991e15, 0.1, 100e-2, 2e0, 0.30000000000000004, 4.5e-10, 1e15, 123456789012345.67]",
       "expect": {
         "result": "canonical",
-        "canonical": "[1,0,1e+21,100000000000000000000,1e-7,0.000001,123.456,5e-324,1.7976931348623157e+308,9007199254740991,-9007199254740991,0.1,1,2,0.30000000000000004,4.5e-10]"
+        "canonical": "[1,0,1e-7,0.000001,123.456,5e-324,9007199254740991,-9007199254740991,9007199254740991,0.1,1,2,0.30000000000000004,4.5e-10,1000000000000000,123456789012345.67]"
       }
     },
     {
-      "id": "number-large-with-fraction",
+      "id": "number-safe-after-rounding",
       "requirements": [
         "ENV-110",
         "ENV-111"
       ],
-      "description": "9007199254740993.0 has a fraction part, so it is not an unsafe-integer token; it rounds to the double 9007199254740992.",
-      "input": "[9007199254740993.0]",
+      "description": "9007199254740991.4 rounds to the double 2^53 − 1, which is safe.",
+      "input": "[9007199254740991.4]",
       "expect": {
         "result": "canonical",
-        "canonical": "[9007199254740992]"
+        "canonical": "[9007199254740991]"
+      }
+    },
+    {
+      "id": "unsafe-integer-with-fraction",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "9007199254740993.0 is written with a fraction but its value (the double 2^53) is integral and unsafe. The rule is on the value, not the spelling.",
+      "input": "[9007199254740993.0]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "unsafe-integer-exponent",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "1e16 is an unsafe integral value written with an exponent. Its JCS form 10000000000000000 would otherwise be rejected on re-parse.",
+      "input": "[1e16]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "id": "unsafe-integer-large-double",
+      "requirements": [
+        "ENV-100"
+      ],
+      "description": "1e21 and up: every double ≥ 2^53 is integral, so all are unsafe. Large numbers belong in strings.",
+      "input": "[1.7976931348623157e308]",
+      "expect": {
+        "result": "reject",
+        "error": {
+          "type": "EnvelopeInvalid",
+          "code": -33001,
+          "reason": "unsafe-integer",
+          "retryable": false
+        }
       }
     },
     {
