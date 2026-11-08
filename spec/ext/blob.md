@@ -154,8 +154,8 @@ provider   = "wwn:" 52BASE32 "/" "wwa:" 52BASE32 ; node, then the agent at that 
   it is, with the Part's provenance.
 
 A reference without `providers` is valid. It is useful only to an agent that is already entitled to the blob
-(BLOB-015), for example because it produced it or received a grant for it earlier. Then its node may use its
-own copy. For anyone else it resolves to nothing, exactly as if the blob did not exist.
+(BLOB-015), because it produced it or has already fetched it completely under its own grant. Then its node may
+use its own copy. For anyone else it resolves to nothing, exactly as if the blob did not exist.
 
 ### 4.2 The reference Part
 
@@ -502,17 +502,30 @@ serve one blob, each one checks a token rooted in its own owner, and a fetcher n
 
 **Entitlement.** A node's store is shared by its agents and deduplicated, so "the node holds H" must never mean
 "any agent here may read H", or knowing a hash would be enough after all. The node keeps, per agent, the hashes the
-agent is **entitled** to: blobs the agent produced, and blobs for which the agent received a verified grant
-(BLOB-014). An entitlement does not expire with the grant, because the agent already had access to the content.
+agent is **entitled** to. There are exactly two ways to become entitled:
+
+1. the agent produced the blob (its node hashed and stored content the agent created); or
+2. the node fetched and verified the **complete** blob (BLOB-021, BLOB-024) from a provider that was eligible
+   (BLOB-041), in Fetches authorised by a grant this agent holds.
+
+Receiving a grant is **not** enough. A grant only shows that its issuer let the agent ask a named provider. Any
+peer allowed to message the agent can mint one, rooted in its own owner, for any hash, and list itself as the
+provider, without holding the blob. Entitlement is earned only when an eligible provider has actually served
+every block. An entitlement does not expire with the grant, because the agent then already had the content.
 
 - [BLOB-015] A node MUST use a blob from its own store for an agent, hand it to the agent, or mint or relay a grant
-  for it on that agent's behalf, only if that agent is entitled to the blob. Otherwise it MUST behave exactly as
+  for it on that agent's behalf, only if that agent is entitled to the blob by one of the two ways above. Holding
+  a grant, without a completed fetch under it, MUST NOT entitle an agent. Otherwise the node MUST behave exactly as
   if the blob were not in its store, including in timing as far as practical, and resolve the reference only
-  through eligible providers (BLOB-041).
+  through eligible providers (BLOB-041). Blocks fetched for that agent count towards its entitlement only once
+  the whole blob is verified. Blocks already in the store from another agent's fetch MUST NOT be used to skip
+  blocks of this agent's fetch.
 
-BLOB-015 is what stops a foreign peer from sending a provider-less reference to a hash it guessed or overheard
-and having the receiving node serve its own copy to the targeted agent. It also stops a prompt-injected agent
-from making its node grant outsiders access to blobs that other agents on the node produced.
+BLOB-015 is what stops a foreign peer from sending a reference to a hash it guessed or overheard (with or without
+a grant it minted itself) and having the receiving node serve its own copy to the targeted agent. It also stops a
+prompt-injected agent from making its node grant outsiders access to blobs that other agents on the node
+produced. The cost is that the same bytes may be transferred again for a second agent. Storage can still be
+deduplicated; access cannot.
 
 **Recommended grant content.** `right("blob:blake3:<hex>#read")`, an expiry that covers the time the recipient
 may need to fetch (the referencing envelope's `exp` plus a margin, at most `MAX_ACCESS_TTL`), and optionally
@@ -655,8 +668,10 @@ Stream-level failures use the binding's transport codes: `ProtocolError` (gramma
   *who wrote them* or whether they are safe: that is the referencing envelope's signature and the Part's taint.
 - **Knowing the hash is not enough** (ART-2). Authorisation runs before lookup and its answer does not depend on
   the store (BLOB-033), so a provider confirms nothing to someone guessing hashes of known files. Inside a node,
-  the shared store is gated per agent by entitlement (BLOB-015), so a provider-less reference to an overheard hash
-  resolves to nothing, and an agent cannot grant others access to blobs it was never entitled to. Grants are
+  the shared store is gated per agent by entitlement (BLOB-015), which only producing the blob or completing a
+  verified fetch from an eligible provider confers. A reference to an overheard hash, even with a grant the sender
+  minted itself, does not unlock the node's copy, and an agent cannot grant others access to blobs it was never
+  entitled to. Grants are
   holder-bound, short-lived by default, and not in any Part or URL. At the HTTP edge the blob URL is tied to the
   task scope that received it (BLOB-080).
 - **Provenance cannot be laundered through a cache** (ART-3). Trust comes from the referencing Part only, and
@@ -704,7 +719,7 @@ names; these kinds check no signatures.
 | `blob/verify` | `{ "hash", "size", "ranges", "data", "mutate"?: { "flip": offset } \| { "truncate": length } \| { "append": hex }, "end"?: "fin" \| "reset" }`. The stream is the honest encoding of `data` for `ranges`, then `mutate`; `end` says whether the provider closed it (default) or it was reset. | `{ "verified", "missing", "complete", "failure": null \| "BlobCorrupt" \| "ProtocolError" }`. `verified` is what the fetcher keeps, also on failure; `complete` means every block of `ranges` verified (not the whole blob). | — |
 | `blob/fetch` | `{ "provider": { "node", "agents" }, "connectionPeer", "bindings": { wwa: wwn }, "envelope": { "from", "to", "ts", "exp", "cap"?, "body" }, "authorization": "allow" or the error of the `capability/v0` token checks (CAP-160 steps 1–7 and 9), "store": { hash: { "size", "blocks"? } } }`. The step-8 match of `cap.capability` with the hash is done by the kind. | `{ "hash", "size", "ranges" }` | the errors of §7.3 |
 | `blob/provenance` | `{ "receiverOwner", "reference": { "senderOwner", "taint" }, "providerOwner", "otherReferences": [taint] }` | `{ "trust", "taint" }` | `EnvelopeInvalid` |
-| `blob/providers` | `{ "fetcherOwner", "pins", "senderOwner", "taintOwners", "reference", "agentCerts": { wwa: { "owner", "node" } }, "grants": [provider], "local": { "held", "entitled" } }` | `{ "local": bool, "contact": [provider] }` in reference order | `BlobRefInvalid` |
+| `blob/providers` | `{ "fetcherOwner", "pins", "senderOwner", "taintOwners", "reference", "agentCerts": { wwa: { "owner", "node" } }, "grants": [provider], "local": { "held", "produced", "fetchedUnderGrant" } }` | `{ "local": bool, "contact": [provider] }` in reference order | `BlobRefInvalid` |
 
 `blob/fetch` takes the result of `capability/v0` authorisation as an input, so it tests where that result is used
 (order, independence from the store) without Biscuit tokens. Real `blob:` tokens belong in the

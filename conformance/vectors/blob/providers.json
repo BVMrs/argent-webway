@@ -2,7 +2,7 @@
   "$schema": "../vector.schema.json",
   "format": "webway-vectors/v0",
   "kind": "blob/providers",
-  "description": "Where a fetcher may get a referenced blob. Input {\"fetcherOwner\", \"pins\": [owner], \"senderOwner\" (verified owner of the envelope that carried the reference), \"taintOwners\" (the referencing Part's taint.owners), \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant), \"local\": {\"held\", \"entitled\"} (the fetcher's node holds the blob; the fetching agent is entitled to it)}. Output {\"local\": use the local copy, \"contact\": [provider] in reference order}. Reject BlobRefInvalid.",
+  "description": "Where a fetcher may get a referenced blob. Input {\"fetcherOwner\", \"pins\": [owner], \"senderOwner\" (verified owner of the envelope that carried the reference), \"taintOwners\" (the referencing Part's taint.owners), \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant), \"local\": {\"held\", \"produced\", \"fetchedUnderGrant\"} (the fetcher's node holds the blob; the fetching agent produced it; the node fetched and verified the complete blob from an eligible provider under a grant this agent holds)}. Output {\"local\": use the local copy, \"contact\": [provider] in reference order}. Reject BlobRefInvalid.",
   "spec": "ext/blob.md#72-choosing-providers",
   "cases": [
     {
@@ -44,7 +44,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -94,7 +95,8 @@
         "grants": [],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -146,7 +148,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -201,7 +204,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -256,7 +260,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -309,7 +314,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -365,7 +371,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -418,7 +425,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -451,7 +459,8 @@
         ],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -464,7 +473,7 @@
     },
     {
       "id": "local-not-entitled",
-      "description": "The node holds the blob but the agent is not entitled to it: the local copy is not used",
+      "description": "The node holds the blob (another agent's copy), this agent has no grant: the local copy is not used",
       "requirements": [
         "BLOB-015"
       ],
@@ -499,7 +508,8 @@
         "grants": [],
         "local": {
           "held": true,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {
@@ -511,8 +521,8 @@
       }
     },
     {
-      "id": "local-entitled",
-      "description": "The agent holds a grant for this hash: the local copy is used",
+      "id": "local-grant-not-fetched",
+      "description": "Grant held and the node holds another agent's copy, but nothing was fetched under the grant: the local copy is not used, the provider is contacted",
       "requirements": [
         "BLOB-015"
       ],
@@ -549,7 +559,61 @@
         ],
         "local": {
           "held": true,
-          "entitled": true
+          "produced": false,
+          "fetchedUnderGrant": false
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "local": false,
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "local-fetched-under-grant",
+      "description": "The node already fetched and verified the complete blob under this agent's grant: the local copy is used",
+      "requirements": [
+        "BLOB-015"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ],
+        "local": {
+          "held": true,
+          "produced": false,
+          "fetchedUnderGrant": true
         }
       },
       "expect": {
@@ -559,6 +623,55 @@
           "contact": [
             "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
           ]
+        }
+      }
+    },
+    {
+      "id": "local-produced",
+      "description": "The agent produced the blob: the local copy is used",
+      "requirements": [
+        "BLOB-015"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "taintOwners": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          },
+          "wwa:772i7xe3fv5uaefhfezdynqdrshtj277yenhaamnj4fy33xxrala": {
+            "owner": "did:key:z6MkvK8YLriZ71k4t3deVsCRx6wsGqDdvR2AdXk3qSKyzkyM",
+            "node": "wwn:sdalyvwpag3i7h3igsmf3wbyxlcivpxjvju252x2navzix6eivta"
+          }
+        },
+        "grants": [],
+        "local": {
+          "held": true,
+          "produced": true,
+          "fetchedUnderGrant": false
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "local": true,
+          "contact": []
         }
       }
     },
@@ -599,7 +712,8 @@
         "grants": [],
         "local": {
           "held": false,
-          "entitled": false
+          "produced": false,
+          "fetchedUnderGrant": false
         }
       },
       "expect": {

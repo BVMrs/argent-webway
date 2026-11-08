@@ -332,7 +332,7 @@ pub fn provenance(input: &Value) -> Out {
 // ---------- blob/providers ----------
 
 /// Where a fetcher may get a referenced blob (BLOB-015, BLOB-041): its own store only if the
-/// fetching agent is entitled to the blob, and listed providers only if they are certified to the
+/// fetching agent is entitled to the blob (produced it, or fetched it completely under its own grant), and listed providers only if they are certified to the
 /// listed node by an owner that is the fetcher's own, the sender's, or in the Part's taint (and
 /// pinned or the fetcher's own), and the agent holds a grant for them. Reference order is kept.
 pub fn providers(input: &Value) -> Out {
@@ -345,7 +345,11 @@ pub fn providers(input: &Value) -> Out {
     let taint = strs("taintOwners");
     let grants = strs("grants");
     let local = &input["local"];
-    let use_local = local["held"].as_bool().unwrap_or(false) && local["entitled"].as_bool().unwrap_or(false);
+    // Entitlement (BLOB-015): the agent produced the blob, or its node fetched and verified the
+    // complete blob from an eligible provider under a grant this agent holds. Merely holding a
+    // grant is not enough: anyone who may message the agent can mint one for any hash.
+    let flag = |k: &str| local[k].as_bool().unwrap_or(false);
+    let use_local = flag("held") && (flag("produced") || flag("fetchedUnderGrant"));
     let mut out = vec![];
     for p in &r.providers {
         let (node, agent) = parse_provider(p).unwrap();

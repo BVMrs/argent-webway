@@ -596,7 +596,8 @@ fn providers_file() -> File {
          owner of the envelope that carried the reference), \"taintOwners\" (the referencing Part's taint.owners), \
          \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \
          \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant), \"local\": {\"held\", \
-         \"entitled\"} (the fetcher's node holds the blob; the fetching agent is entitled to it)}. Output {\"local\": use \
+         \"produced\", \"fetchedUnderGrant\"} (the fetcher's node holds the blob; the fetching agent produced it; the node \
+         fetched and verified the complete blob from an eligible provider under a grant this agent holds)}. Output {\"local\": use \
          the local copy, \"contact\": [provider] in reference order}. Reject BlobRefInvalid.",
     );
     let (a, b, c, d) = (owner("A"), owner("B"), owner("C"), owner("D"));
@@ -618,7 +619,7 @@ fn providers_file() -> File {
             "reference": url(&hh, 100_000, &ps), "agentCerts": certs, "grants": grants, "local": local
         })
     };
-    let no = json!({ "held": false, "entitled": false });
+    let no = json!({ "held": false, "produced": false, "fetchedUnderGrant": false });
     let none = |l: bool| json!({ "local": l, "contact": [] });
     let r = &["BLOB-041"];
     f.case("granted-sender", "The sender's own provider with a grant", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, no.clone()), AcceptWith(json!({ "local": false, "contact": [pb] })));
@@ -639,19 +640,34 @@ fn providers_file() -> File {
     f.case("agent-on-other-node", "The agent is certified to another node than the one listed", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &moved, no.clone()), AcceptWith(none(false)));
     f.case("no-cert", "No verified agent-cert for the provider's agent", r, x(vec![&b], vec![&b], vec![&pb], vec![&pb], &json!({}), no.clone()), AcceptWith(none(false)));
     let e = &["BLOB-015"];
+    let local = |produced: bool, fetched: bool| json!({ "held": true, "produced": produced, "fetchedUnderGrant": fetched });
     f.case(
         "local-not-entitled",
-        "The node holds the blob but the agent is not entitled to it: the local copy is not used",
+        "The node holds the blob (another agent's copy), this agent has no grant: the local copy is not used",
         e,
-        x(vec![&b], vec![&b], vec![], vec![], &certs, json!({ "held": true, "entitled": false })),
+        x(vec![&b], vec![&b], vec![], vec![], &certs, local(false, false)),
         AcceptWith(none(false)),
     );
     f.case(
-        "local-entitled",
-        "The agent holds a grant for this hash: the local copy is used",
+        "local-grant-not-fetched",
+        "Grant held and the node holds another agent's copy, but nothing was fetched under the grant: the local copy is not used, the provider is contacted",
         e,
-        x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, json!({ "held": true, "entitled": true })),
+        x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, local(false, false)),
+        AcceptWith(json!({ "local": false, "contact": [pb] })),
+    );
+    f.case(
+        "local-fetched-under-grant",
+        "The node already fetched and verified the complete blob under this agent's grant: the local copy is used",
+        e,
+        x(vec![&b], vec![&b], vec![&pb], vec![&pb], &certs, local(false, true)),
         AcceptWith(json!({ "local": true, "contact": [pb] })),
+    );
+    f.case(
+        "local-produced",
+        "The agent produced the blob: the local copy is used",
+        e,
+        x(vec![&b], vec![&b], vec![], vec![], &certs, local(true, false)),
+        AcceptWith(json!({ "local": true, "contact": [] })),
     );
     f.case("bad-reference", "Malformed reference", &["BLOB-010"], json!({
         "fetcherOwner": a, "pins": [b], "senderOwner": b, "taintOwners": [b], "reference": format!("webway-blob:{hh}?size=01"),
