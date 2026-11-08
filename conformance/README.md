@@ -1,6 +1,7 @@
 # conformance/
 
-The conformance suite for the argent-webway spec. Nothing here yet (roadmap track T4).
+The conformance suite for the argent-webway spec (roadmap track T4). So far on this branch: the `mailbox/v0`
+vectors in `vectors/mailbox/` and their reference model in `tools/mailbox-model/` (Rust).
 
 - `vectors/`: language-neutral JSON test vectors: canonicalisation, envelope signatures (valid and invalid),
   capability chains (allow and deny), task state transitions (legal and illegal), error mapping.

@@ -153,7 +153,7 @@ A host declaration is only useful if it is authentic, and before sealed envelope
 everything it holds. So a depositor needs two things: the list of hosts must come from the recipient, and the
 sender's owner must be willing to show the content to the operator of the host.
 
-- [MBX-003] A depositor MUST take a recipient's mailbox hosts only from: the recipient's Agent Card, verified as
+- [MBX-003] *Pending: T4, T5.* A depositor MUST take a recipient's mailbox hosts only from: the recipient's Agent Card, verified as
   the profile and `ext/capability.md` §4.7 require; an invite from the recipient's owner (`ext/capability.md` §8,
   the `deposit` claim, §4.4 below); or the `cap.mailbox.hosts` of a verified envelope whose `from` is the recipient
   (§4.3). The most recently verified of these replaces the others. It MUST NOT take hosts from any other source,
@@ -184,7 +184,7 @@ those members (G12).
 
 ### 4.1 Deposit keys
 
-- [MBX-002] Each agent that sends envelopes through mailbox hosts MUST have a deposit key: an Ed25519 key pair
+- [MBX-002] *Pending: T4, T5.* Each agent that sends envelopes through mailbox hosts MUST have a deposit key: an Ed25519 key pair
   held by its node, distinct from every other key (`ext/capability.md` CAP-003, role "deposit key"), and published
   as `depositKey` in the agent's card. The deposit key MUST sign nothing but deposit signatures (§5.1).
 
@@ -242,7 +242,7 @@ next to the capability members of `ext/capability.md` §5.8:
 The token is bound to the *receiver's* published deposit key, so it is useless to anyone else, and carrying it in
 the signed header (kept in audit logs and mailbox indexes) reveals nothing secret.
 
-- [MBX-012] A node MUST act on `cap.mailbox` only after the envelope verified, and only if the token's `right` names
+- [MBX-012] *Pending: T4, T5.* A node MUST act on `cap.mailbox` only after the envelope verified, and only if the token's `right` names
   the envelope's `from`. It MUST otherwise ignore the member and record an anomaly. A valid `cap.mailbox` replaces
   the deposit token and host list the node held for that agent, unless the held token expires later and names the
   same hosts.
@@ -250,7 +250,7 @@ the signed header (kept in audit logs and mailbox indexes) reveals nothing secre
   unexpired token for the sender's agent, and in every response whose request carried none or one that expires
   within a quarter of its lifetime. A requester that may receive deferred responses or events needs to have given
   the responder a token (PROF-036), so the first request to a peer SHOULD always carry one.
-- [MBX-013] A node MUST NOT give a deposit token, or a deposit key, to an agent, and MUST NOT put either in message
+- [MBX-013] *Pending: T4, T5.* A node MUST NOT give a deposit token, or a deposit key, to an agent, and MUST NOT put either in message
   text, Parts or artefacts (as `ext/capability.md` CAP-151 requires for all tokens).
 
 Activation: `cap.mailbox` changes nothing about the request it travels in, so a node that implements this
@@ -272,7 +272,7 @@ the inviting owner knows the invitee's deposit key, the invite carries a fresh k
 }
 ```
 
-- [MBX-014] The `deposit` claim of an invite MUST have the members above, with `token` bound to the public key of
+- [MBX-014] *Pending: T4, T5.* The `deposit` claim of an invite MUST have the members above, with `token` bound to the public key of
   `key` and `right` naming `agent`. An invitee MUST use that key only for deposits to `agent`, and MUST stop using
   it once it holds a token for `agent` bound to its own deposit key (from a `cap.mailbox`).
 
@@ -291,7 +291,7 @@ envelope). This extension assigns one frame type from the extension range of bin
 `DEPOSIT_AUTH` applies to the `DELIVER` frame that follows it on the same stream. `CUSTODY` frames still match
 `DELIVER` frames one to one (BIND-024): `DEPOSIT_AUTH` gets no answer of its own.
 
-- [MBX-020] A depositor MUST send `DEPOSIT_AUTH` only on a deliver stream to a peer whose HELLO lists the role
+- [MBX-020] *Pending: T4, T5.* A depositor MUST send `DEPOSIT_AUTH` only on a deliver stream to a peer whose HELLO lists the role
   `mailbox-host` and the feature `…/ext/mailbox/v0`, and MUST send it immediately before the `DELIVER` frame it
   authorises. A mailbox host MUST treat a `DEPOSIT_AUTH` that is followed by anything other than a `DELIVER`
   frame, or by the end of the stream, or whose payload exceeds `MAX_DEPOSIT_AUTH_BYTES` or is not such a JSON
@@ -342,7 +342,7 @@ per-registration quota the host grants.
   `agentCert`, the issuer certificates, the lease) and MUST grant a lease ending at the earlier of the requested
   `leaseUntil` and its current time plus `LEASE_MAX`. A later accepted `#Register` for the same agent replaces the
   earlier one, including its node: held envelopes then go to the new node.
-- [MBX-032] A recipient node MUST renew the lease at every host its agent declares before the lease ends, while it
+- [MBX-032] *Pending: T4, T5.* A recipient node MUST renew the lease at every host its agent declares before the lease ends, while it
   declares that host. A node SHOULD declare a host in the card only once it holds a lease there.
 
 When a lease ends, the host stops admitting deposits for the agent (RecipientUnknown, §7) and keeps what it holds
@@ -414,18 +414,18 @@ the same envelope deposited again (step 11 answers `duplicate`).
   delete the envelope body and keep only a **tombstone** (`from`, `id`, header digest, `exp`) until
   `now > exp + SKEW`, so that a re-deposit is answered `duplicate` (step 11) and never delivered twice by this host.
   It MAY delete the tombstone after that.
-- [MBX-051] A mailbox host MUST deliver a held envelope only to the node recorded in the registration for its `to`
+- [MBX-051] *Pending: T4, T5.* A mailbox host MUST deliver a held envelope only to the node recorded in the registration for its `to`
   (MBX-031), only on a connection whose peer node key is that node, and only on a DELIVER stream it opens (binding
   §9). It MUST NOT deliver held envelopes to anyone else, whatever they ask.
-- [MBX-052] A mailbox host MUST deliver the held envelopes of one recipient agent in the order it admitted them,
+- [MBX-052] *Pending: T4, T5.* A mailbox host MUST deliver the held envelopes of one recipient agent in the order it admitted them,
   and MUST NOT start delivering an envelope while an earlier one for the same agent and the same `ctx.taskId` is
   without a `CUSTODY` answer.
 - [MBX-053] A mailbox host MUST NOT deliver an envelope once `now > exp` (ENV-304) and MUST then move it to
   `expired`.
-- [MBX-054] A mailbox host MUST NOT tell a depositor, or anyone, that an envelope was delivered, and MUST NOT sign or
+- [MBX-054] *Pending: T4, T5.* A mailbox host MUST NOT tell a depositor, or anyone, that an envelope was delivered, and MUST NOT sign or
   send any envelope about a held envelope on the recipient's behalf. Its only statement to a depositor is the
   per-hop `CUSTODY` at deposit time.
-- [MBX-055] A mailbox host MUST start delivering a registered node's held envelopes once that node's HELLO has
+- [MBX-055] *Pending: T4, T5.* A mailbox host MUST start delivering a registered node's held envelopes once that node's HELLO has
   arrived on a new connection, without waiting for a request from it.
 
 Delivering in order per task (MBX-052) keeps continuations of a task in order. Events need no help: they carry
@@ -437,7 +437,7 @@ tombstone.
 
 ### 9.1 Entries
 
-- [MBX-060] A node MUST keep every envelope that it must get to another node (requests to offline peers, deferred
+- [MBX-060] *Pending: T4, T5.* A node MUST keep every envelope that it must get to another node (requests to offline peers, deferred
   responses and events, `CancelTask` by deferred path) as an outbox entry in durable storage, written before it
   first transmits the envelope and before it tells its agent the request is `queued` (PROF-030). The entry MUST
   hold the signed envelope exactly as signed, so every attempt sends the same signed envelope (ENV-500, PROF-033).
@@ -574,11 +574,11 @@ in time.
   hosts open. It MUST answer each `DELIVER` with `CUSTODY` as binding BIND-023 requires: `accepted` only once the
   envelope's effects are durable together with its dedupe entry (ENV-503), `duplicate` for a duplicate, `rejected`
   with the verification or processing error otherwise.
-- [MBX-081] When a final recipient answers a duplicate of a request that carried `webway-reply: deferred` (whether
+- [MBX-081] *Pending: T4, T5.* When a final recipient answers a duplicate of a request that carried `webway-reply: deferred` (whether
   the duplicate came live, direct or from a host), and the stored answer (ENV-520) is not already in its outbox, it
   MUST put the stored answer, byte for byte, into its outbox again for deferred delivery to the request's `from`
   (binding BIND-025).
-- [MBX-082] A responder node MUST give each event it sends by deferred delivery an envelope with `exp − ts` at most
+- [MBX-082] *Pending: T4, T5.* A responder node MUST give each event it sends by deferred delivery an envelope with `exp − ts` at most
   `MAX_TTL`, and SHOULD use `DEFAULT_TTL`. An event entry that expires undelivered MUST NOT be removed from the task's
   event log because of that: the requester fetches it with its cursor (§11).
 - A recipient node SHOULD drain its hosts before it reports itself ready to its agents after a restart, so that
@@ -590,7 +590,7 @@ A requester that was offline or crashed may have missed events: the stream it he
 envelopes may have expired in an outbox or been dropped by a host, and events arrive from two paths in any order.
 The signed `seq` (PROF-020, PROF-021) is the single source of truth, and the cursor of PROF-027 the recovery.
 
-- [MBX-090] A requester node MUST store, for each proxy task, the highest `seq` it has applied, durably and in the
+- [MBX-090] *Pending: T4, T5.* A requester node MUST store, for each proxy task, the highest `seq` it has applied, durably and in the
   same transaction as the applied event, so that a restart neither re-applies nor skips an event.
 - [MBX-091] After a requester node restarts or reconnects, and once it has drained its own mailbox hosts (MBX-080),
   it MUST, for each proxy task whose delivery is `acknowledged` and whose remote task it has not seen in a terminal
@@ -660,7 +660,7 @@ Test vectors are in `conformance/vectors/mailbox/`, in the format `webway-vector
 | `mailbox/card` | `{"params": <card extension params>}` | `{"hosts": <int>}` | any (MBX-001) |
 | `mailbox/token` | `{"blocks": <int>, "facts": {<fact name>: [<term array>…]}, "signedBy": <wwi>, "now", "recipient": <wwa>, "registrationOwner": <did>, "issuerChainOwner": <did>, "issuerScope": [<capability pattern>…], "depositSigner": <base64url key>, "revoked": <bool>}` | `{"quota": {"envelopes"?, "bytes"?}}` | `CapabilityInvalid`, `CapabilityDenied`, `CapabilityRevoked` |
 | `mailbox/deposit-sig` | `{"depositKey": <base64url>, "headerDigest": <hex>, "sig": <base64url>}` | `{"signingInput": <hex>}` | `CapabilityDenied` |
-| `mailbox/admit` | `{"now", "registration": {"agent", "leaseUntil"} or null, "envelope": {"parsed", "to", "from", "id", "ts", "exp", "digest", "bytes", "valid"}, "deposit": {"token": "ok" \| "invalid" \| "denied" \| "revoked", "sigValid"} or null, "held": [{"from", "id", "digest"}…], "usage": {"envelopes", "bytes"}, "quota": {"envelopes", "bytes"}}` | `{"custody": "accepted" \| "duplicate"}` | the error of the failing step (§7) |
+| `mailbox/admit` | `{"now", "registration": {"agent", "leaseUntil"} or null, "envelope": {"parsed", "to", "from", "id", "ts", "exp", "digest", "bytes", "verify": "ok" \| "signature" \| "body-hash" \| "format"}, "deposit": {"token": "ok" \| "invalid" \| "denied" \| "revoked", "sigValid"} or null, "held": [{"from", "id", "digest"}…], "usage": {"envelopes", "bytes"}, "quota": {"envelopes", "bytes"}}` | `{"custody": "accepted" \| "duplicate"}` | the error of the failing step (§7) |
 | `mailbox/register` | `{"now", "leaseUntil", "capability": "ok" \| "missing" \| "denied" \| "revoked", "certifiesFrom": <bool>}` | `{"leaseUntil"}` | `CapabilityMissing`, `CapabilityDenied`, `CapabilityRevoked`, `IdentityUntrusted`, `InvalidParamsError` |
 | `mailbox/host-step` | `{"state", "event"}` (§8) | `{"state"}` | any (illegal) |
 | `mailbox/outbox-step` | `{"request": <bool>, "state", "event"}` (§9.2) | `{"state"}` | any (illegal) |
@@ -689,7 +689,8 @@ Coverage:
 | MBX-067 | `mailbox/backoff` |
 | MBX-068 | `mailbox/order` |
 | MBX-091 | `mailbox/reconnect` |
-| MBX-002, MBX-003, MBX-012, MBX-013, MBX-014, MBX-020, MBX-032, MBX-051, MBX-052, MBX-054, MBX-055, MBX-060, MBX-080, MBX-081, MBX-082, MBX-090 | Harness scenarios (T4, T5, T10), not written yet. The M1 scenario step 6 (due diligence §6) covers MBX-060, MBX-080, MBX-081, MBX-090 and MBX-091 end to end: `beta` down longer than `SKEW`, delivery exactly once despite outbox retries, crash before ack, a third task expiring, `alpha` killed mid-stream. |
+| MBX-080 (freshness on delivery) | `mailbox/timing` |
+| MBX-002, MBX-003, MBX-012, MBX-013, MBX-014, MBX-020, MBX-032, MBX-051, MBX-052, MBX-054, MBX-055, MBX-060, MBX-081, MBX-082, MBX-090 | Harness scenarios (T4, T5, T10), not written yet. These carry the pending marker `*Pending: T4, T5.*` of change 0001 (`CONV-007`, proposed with `ext/capability.md`). The M1 scenario step 6 (due diligence §6) covers MBX-060, MBX-080, MBX-081, MBX-090 and MBX-091 end to end: `beta` down longer than `SKEW`, delivery exactly once despite outbox retries, crash before ack, a third task expiring, `alpha` killed mid-stream. |
 
 The reference model `conformance/tools/mailbox-model` implements every kind above. `cargo run -- check` runs all
 vectors against it; `cargo run -- adapter` is a stdio adapter (CONV-006) for the harness.

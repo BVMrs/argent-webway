@@ -1,0 +1,33 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/host-step",
+  "description": "Mailbox host held-record state machine. Input {\"state\", \"event\"}. Accept with {\"state\": next}, or reject an illegal event. Generated from the table of spec §8 by conformance/tools/mailbox-model.",
+  "spec": "ext/mailbox.md#8-mailbox-host-held-envelopes",
+  "cases": [
+    {"id":"held-recipient-accepted","description":"held record: held --recipient-accepted--> delivered","requirements":["MBX-050"],"input":{"state":"held","event":"recipient-accepted"},"expect":{"result":"accept","output":{"state":"delivered"}}},
+    {"id":"held-recipient-duplicate","description":"held record: held --recipient-duplicate--> delivered","requirements":["MBX-050"],"input":{"state":"held","event":"recipient-duplicate"},"expect":{"result":"accept","output":{"state":"delivered"}}},
+    {"id":"held-recipient-refusal","description":"held record: held --recipient-refusal--> dropped","requirements":["MBX-050"],"input":{"state":"held","event":"recipient-refusal"},"expect":{"result":"accept","output":{"state":"dropped"}}},
+    {"id":"held-retryable-error","description":"held record: held --retryable-error--> held","requirements":["MBX-050"],"input":{"state":"held","event":"retryable-error"},"expect":{"result":"accept","output":{"state":"held"}}},
+    {"id":"held-exp-passed","description":"held record: held --exp-passed--> expired","requirements":["MBX-050","MBX-053"],"input":{"state":"held","event":"exp-passed"},"expect":{"result":"accept","output":{"state":"expired"}}},
+    {"id":"held-re-deposit","description":"held record: held --re-deposit--> held","requirements":["MBX-050"],"input":{"state":"held","event":"re-deposit"},"expect":{"result":"accept","output":{"state":"held"}}},
+    {"id":"delivered-recipient-accepted","description":"held record: recipient-accepted is illegal in delivered","requirements":["MBX-050"],"input":{"state":"delivered","event":"recipient-accepted"},"expect":{"result":"reject"}},
+    {"id":"delivered-recipient-duplicate","description":"held record: recipient-duplicate is illegal in delivered","requirements":["MBX-050"],"input":{"state":"delivered","event":"recipient-duplicate"},"expect":{"result":"reject"}},
+    {"id":"delivered-recipient-refusal","description":"held record: recipient-refusal is illegal in delivered","requirements":["MBX-050"],"input":{"state":"delivered","event":"recipient-refusal"},"expect":{"result":"reject"}},
+    {"id":"delivered-retryable-error","description":"held record: retryable-error is illegal in delivered","requirements":["MBX-050"],"input":{"state":"delivered","event":"retryable-error"},"expect":{"result":"reject"}},
+    {"id":"delivered-exp-passed","description":"held record: delivered --exp-passed--> delivered","requirements":["MBX-050","MBX-053"],"input":{"state":"delivered","event":"exp-passed"},"expect":{"result":"accept","output":{"state":"delivered"}}},
+    {"id":"delivered-re-deposit","description":"held record: delivered --re-deposit--> delivered","requirements":["MBX-050"],"input":{"state":"delivered","event":"re-deposit"},"expect":{"result":"accept","output":{"state":"delivered"}}},
+    {"id":"dropped-recipient-accepted","description":"held record: recipient-accepted is illegal in dropped","requirements":["MBX-050"],"input":{"state":"dropped","event":"recipient-accepted"},"expect":{"result":"reject"}},
+    {"id":"dropped-recipient-duplicate","description":"held record: recipient-duplicate is illegal in dropped","requirements":["MBX-050"],"input":{"state":"dropped","event":"recipient-duplicate"},"expect":{"result":"reject"}},
+    {"id":"dropped-recipient-refusal","description":"held record: recipient-refusal is illegal in dropped","requirements":["MBX-050"],"input":{"state":"dropped","event":"recipient-refusal"},"expect":{"result":"reject"}},
+    {"id":"dropped-retryable-error","description":"held record: retryable-error is illegal in dropped","requirements":["MBX-050"],"input":{"state":"dropped","event":"retryable-error"},"expect":{"result":"reject"}},
+    {"id":"dropped-exp-passed","description":"held record: dropped --exp-passed--> dropped","requirements":["MBX-050","MBX-053"],"input":{"state":"dropped","event":"exp-passed"},"expect":{"result":"accept","output":{"state":"dropped"}}},
+    {"id":"dropped-re-deposit","description":"held record: dropped --re-deposit--> dropped","requirements":["MBX-050"],"input":{"state":"dropped","event":"re-deposit"},"expect":{"result":"accept","output":{"state":"dropped"}}},
+    {"id":"expired-recipient-accepted","description":"held record: recipient-accepted is illegal in expired","requirements":["MBX-050"],"input":{"state":"expired","event":"recipient-accepted"},"expect":{"result":"reject"}},
+    {"id":"expired-recipient-duplicate","description":"held record: recipient-duplicate is illegal in expired","requirements":["MBX-050"],"input":{"state":"expired","event":"recipient-duplicate"},"expect":{"result":"reject"}},
+    {"id":"expired-recipient-refusal","description":"held record: recipient-refusal is illegal in expired","requirements":["MBX-050"],"input":{"state":"expired","event":"recipient-refusal"},"expect":{"result":"reject"}},
+    {"id":"expired-retryable-error","description":"held record: retryable-error is illegal in expired","requirements":["MBX-050"],"input":{"state":"expired","event":"retryable-error"},"expect":{"result":"reject"}},
+    {"id":"expired-exp-passed","description":"held record: expired --exp-passed--> expired","requirements":["MBX-050","MBX-053"],"input":{"state":"expired","event":"exp-passed"},"expect":{"result":"accept","output":{"state":"expired"}}},
+    {"id":"expired-re-deposit","description":"held record: expired --re-deposit--> expired","requirements":["MBX-050"],"input":{"state":"expired","event":"re-deposit"},"expect":{"result":"accept","output":{"state":"expired"}}}
+  ]
+}
