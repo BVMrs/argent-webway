@@ -826,18 +826,12 @@
       ]
     },
     {
-      "description": "after a normal rotation, a cert signed by the old root key stays valid",
+      "description": "after a rotation, a cert signed by the old root key is no longer accepted (owners reissue)",
       "expect": {
-        "output": {
-          "exp": "2027-10-01T00:00:00Z",
-          "iat": "2026-11-01T00:00:00Z",
-          "iss": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
-          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
-          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
-        },
-        "result": "accept"
+        "error": "StatementUntrusted",
+        "result": "reject"
       },
-      "id": "rotated-old-key-valid",
+      "id": "rotated-old-key-retired",
       "input": {
         "now": "2026-11-07T12:00:00Z",
         "pins": [
@@ -938,40 +932,65 @@
       ]
     },
     {
-      "description": "after a rotation marked compromised, the old key's certs are rejected",
+      "description": "C's root list revokes the agent key the cert certifies",
       "expect": {
-        "error": "StatementUntrusted",
+        "error": "StatementRevoked",
         "result": "reject"
       },
-      "id": "rotated-compromised-old-key",
+      "id": "revoked-subject-key",
       "input": {
         "now": "2026-11-07T12:00:00Z",
         "pins": [
           {
-            "events": [
-              {
-                "payload": "eyJpYXQiOiIyMDI2LTExLTAyVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwia2V5IjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJuZXh0IjoiYjM6MFpJMGhjM1VhdWthT0dQLWNidFJUZ1p6R29xTl9ZZDFJTDhGNko2RU5MVSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzZXEiOjB9",
-                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
-                "signature": "IoWIZEjjWwE38YksmuC5ouTTpUpeV9N6pNY0nWKjgbUW2arLlzDmRuCtLp5C4xpVrZivqv27egzD6vXjgf3iCA"
-              },
-              {
-                "payload": "eyJjb21wcm9taXNlZCI6dHJ1ZSwiaWF0IjoiMjAyNi0xMS0wMlQwMDowMDowMFoiLCJpc3MiOiJkaWQ6a2V5Ono2TWt3UG1nNjNqeVJGd21kOFp2TE5xaEJyMzdEcUpxUjh3eEE1VERxS0ZlYXhpNiIsImtleSI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwibmV4dCI6ImIzOjJua3ZsU0k4ZEM3Xy1sUF9IQVY3VE5TelpUaWduOTZCMEtUWE1HTk5Yd0UiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwicHJldiI6ImIzOkxST2ZMU0N1NzFnOGlnMTQtNHh5WTBkOUNOX0w1bjJ0dGM2UG1mbzRSVjQiLCJzZXEiOjF9",
-                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3dQbWc2M2p5UkZ3bWQ4WnZMTnFoQnIzN0RxSnFSOHd4QTVURHFLRmVheGk2IiwidHlwIjoid2Vid2F5LW93bmVyLWtleStqd3MifQ",
-                "signature": "_--rZ_0cSYgkrNzMYirS3NRhnRDvBt01hHUJUCfhOa3L14rjnubPsog1IM_3v2K-HRABMmyaImvFtnUl1D4dDw"
-              }
-            ],
+            "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
+          }
+        ],
+        "revocations": [
+          {
+            "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOlsid3dhOnlpdmRsbWRsbzJkcWl5NWl3anBldnduZ216bWQ3eDRldng2b3J4bWo0cGJ4N2Uyemp5YmEiXSwic2VxIjoxLCJ2YWxpZFVudGlsIjoiMjAyNi0xMi0wMVQwMDowMDowMFoifQ",
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+            "signature": "MOIgIGjPwbgGhNB1qovxFbcppXvU1lE64aGIU8sjVgk3tngZA1JHDRXiaUz-AaUBqdf6AM84j8NC9ciLIsQsDA"
+          }
+        ],
+        "statement": {
+          "payload": "eyJhZ2VudCI6Ind3YTp5aXZkbG1kbG8yZHFpeTVpd2pwZXZ3bmdtem1kN3g0ZXZ4Nm9yeG1qNHBieDdlMnpqeWJhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwibm9kZSI6Ind3bjpvczVibDN2eXI2aHVjejRqeXR4Z3puZzdpNzQ0d3FpaG5uNm9uMml5ZzVtN2o3d3JhNGlhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+          "signature": "gbJetlQZyb62Wpoo0oB8PJeW6q9tWVuHAZ68YqRztz74A1N-tQApEs285iF85aomCQVV0YJEU9cHX9IGz5AjCg"
+        },
+        "typ": "webway-agent-cert+jws"
+      },
+      "requirements": [
+        "CAP-175"
+      ]
+    },
+    {
+      "description": "an issuer-signed list valid after its issuer-cert expires",
+      "expect": {
+        "error": "StatementInvalid",
+        "result": "reject"
+      },
+      "id": "revocation-list-outlives-issuer",
+      "input": {
+        "issuerCert": {
+          "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+          "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+        },
+        "now": "2026-11-29T13:00:00Z",
+        "pins": [
+          {
             "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
           }
         ],
         "statement": {
-          "payload": "eyJleHAiOiIyMDI3LTEwLTAxVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJub2RlIjoid3duOm9zNWJsM3Z5cjZodWN6NGp5dHhnem5nN2k3NDR3cWlobm42b24yaXlnNW03ajd3cmE0aWEiLCJvd25lciI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIn0",
-          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LW5vZGUtY2VydCtqd3MifQ",
-          "signature": "PBDPxgrJTdhKTppxQGMaoP5QXLDrPBgCGucoS2bH0bcNdNzxc2K_edzt68UyC_0GBljiLxktISZ4JpxT5EFlAg"
+          "payload": "eyJpYXQiOiIyMDI2LTExLTI5VDEyOjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjEsInZhbGlkVW50aWwiOiIyMDI2LTExLTMwVDA2OjAwOjAwWiJ9",
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+          "signature": "PHgOUtycVoWjB08ryQ2S_6PYKvRJ_LK3v0lDbnlOrxG8dCR2gDqwEwNHNCVWZYHaNCSN2_BKZ0AkH_pWTlDPDQ"
         },
-        "typ": "webway-node-cert+jws"
+        "typ": "webway-revocation+jws"
       },
       "requirements": [
-        "CAP-021"
+        "CAP-014"
       ]
     }
   ],

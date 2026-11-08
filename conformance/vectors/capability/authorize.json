@@ -24,8 +24,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -90,8 +89,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:7tblz65xioroiomjxyvorzcyuyv4hrc66i6uaozriasta4nhanaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:7tblz65xioroiomjxyvorzcyuyv4hrc66i6uaozriasta4nhanaq"
         },
         "state": {
           "calls": {
@@ -152,8 +150,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -253,7 +250,7 @@
       ]
     },
     {
-      "description": "20-day token with a fresh list from its issuing key",
+      "description": "20-day token with fresh lists from its issuing key and its owner's root key",
       "expect": {
         "output": {
           "holders": [
@@ -275,8 +272,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -288,6 +284,11 @@
               "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
               "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
             }
           ]
         },
@@ -320,7 +321,7 @@
       ]
     },
     {
-      "description": "the fresh list is stapled by the sender",
+      "description": "the fresh lists are stapled by the sender",
       "expect": {
         "output": {
           "holders": [
@@ -339,6 +340,11 @@
               "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
               "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
             }
           ]
         },
@@ -349,8 +355,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -389,6 +394,68 @@
       ]
     },
     {
+      "description": "20-day token, fresh issuer list but no fresh root list",
+      "expect": {
+        "error": "RevocationStatusUnavailable",
+        "result": "reject"
+      },
+      "id": "long-lived-no-root-list",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGIICCmtcGIg0KCwiHCBIGIIC-g9gGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiCAvoPYBgoEGgIIAhIkCAASIDUtIKK97qw-5s-OW5ceEdhjMfMXINwePJhr0xuV9qBjGkA_qAc94mL_z1OSx7RmHc0-sKd2UCMDe6RIjaSfvWr8jHvbTKgH4usWAoPo_TvXAzZ9J7n7SICtzUejCynI6VEGIiIKIHTgH3DsNU6OJv31ebxUD9INxFB8I64bd7Ya2_UYH5DG",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            }
+          ]
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-172"
+      ]
+    },
+    {
       "description": "A's issuing key lists C's token: not its token, ignored",
       "expect": {
         "output": {
@@ -411,8 +478,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -495,8 +561,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -575,8 +640,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -655,8 +719,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -712,8 +775,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -769,8 +831,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -820,8 +881,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:mko74vtrke4ulqud3r6k4eegxojamjhvupmgtghwwqwcdfiyn7sq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:mko74vtrke4ulqud3r6k4eegxojamjhvupmgtghwwqwcdfiyn7sq"
         },
         "state": {
           "calls": {
@@ -877,8 +937,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -934,8 +993,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -991,8 +1049,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1048,8 +1105,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1105,8 +1161,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1163,8 +1218,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1220,8 +1274,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1282,8 +1335,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1339,8 +1391,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1396,8 +1447,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1453,8 +1503,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1510,8 +1559,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1567,8 +1615,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1630,8 +1677,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1687,8 +1733,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1744,8 +1789,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1801,8 +1845,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1858,8 +1901,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -1915,8 +1957,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -1972,8 +2013,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2029,8 +2069,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2086,8 +2125,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2143,8 +2181,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2200,8 +2237,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2257,8 +2293,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:ilnpd3iwre5m32mx7lwt7ym6osdcwyqihw5sw6nr4gpofoehm3gq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:ilnpd3iwre5m32mx7lwt7ym6osdcwyqihw5sw6nr4gpofoehm3gq"
         },
         "state": {
           "calls": {
@@ -2322,8 +2357,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:gi7yetinfgnc4uzwdp2o6plb4j4qf2lf3hepgszs2xp3tnymnrja",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:gi7yetinfgnc4uzwdp2o6plb4j4qf2lf3hepgszs2xp3tnymnrja"
         },
         "state": {
           "calls": {
@@ -2379,8 +2413,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2436,8 +2469,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2493,8 +2525,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2550,8 +2581,7 @@
             "suite": "unit"
           },
           "operation": "SendStreamingMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2607,8 +2637,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2664,8 +2693,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -2721,8 +2749,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2778,8 +2805,7 @@
             "suite": "unit"
           },
           "operation": "CancelTask",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2835,8 +2861,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2893,8 +2918,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -2965,8 +2989,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3023,8 +3046,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3086,8 +3108,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -3149,8 +3170,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3213,8 +3233,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3283,8 +3302,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3347,8 +3365,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3404,8 +3421,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3467,8 +3483,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3537,8 +3552,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3607,8 +3621,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3677,8 +3690,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3747,8 +3759,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3817,8 +3828,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3887,8 +3897,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -3958,8 +3967,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4023,8 +4031,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4093,8 +4100,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4164,8 +4170,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -4235,8 +4240,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4306,8 +4310,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4376,8 +4379,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4447,8 +4449,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4524,8 +4525,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4595,8 +4595,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4666,8 +4665,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4736,8 +4734,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
         },
         "state": {
           "calls": {
@@ -4794,8 +4791,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4857,8 +4853,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
         },
         "state": {
           "calls": {
@@ -4914,8 +4909,7 @@
             "suite": "unit"
           },
           "operation": "InviteRedeem",
-          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq"
         },
         "state": {
           "calls": {
@@ -4927,6 +4921,11 @@
               "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
               "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
             }
           ]
         },
@@ -4978,8 +4977,7 @@
             "suite": "unit"
           },
           "operation": "InviteRedeem",
-          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq"
         },
         "state": {
           "calls": {
@@ -4994,6 +4992,11 @@
               "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
               "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
             }
           ]
         },
@@ -5044,8 +5047,7 @@
             "suite": "unit"
           },
           "operation": "SendMessage",
-          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq",
-          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq"
         },
         "state": {
           "calls": {
@@ -5057,6 +5059,11 @@
               "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
               "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
             }
           ]
         },
@@ -5125,6 +5132,7 @@
                 "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
               }
             ],
+            "capability": "skill:run-tests",
             "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
             "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
           }
@@ -5194,6 +5202,7 @@
                 "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
               }
             ],
+            "capability": "skill:run-tests",
             "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
             "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
           }
@@ -5261,6 +5270,7 @@
                 "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
               }
             ],
+            "capability": "skill:run-tests",
             "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
             "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
           }
@@ -5328,6 +5338,7 @@
                 "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
               }
             ],
+            "capability": "skill:run-tests",
             "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
             "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
           }
@@ -5401,6 +5412,7 @@
                 "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE"
               }
             ],
+            "capability": "skill:run-tests",
             "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
             "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
           }
@@ -5432,6 +5444,899 @@
       "requirements": [
         "CAP-161",
         "CAP-174"
+      ]
+    },
+    {
+      "description": "an authority-block rule right($c) <- capability($c)",
+      "expect": {
+        "error": "CapabilityInvalid",
+        "result": "reject"
+      },
+      "id": "authority-rule-widening",
+      "input": {
+        "cap": {
+          "access": "EtgECu0DCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCgFjCgpjYXBhYmlsaXR5CglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAKhMKBwgEEgMIiwgSCAiMCBIDCIsIMhoKGAoCCBsSCAiNCBIDCI4IEggIjwgSAwiOCDIoCiYKAggbEgcIBRIDCJAIGhcKBQoDCJAICggKBiDIs7zXBgoEGgIIAhIkCAASICaTjFjJ9D4Lohh6d9vlzPAr4d_ZEWojaZixPNEjVmMfGkA175r0xTaJbgQtySrGlc5xDQiDZWZPrsxZpTxEPW-oNhMI7XFYqO_TKO8hvIuLPl-8m3W8FIBRu7P6z7Xi8C4JIiIKIKR5TG3q1gD8UWZA-YoTP6993ZgJnr5-1587QknnCc2J",
+          "capability": "invite:0190f1d0-1111-7000-8000-000000000001#redeem"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "InviteRedeem",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJyZXNvdXJjZSI6WyJza2lsbDpydW4tdGVzdHMiXX19",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "C66tkKWEdBtjINR1WnzEdX8xz8x4ApA3IFV_oS2VQVhCLhLpU6B5tLVcT6Y_IzYL7uT_j053AUzSTMULhk1_Ag"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-105"
+      ]
+    },
+    {
+      "description": "the requested capability is outside the issuing key's resource scope",
+      "expect": {
+        "error": "CapabilityDenied",
+        "result": "reject"
+      },
+      "id": "capability-outside-scope",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASICASS5Uz46mVb_NvbovNLGcPQ0WA_VHTGORDNr8bYTxvGkAk17-0AD-CXlKJKqZ_H165DlbZbO1ZNiiKOaGvrKQw1uTpTQxnWzsuQt_tfva3Qe46oW-mpl8prhIFDum6iusGIiIKIOFpFgqe1niigEThPUJ1TjTuESR9WKSogPn9bRbYOkF8",
+          "capability": "skill:lint"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJyZXNvdXJjZSI6WyJza2lsbDpydW4tdGVzdHMiXX19",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "C66tkKWEdBtjINR1WnzEdX8xz8x4ApA3IFV_oS2VQVhCLhLpU6B5tLVcT6Y_IzYL7uT_j053AUzSTMULhk1_Ag"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-030"
+      ]
+    },
+    {
+      "description": "a mandate authority-block rule derives grant() for any request",
+      "expect": {
+        "error": "CapabilityInvalid",
+        "result": "reject"
+      },
+      "id": "mandate-rule-widening",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASICASS5Uz46mVb_NvbovNLGcPQ0WA_VHTGORDNr8bYTxvGkAk17-0AD-CXlKJKqZ_H165DlbZbO1ZNiiKOaGvrKQw1uTpTQxnWzsuQt_tfva3Qe46oW-mpl8prhIFDum6iusGIiIKIOFpFgqe1niigEThPUJ1TjTuESR9WKSogPn9bRbYOkF8",
+          "capability": "skill:run-tests",
+          "mandate": {
+            "issuerCert": {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "eNd_MY9WTpcSTq7NaLBDByGrrlTWCfswxuq0bW4A4Bmwx7YCfI6utJvyk9ip4yhLVWhSzTsGG6xU81Cme942Aw"
+            },
+            "principalCert": {
+              "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+            },
+            "token": "EqEGCrYFCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoKc2tpbGw6bm9uZQoLb3JpZ2luX3Rhc2sKJDAxOTBmMWMwLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDBhYQoGaG9sZGVyCjh3d2E6bnAyZ2kzbGF5dmZ2NXdjbGt1cWdlcjZvY3V5cHY3YnV1MjN2N2QzeG03cWV2bHBrYWNtcQoBbwoBYwoOcmVzb3VyY2Vfb3duZXIKCmNhcGFiaWxpdHkKCXByZXNlbnRlcgoBawoOY3VycmVudF9ob2xkZXIYAyIPCg0IgAgSAxiBCBIDGIIIIgoKCAiDCBIDGIQIIgkKBwgHEgMYhQgiDQoLCIYIEgYguJe81wYiDQoLCIcIEgYgyLO81wYiCgoICIgIEgMYiQgiDwoNCIoIEgMYiwgSAxiMCCIKCggIjQgSAxiOCCIOCgwIjwgSAxiQCBICEAAqIwoNCIoIEgMIkQgSAwiSCBIICJMIEgMIkQgSCAiUCBIDCJIIMhoKGAoCCBsSCAiVCBIDCJYIEggIlwgSAwiWCBIkCAASIBMxHvPOO0A21xZKZf6QezIz00gSDpANSOi7HQzAGPsSGkB_gAadaji5AnChwYUkWYIW58ecn0T0bGnSP-Poim31M3V0dUKNPwmSns2ZeTjDnhE9QQ2SxYeqVsrOhmQOc7cIIiIKIKrdkTGdN0nuwmn3XJ2GZJiLVeR0tJpR4CJ-aH7fQRvr"
+          }
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-105"
+      ]
+    },
+    {
+      "description": "task:T1#read presented for task T2",
+      "expect": {
+        "error": "CapabilityDenied",
+        "result": "reject"
+      },
+      "id": "task-id-mismatch",
+      "input": {
+        "cap": {
+          "access": "EtMECugDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoudGFzazowMTkwZjFjMi03ZDNhLTcwMDAtODAwMC0wMDAwMDAwMDAwMDEjcmVhZAoGaG9sZGVyCjh3d2E6bnAyZ2kzbGF5dmZ2NXdjbGt1cWdlcjZvY3V5cHY3YnV1MjN2N2QzeG03cWV2bHBrYWNtcQoJcHJlc2VudGVyCgFrCg5jdXJyZW50X2hvbGRlcgoBdBgDIg8KDQiACBIDGIEIEgMYgggiCgoICIMIEgMYhAgiCQoHCAcSAxiFCCINCgsIhggSBiC4l7zXBiINCgsIhwgSBiDIs7zXBiIJCgcIBBIDGIgIIg4KDAiJCBIDGIoIEgIQADIaChgKAggbEggIiwgSAwiMCBIICI0IEgMIjAgyKAomCgIIGxIHCAUSAwiOCBoXCgUKAwiOCAoICgYgyLO81wYKBBoCCAISJAgAEiDfntUDMMJhj7VGBwid3VpdtCgnE0Gs_Hu6cgIm-y3bNBpAvpDC-1idbWznb8mYNb_NnbUpNJb5OXpgxmkMvAXOLicpFSRTeW-3XGp6q2s0sGjs8Iu_haEbwiMfiXBsntR5AyIiCiDpyN5JCtjAbcgB0YApQLYT9c7_l1RK9QTijG77mEWomA",
+          "capability": "task:0190f1c2-7d3a-7000-8000-000000000001#read"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "GetTask",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+          "taskId": "0190f1c2-7d3a-7000-8000-0000000000ff"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-106"
+      ]
+    },
+    {
+      "description": "the creator continues its task, presenting its skill token again",
+      "expect": {
+        "output": {
+          "holders": [
+            "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+          ]
+        },
+        "result": "accept"
+      },
+      "id": "skill-continue-own-task",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASICASS5Uz46mVb_NvbovNLGcPQ0WA_VHTGORDNr8bYTxvGkAk17-0AD-CXlKJKqZ_H165DlbZbO1ZNiiKOaGvrKQw1uTpTQxnWzsuQt_tfva3Qe46oW-mpl8prhIFDum6iusGIiIKIOFpFgqe1niigEThPUJ1TjTuESR9WKSogPn9bRbYOkF8",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [],
+          "task": {
+            "authorizedBy": [],
+            "capability": "skill:run-tests",
+            "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+            "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          }
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-106",
+        "CAP-161"
+      ]
+    },
+    {
+      "description": "another holder of the same skill cannot inject into broker's task",
+      "expect": {
+        "error": "CapabilityDenied",
+        "result": "reject"
+      },
+      "id": "skill-continue-other-task",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTp6YzZzcHVuZmlrZjU2dnJsbnNyZXl6ZWl6ZmplZDV4ZTdmaTZuNTY1dzdhc3lleDNudWFxCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASIPqnvr8Nacm3OP4bGLXptTNPYcSlLOLIM4tK6Xuz7yKsGkC_YvhHBXKOSqBcMsO3VhpbN11kGKFNFCeYr845ZulR0y1Mb3jjrjerFz-ZY8VNkYUPMPDf5pmSj12pCADXEv8FIiIKICiKcyfz8O6E5bqfpBNEnG5VoW0uVfEF2GCjYJkIbEO-",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
+          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [],
+          "task": {
+            "authorizedBy": [],
+            "capability": "skill:run-tests",
+            "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+            "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          }
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTp6YzZzcHVuZmlrZjU2dnJsbnNyZXl6ZWl6ZmplZDV4ZTdmaTZuNTY1dzdhc3lleDNudWFxIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "Q_fH1BbO9gO7svLroEMFOR2-4-3qFEeo8woUElaxZcYPp-nXH29fXqKWoacKCNF_YkF3FpY0aws_DgDNfyioCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-106"
+      ]
+    },
+    {
+      "description": "task:<id>#write lets another agent continue that task",
+      "expect": {
+        "output": {
+          "holders": [
+            "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
+          ]
+        },
+        "result": "accept"
+      },
+      "id": "task-write-granted",
+      "input": {
+        "cap": {
+          "access": "EtQECukDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwovdGFzazowMTkwZjFjMi03ZDNhLTcwMDAtODAwMC0wMDAwMDAwMDAwMDEjd3JpdGUKBmhvbGRlcgo4d3dhOnpjNnNwdW5maWtmNTZ2cmxuc3JleXplaXpmamVkNXhlN2ZpNm41NjV3N2FzeWV4M251YXEKCXByZXNlbnRlcgoBawoOY3VycmVudF9ob2xkZXIKAXQYAyIPCg0IgAgSAxiBCBIDGIIIIgoKCAiDCBIDGIQIIgkKBwgHEgMYhQgiDQoLCIYIEgYguJe81wYiDQoLCIcIEgYgyLO81wYiCQoHCAQSAxiICCIOCgwIiQgSAxiKCBICEAAyGgoYCgIIGxIICIsIEgMIjAgSCAiNCBIDCIwIMigKJgoCCBsSBwgFEgMIjggaFwoFCgMIjggKCAoGIMizvNcGCgQaAggCEiQIABIgp5MoV3y1OVFFNHuDFLgwwM9bCf68O832pAYC74P966kaQJdAynTqF5xSm2ooEdPHTGXZxF_BnQaayvnyu75nhGD1W6VL87nwfepBSuYmqd0Au1sXscvBNoIumv9QYrSOKQYiIgogOhBNuFufKSaQChgZHoRA6vQZ_AhEanHcB9CQrks85nM",
+          "capability": "task:0190f1c2-7d3a-7000-8000-000000000001#write"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq",
+          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [],
+          "task": {
+            "authorizedBy": [],
+            "capability": "skill:run-tests",
+            "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+            "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          }
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTp6YzZzcHVuZmlrZjU2dnJsbnNyZXl6ZWl6ZmplZDV4ZTdmaTZuNTY1dzdhc3lleDNudWFxIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "Q_fH1BbO9gO7svLroEMFOR2-4-3qFEeo8woUElaxZcYPp-nXH29fXqKWoacKCNF_YkF3FpY0aws_DgDNfyioCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-106",
+        "CAP-102"
+      ]
+    },
+    {
+      "description": "continuing a task with new input needs the token again",
+      "expect": {
+        "error": "CapabilityMissing",
+        "result": "reject"
+      },
+      "id": "followup-continue-needs-token",
+      "input": {
+        "cap": {},
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+          "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [],
+          "task": {
+            "authorizedBy": [],
+            "capability": "skill:run-tests",
+            "creator": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq",
+            "taskId": "0190f1c2-7d3a-7000-8000-000000000001"
+          }
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-161"
+      ]
+    },
+    {
+      "description": "A's root list revokes the issuing key itself; another cert for it does not help",
+      "expect": {
+        "error": "CapabilityRevoked",
+        "result": "reject"
+      },
+      "id": "revoked-issuer-key",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASICASS5Uz46mVb_NvbovNLGcPQ0WA_VHTGORDNr8bYTxvGkAk17-0AD-CXlKJKqZ_H165DlbZbO1ZNiiKOaGvrKQw1uTpTQxnWzsuQt_tfva3Qe46oW-mpl8prhIFDum6iusGIiIKIOFpFgqe1niigEThPUJ1TjTuESR9WKSogPn9bRbYOkF8",
+          "capability": "skill:run-tests",
+          "mandate": {
+            "issuerCert": {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDJUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJpc3N1ZXIiOiJ3d2k6dGNhaW9keTdic3h0NDJqN2NtbnRmZDM2aW9oeTd1aXA1Y3k2aWp4ZW14MnFmZHdoNTRpcSIsIm5vZGUiOiJ3d246YjJtcjJ6cnZqd29jZHFrcGNxbnhkbm5zazN2Yzd1ejd2Mm1kdGJwa3RhY2ttNGVtM3h6YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1rclNOOHlVOWhUV3E0dXZBUm9tWFBnc0puNXBNU0NKWUo4RUpjdHJVSEgxOHoiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "4l1KkpPOhjd2J1EgnDxKGFb9GMptEjRnctxq_UhJLexL-WUwFM_oe_VF1BymZRQs4N-27NR_oF_x-xznDUWRBA"
+            },
+            "principalCert": {
+              "payload": "eyJhZ2VudCI6Ind3YTozZ2wzY2lrNGN0dHM2YTNseTR1bmRmbWRyc2loYzNzZ2psN2ZjN3Jwd3l1bWNndHRsbXlhIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwibm9kZSI6Ind3bjpiMm1yMnpydmp3b2NkcWtwY3FueGRubnNrM3ZjN3V6N3YybWR0YnBrdGFja200ZW0zeHphIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "9GxlA9gickd1yUS0y1ZA8rSOQLedJgGAJcpegTd-pN8Mj8iliUGmH4wcjnHduYB2lSbq3vDnQif-wKLx-lpHDA"
+            },
+            "token": "Et8FCvQECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEKOGRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6CgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOjNnbDNjaWs0Y3R0czZhM2x5NHVuZGZtZHJzaWhjM3Nnamw3ZmM3cnB3eXVtY2d0dGxteWEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoPc2tpbGw6cnVuLXRlc3RzCgtvcmlnaW5fdGFzawokMDE5MGYxYzAtMDAwMC03MDAwLTgwMDAtMDAwMDAwMDAwMGFhCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyGAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgoKCAiICBIDGIkIIg8KDQiKCBIDGIsIEgMYjAgiCgoICI0IEgMYjggiDgoMCI8IEgMYkAgSAhAAMhoKGAoCCBsSCAiRCBIDCJIIEggIkwgSAwiSCBIkCAASIORxGJ_ODm9Gs63EfCUeuNiQ9p0ld2ZElz6cOXRYyreXGkAyNJkz_K4XMO0mTzNdVEFbE2b6MHcF2TvFLoS8EZTDVwPO4gw6nYBpPtCVYEQ-Y8hzueJO8Nqz9GhI7tzGyS8KIiIKIGeaAlY2JeFqV-1Tl3xw4YL2AYMwVVQYWuKlsFEwQV5v"
+          }
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6Iiwib3duZXIiOiJkaWQ6a2V5Ono2TWtyU044eVU5aFRXcTR1dkFSb21YUGdzSm41cE1TQ0pZSjhFSmN0clVISDE4eiIsInJldm9rZWQiOlsid3dpOnRjYWlvZHk3YnN4dDQyajdjbW50ZmQzNmlvaHk3dWlwNWN5NmlqeGVteDJxZmR3aDU0aXEiXSwic2VxIjozLCJ2YWxpZFVudGlsIjoiMjAyNi0xMi0wMVQwMDowMDowMFoifQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3JTTjh5VTloVFdxNHV2QVJvbVhQZ3NKbjVwTVNDSllKOEVKY3RyVUhIMTh6IiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "i92HGybAkxSrbf0GrYjJZ5DvPjFCRe7K2KcCeZx0uVb-NRNPZLIe2PEL7m8e7CWSCCK4cRFXuOfDhcgQRRzxDA"
+            }
+          ]
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-175"
+      ]
+    },
+    {
+      "description": "B's root list revokes broker's agent key",
+      "expect": {
+        "error": "CapabilityDenied",
+        "result": "reject"
+      },
+      "id": "revoked-presenter-key",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASICASS5Uz46mVb_NvbovNLGcPQ0WA_VHTGORDNr8bYTxvGkAk17-0AD-CXlKJKqZ_H165DlbZbO1ZNiiKOaGvrKQw1uTpTQxnWzsuQt_tfva3Qe46oW-mpl8prhIFDum6iusGIiIKIOFpFgqe1niigEThPUJ1TjTuESR9WKSogPn9bRbYOkF8",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSIsInJldm9rZWQiOlsid3dhOm5wMmdpM2xheXZmdjV3Y2xrdXFnZXI2b2N1eXB2N2J1dTIzdjdkM3htN3Fldmxwa2FjbXEiXSwic2VxIjozLCJ2YWxpZFVudGlsIjoiMjAyNi0xMi0wMVQwMDowMDowMFoifQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "JSXYQfmIovIYziKxv54dBgljYscYOJhoDrEp0kIB0_2Ppflk8vEzWmAuEo2EKDUhDtKu29K0lbDmiv853SQiBw"
+            }
+          ]
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-175",
+        "CAP-041"
+      ]
+    },
+    {
+      "description": "a token minted by C's issuing key on node gamma2, presented at gamma",
+      "expect": {
+        "error": "CapabilityInvalid",
+        "result": "reject"
+      },
+      "id": "access-other-node",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6Z243bnlldWhuc2hzbG9wYmVreGVlNG90ZzR3am42eDU1YWo3NWw0dWJwZ3M3cHhleTY2cQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASIEcB8zskoF54XPXQ4o-GKmhO-ThIkUjsASFZiZJE5KmOGkCHyNxgsx9FaOtbY_HCdHwWcO2RF9enBS39npuEtgtEU3JIBEWEXTnSE8X1iMVlP-vBlcOGNwzHk-xH_gvAppUIIiIKIKbRv4ZqZwudXGBO2YulEPu3uf_kmyp3dsoGvksTuD8t",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            },
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6Z243bnlldWhuc2hzbG9wYmVreGVlNG90ZzR3am42eDU1YWo3NWw0dWJwZ3M3cHhleTY2cSIsIm5vZGUiOiJ3d246M3BoMmZtbnBuM2R2ZHVrZHdzeXV0N2hta25tcXhhd2lhNmRmYTZmZXN0ZHI2Z3F3Y3YzYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "MKT7RelkitRvabeSrdTVCC6hH0aGdhMSiVJwb3vQxcdHbGCO6Bn_fzqoRE-fTmDdBkyE5H5nWv5QCDuVemZ_Dg"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-110"
+      ]
+    },
+    {
+      "description": "a redemption carrying a mandate rooted in the redeemer's own owner",
+      "expect": {
+        "error": "CapabilityInvalid",
+        "result": "reject"
+      },
+      "id": "redeem-with-mandate",
+      "input": {
+        "cap": {
+          "access": "EqoECr8DCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoyaW52aXRlOjAxOTBmMWQwLTExMTEtNzAwMC04MDAwLTAwMDAwMDAwMDAwMSNyZWRlZW0KBmhvbGRlcgo4d3dhOngzcm5sZWgyYmtuMmdneWtuNDJrbGh4dHhzdmx2cnFubTN6ZHppczQ3Y2NhYXlhdjdhd3EKCXByZXNlbnRlcgoBawoOY3VycmVudF9ob2xkZXIYAyIPCg0IgAgSAxiBCBIDGIIIIgoKCAiDCBIDGIQIIgkKBwgHEgMYhQgiDQoLCIYIEgYggLW71wYiDQoLCIcIEgYggNjA1wYiCQoHCAQSAxiICCIOCgwIiQgSAxiKCBICEAAyGgoYCgIIGxIICIsIEgMIjAgSCAiNCBIDCIwIEiQIABIgD9e12M22XOo6R0zuJ3x_M8z6LZjgRB-3wEX0P3q5VAUaQCuBQLFi3-KI4Gl1nY4JuWapTNm4LmM_o_qST76-lHZjBhOFyQSMOGen_lPhMUoCeea3X151EQB7k6vVD24tWQMaqgIKVAoGaG9sZGVyCjh3d2E6emJ5bnF2aHB6M2I3c2c2bHdxanR1ZGNsNjRqemh0ajR5d29wbHFnYW41dnU0b3Bwbm9wcRgFIg4KDAiACBIDGIEIEgIQARIkCAASINSEGxd6KlZFRhEXoz0onpsUVP47gTKM8JY0scJ3NcNtGkA12TqomlqgkpUEXln_KYXKVxkw35RDR422xoUl6gTmD_dOsv0-WJfQ9mvPjhauhzFNlbCBGQtJ4jrlYeisWqsPImgKQN5Aequ4mra82zOJGXFfEBiDcuA4VH7IyukWDFqSebXOG_ZbqUmOQ8gIbsgnR5cMsRdDFJu07MUvdMJRDZ23ggMSJAgAEiC-4tWQ-gqboxsKbzSlnvO8qrrGDWbyPKJc-IQAYBX4LSgBIiIKICBKhi9nUCF9fPwoLnkbmWj7IpYvjJS0jXFhef5drR8M",
+          "capability": "invite:0190f1d0-1111-7000-8000-000000000001#redeem",
+          "mandate": {
+            "issuerCert": {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWVESEJlZGRMNkcySkoxTk1GUXZ0MjZZY3BSUjdjUTlQSnRCRWNQaW1RN0UiLCJpc3N1ZXIiOiJ3d2k6enl6ZmVlbHdqbWV6eWttd3RwMjMzZ2JkNXpsYXMza2c0dnBjYmF0eHFjN2dieXVrNDZrYSIsIm5vZGUiOiJ3d246cnJ6b3U0c3N6a2Y3NGltczdydm9iYng0YzZzZnVweHZqcngzaXNxam1rbXpheGRkdnc3YSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWVESEJlZGRMNkcySkoxTk1GUXZ0MjZZY3BSUjdjUTlQSnRCRWNQaW1RN0UiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "A0VUG9EEvH_iZLTLS8-Y6DWfgRrCCVFCnVRTBP_zsNccKFAsYskoBbZBsGSqBcSzIzT-rt1hlYa2WAcrpiOhAw"
+            },
+            "principalCert": {
+              "payload": "eyJhZ2VudCI6Ind3YTp6YnlucXZocHozYjdzZzZsd3FqdHVkY2w2NGp6aHRqNHl3b3BscWdhbjV2dTRvcHBub3BxIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwibm9kZSI6Ind3bjpycnpvdTRzc3prZjc0aW1zN3J2b2JieDRjNnNmdXB4dmpyeDNpc3FqbWttemF4ZGR2dzdhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpZURIQmVkZEw2RzJKSjFOTUZRdnQyNlljcFJSN2NROVBKdEJFY1BpbVE3RSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "IO9k38btub9wkGRseAAOEaFHj8zbbla6nxDFTNDtNgStKtWA0IbPYJHTdeVcT4u-zG0FT8kNR8Tw4N1UWTXQCQ"
+            },
+            "token": "Ep4FCrMECgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKB21hbmRhdGUKBmlzc3Vlcgo4d3dpOnp5emZlZWx3am1lenlrbXd0cDIzM2diZDV6bGFzM2tnNHZwY2JhdHhxYzdnYnl1azQ2a2EKOGRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFCgZpc3N1ZWQKB2V4cGlyZXMKCXByaW5jaXBhbAo4d3dhOnpieW5xdmhwejNiN3NnNmx3cWp0dWRjbDY0anpodGo0eXdvcGxxZ2FuNXZ1NG9wcG5vcHEKBWdyYW50CjhkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRQoIaW52aXRlOioKC29yaWdpbl90YXNrCiQwMTkwZjFjMC0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwYWEKBmhvbGRlcgoJcHJlc2VudGVyCgFrCg5jdXJyZW50X2hvbGRlchgDIg8KDQiACBIDGIEIEgMYgggiCgoICIMIEgMYhAgiCQoHCAcSAxiFCCINCgsIhggSBiC4l7zXBiINCgsIhwgSBiDIs7zXBiIKCggIiAgSAxiJCCIPCg0IiggSAxiLCBIDGIwIIgoKCAiNCBIDGI4IIg4KDAiPCBIDGIkIEgIQADIaChgKAggbEggIkAgSAwiRCBIICJIIEgMIkQgSJAgAEiDoz3NgJ6npAn5VA-B277i6hZUAgew6KMlWWd0wFycJ_xpALdmCeYY68Mh-wNoteg96M7JCcInw_fC39vHJPH2di2wRE5UdDNM3pND6PMk1ilmYw3ZL7lQMofKQKRFc119mACIiCiAZAyJ3-NccBvhVaun896vKAa3Fn0IwxzpDu6kP1W-ycQ"
+          }
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "InviteRedeem",
+          "presenter": "wwa:zbynqvhpz3b7sg6lwqjtudcl64jzhtj4ywoplqgan5vu4oppnopq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": [
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA3VDA2OjAwOjAwWiIsImlzcyI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjcsInZhbGlkVW50aWwiOiIyMDI2LTExLTA4VDA2OjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Ind3aTptMm5pZjRzNGhhZTIzbTNzdGp5ZXM2dHppY3U2ZGV2NnV3bG9ucHpndjNiejdhcmVxa2dxIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "j64MyG64c7fHeTLzSivnVYdvv-AP2RjU_ac7sKr7i9YdqmFvSV6GToC-kEBahVfybKI3ju9NOND0fr70YT_2Ag"
+            },
+            {
+              "payload": "eyJpYXQiOiIyMDI2LTExLTA1VDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpaVNUQzdXQ2dlR1VwQkNLNXBZUXUyTVNvaUdMbWFHaG5RTUZLcVVFeFpoRSIsInJldm9rZWQiOltdLCJzZXEiOjIsInZhbGlkVW50aWwiOiIyMDI2LTEyLTAxVDAwOjAwOjAwWiJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LXJldm9jYXRpb24randzIn0",
+              "signature": "4ReOgw9UxOV3EWQHS9ESqtPLb2P1KI7Vt1TezVJWtvLuDh_piAQ6Y14afc7bpmKgRBz9Ioq27QejMZ6Om4_LCQ"
+            }
+          ]
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTp6YnlucXZocHozYjdzZzZsd3FqdHVkY2w2NGp6aHRqNHl3b3BscWdhbjV2dTRvcHBub3BxIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwibm9kZSI6Ind3bjpycnpvdTRzc3prZjc0aW1zN3J2b2JieDRjNnNmdXB4dmpyeDNpc3FqbWttemF4ZGR2dzdhIiwib3duZXIiOiJkaWQ6a2V5Ono2TWtpZURIQmVkZEw2RzJKSjFOTUZRdnQyNlljcFJSN2NROVBKdEJFY1BpbVE3RSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2llREhCZWRkTDZHMkpKMU5NRlF2dDI2WWNwUlI3Y1E5UEp0QkVjUGltUTdFIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "IO9k38btub9wkGRseAAOEaFHj8zbbla6nxDFTNDtNgStKtWA0IbPYJHTdeVcT4u-zG0FT8kNR8Tw4N1UWTXQCQ"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-203"
+      ]
+    },
+    {
+      "description": "a fact string containing quotes and Datalog syntax sets no holder and no time",
+      "expect": {
+        "output": {
+          "holders": [
+            "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+          ]
+        },
+        "result": "accept"
+      },
+      "id": "string-looks-like-datalog",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASINebS2lZzf8heFt9gHS13EXVEBGZiGTAgnkpxMdMHMBGGkAyLrgYAKaYxdUY7pwen11i70DsVd1aaFJQ3LvoDQpB6s44RIYGc8CngOJ17QH8JL3NX10c1IT5AsFwG7GT1wUFGu0BCoIBCgRub3RlCmx4Iik7IGhvbGRlcigid3dhOnpjNnNwdW5maWtmNTZ2cmxuc3JleXplaXpmamVkNXhlN2ZpNm41NjV3N2FzeWV4M251YXEiLCAxKTsgdGltZSgyMDMwLTAxLTAxVDAwOjAwOjAwWik7IHkoInoYAyIKCggIjwgSAxiQCBIkCAASIFyddyAkvQwJyzVjyXEMd44meEPOak0N0T2eKMyIcBLgGkBq21EOXi1pHlqSBj7ccfuugsSxPz-0YAjdPM28nkr0LqxH0QKsqECWOc0mE6HpQ7Ccv9lQABzAVVrY8D_Ic2sNIiIKIInFQ133Fzpaafi0CMsHMxaRqh_T7_Z3sPmZ4ngTQBrb",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:np2gi3layvfv5wclkuqger6ocuypv7buu23v7d3xm7qevlpkacmq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "3mc5z3XBmjseYcpNnBRgnTMsJWbeGHoXfOMvqD9LsRCk6Ha3n4oylW2HBmhQarWSqF3HSt_jxAvec67WOVjKCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-103",
+        "CAP-120"
+      ]
+    },
+    {
+      "description": "the same token presented by the agent the string names",
+      "expect": {
+        "error": "CapabilityDenied",
+        "result": "reject"
+      },
+      "id": "string-looks-like-datalog-holder",
+      "input": {
+        "cap": {
+          "access": "ErQECskDCgZ3ZWJ3YXkKDWNhcGFiaWxpdHkvdjAKBmFjY2VzcwoGaXNzdWVyCjh3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncQo4ZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUKBmlzc3VlZAoHZXhwaXJlcwoPc2tpbGw6cnVuLXRlc3RzCgZob2xkZXIKOHd3YTpucDJnaTNsYXl2ZnY1d2Nsa3VxZ2VyNm9jdXlwdjdidXUyM3Y3ZDN4bTdxZXZscGthY21xCglwcmVzZW50ZXIKAWsKDmN1cnJlbnRfaG9sZGVyCgF0GAMiDwoNCIAIEgMYgQgSAxiCCCIKCggIgwgSAxiECCIJCgcIBxIDGIUIIg0KCwiGCBIGILiXvNcGIg0KCwiHCBIGIMizvNcGIgkKBwgEEgMYiAgiDgoMCIkIEgMYiggSAhAAMhoKGAoCCBsSCAiLCBIDCIwIEggIjQgSAwiMCDIoCiYKAggbEgcIBRIDCI4IGhcKBQoDCI4ICggKBiDIs7zXBgoEGgIIAhIkCAASINebS2lZzf8heFt9gHS13EXVEBGZiGTAgnkpxMdMHMBGGkAyLrgYAKaYxdUY7pwen11i70DsVd1aaFJQ3LvoDQpB6s44RIYGc8CngOJ17QH8JL3NX10c1IT5AsFwG7GT1wUFGu0BCoIBCgRub3RlCmx4Iik7IGhvbGRlcigid3dhOnpjNnNwdW5maWtmNTZ2cmxuc3JleXplaXpmamVkNXhlN2ZpNm41NjV3N2FzeWV4M251YXEiLCAxKTsgdGltZSgyMDMwLTAxLTAxVDAwOjAwOjAwWik7IHkoInoYAyIKCggIjwgSAxiQCBIkCAASIFyddyAkvQwJyzVjyXEMd44meEPOak0N0T2eKMyIcBLgGkBq21EOXi1pHlqSBj7ccfuugsSxPz-0YAjdPM28nkr0LqxH0QKsqECWOc0mE6HpQ7Ccv9lQABzAVVrY8D_Ic2sNIiIKIInFQ133Fzpaafi0CMsHMxaRqh_T7_Z3sPmZ4ngTQBrb",
+          "capability": "skill:run-tests"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "request": {
+          "args": {
+            "repo": "github.com/acme/app",
+            "suite": "unit"
+          },
+          "operation": "SendMessage",
+          "presenter": "wwa:zc6spunfikf56vrlnsreyzeizfjed5xe7fi6n565w7asyex3nuaq"
+        },
+        "state": {
+          "calls": {
+            "access": 0,
+            "mandate": 0
+          },
+          "revocations": []
+        },
+        "verifier": {
+          "agentCerts": [
+            {
+              "payload": "eyJhZ2VudCI6Ind3YTp6YzZzcHVuZmlrZjU2dnJsbnNyZXl6ZWl6ZmplZDV4ZTdmaTZuNTY1dzdhc3lleDNudWFxIiwiZXhwIjoiMjAyNy0xMC0wMVQwMDowMDowMFoiLCJpYXQiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiIsImlzcyI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwibm9kZSI6Ind3bjp2b25ldzJ1eWtidDU1aHU2cHJwcjJva3EzeXB1MnZhZW4yeGM3cmF0amNlYXVveHJlc3FxIiwib3duZXIiOiJkaWQ6a2V5Ono2TWt0M3lzdHFyakRZMWYzV3JHeGFiQkRSaFBhNWJ1ZEVMZHBSOHpZU04xSHF6ZSJ9",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3QzeXN0cXJqRFkxZjNXckd4YWJCRFJoUGE1YnVkRUxkcFI4ellTTjFIcXplIiwidHlwIjoid2Vid2F5LWFnZW50LWNlcnQrandzIn0",
+              "signature": "Q_fH1BbO9gO7svLroEMFOR2-4-3qFEeo8woUElaxZcYPp-nXH29fXqKWoacKCNF_YkF3FpY0aws_DgDNfyioCg"
+            }
+          ],
+          "issuerCerts": [
+            {
+              "payload": "eyJleHAiOiIyMDI2LTExLTMwVDAwOjAwOjAwWiIsImlhdCI6IjIwMjYtMTEtMDFUMDA6MDA6MDBaIiwiaXNzIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJpc3N1ZXIiOiJ3d2k6bTJuaWY0czRoYWUyM20zc3RqeWVzNnR6aWN1NmRldjZ1d2xvbnB6Z3YzYno3YXJlcWtncSIsIm5vZGUiOiJ3d246b3M1YmwzdnlyNmh1Y3o0anl0eGd6bmc3aTc0NHdxaWhubjZvbjJpeWc1bTdqN3dyYTRpYSIsIm93bmVyIjoiZGlkOmtleTp6Nk1raWlTVEM3V0NnZUdVcEJDSzVwWVF1Mk1Tb2lHTG1hR2huUU1GS3FVRXhaaEUiLCJzY29wZSI6eyJhZ2VudENlcnRzIjp0cnVlLCJjYXJkcyI6dHJ1ZSwiaW52aXRlcyI6dHJ1ZSwibWFuZGF0ZSI6eyJjYXBhYmlsaXRpZXMiOlsic2tpbGw6KiJdLCJtYXhUdGwiOjM2MDAsInRhcmdldHMiOlsiKiJdfSwicmVzb3VyY2UiOlsic2tpbGw6KiIsInRhc2s6KiIsImludml0ZToqIiwiYmxvYjoqIiwibWFpbGJveDoqIl19fQ",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2lpU1RDN1dDZ2VHVXBCQ0s1cFlRdTJNU29pR0xtYUdoblFNRktxVUV4WmhFIiwidHlwIjoid2Vid2F5LWlzc3Vlci1jZXJ0K2p3cyJ9",
+              "signature": "pgUEqgAaCvN2XieTfFSZdwMX3djmidaFW_IhHjuSxj97n8ZO_9yZppkASkjxMTWAbHs0EoVoypP0oqEaqKCGCA"
+            }
+          ],
+          "node": "wwn:os5bl3vyr6hucz4jytxgzng7i744wqihnn6on2iyg5m7j7wra4ia",
+          "owner": "did:key:z6MkiiSTC7WCgeGUpBCK5pYQu2MSoiGLmaGhnQMFKqUExZhE",
+          "pins": [
+            "did:key:z6MkrSN8yU9hTWq4uvARomXPgsJn5pMSCJYJ8EJctrUHH18z",
+            "did:key:z6Mkt3ystqrjDY1f3WrGxabBDRhPa5budELdpR8zYSN1Hqze"
+          ],
+          "recipient": "wwa:yivdlmdlo2dqiy5iwjpevwngmzmd7x4evx6orxmj4pbx7e2zjyba"
+        }
+      },
+      "requirements": [
+        "CAP-121"
       ]
     }
   ],
