@@ -94,6 +94,7 @@ pub struct Env {
     pub body: J,
 }
 
+const BLOB_GET: &str = "https://github.com/BVMrs/argent-webway/spec/ext/blob/v0#GetBlob";
 const ACCESS_TOKEN: &str = "dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA"; // placeholder, not a Biscuit
 
 impl Fx {
@@ -322,6 +323,7 @@ struct Recv<'a> {
     now: Nanos,
     watermark: Option<Nanos>,
     framing_op: Option<&'static str>,
+    extension_ops: Vec<&'static str>,
 }
 
 struct Cases {
@@ -329,7 +331,7 @@ struct Cases {
 }
 
 fn dr(fx: &Fx) -> Recv<'_> {
-    Recv { hosts: vec![&fx.bob], now: fx.t0 + 10 * SEC, watermark: None, framing_op: None }
+    Recv { hosts: vec![&fx.bob], now: fx.t0 + 10 * SEC, watermark: None, framing_op: None, extension_ops: vec![] }
 }
 
 impl Cases {
@@ -338,7 +340,7 @@ impl Cases {
     fn add(&mut self, id: &str, reqs: &[&str], desc: &str, rx: Recv, input: Input, expect: Result<(), Reject>) {
         let bytes = input.bytes();
         let hosts: Vec<[u8; 32]> = rx.hosts.iter().map(|k| k.pk).collect();
-        let cx = Ctx { hosts: &hosts, now: rx.now, watermark: rx.watermark, framing_op: rx.framing_op };
+        let cx = Ctx { hosts: &hosts, now: rx.now, watermark: rx.watermark, framing_op: rx.framing_op, extension_ops: &rx.extension_ops };
         let got = verify::verify(&bytes, &cx);
         // One defect per case (ENV-601): a case expecting anything but a signature or version error must
         // carry a valid signature whenever the signature can be checked at all.
@@ -359,6 +361,9 @@ impl Cases {
         }
         if let Some(f) = rx.framing_op {
             r.insert("framing_op".into(), json!(f));
+        }
+        if !rx.extension_ops.is_empty() {
+            r.insert("extension_ops".into(), json!(rx.extension_ops));
         }
         c.insert("receiver".into(), J::Object(r));
         input.write(&mut c);
@@ -534,7 +539,22 @@ pub fn envelopes(fx: &Fx) -> J {
         e.prov = None;
         e.ctx = None;
         e.body = json!({"hash": "blake3:00", "anything": [1, 2, 3]});
-        cs.add("valid-extension-op", &["ENV-021"], "An extension operation (URI#name). Its body is not an A2A schema, so only the generic rules apply.",
+        let mut rx = dr(fx);
+        rx.extension_ops = vec![BLOB_GET];
+        cs.add("valid-extension-op", &["ENV-021", "ENV-022"],
+            "An extension operation (URI#name) that the receiver implements (receiver.extension_ops). Its body is not an A2A schema, so only the generic rules apply.",
+            rx, txt(&fx.sign(&e)), Ok(()));
+        let mut rx = dr(fx);
+        rx.extension_ops = vec!["https://github.com/BVMrs/argent-webway/spec/ext/blob/v0#PutBlob"];
+        cs.add("extension-op-not-implemented", &["ENV-022"],
+            "A well-formed extension operation that the receiver does not implement: UnsupportedOperationError, like an unknown A2A method.",
+            rx, txt(&fx.sign(&e)), Err(rj("UnsupportedOperationError", "unsupported-op")));
+    }
+    {
+        let mut e = fx.get_task("prov-no-parts", "GetTask");
+        e.prov = Some(json!({"x-future": {"note": "a member added by a later minor revision"}}));
+        cs.add("valid-prov-without-parts", &["ENV-002", "ENV-050"],
+            "A body with no Parts and a prov member without `parts`: nothing to taint, and unknown prov members are kept and ignored.",
             dr(fx), txt(&fx.sign(&e)), Ok(()));
     }
 
@@ -786,6 +806,8 @@ pub fn envelopes(fx: &Fx) -> J {
         txt(&form("sf-default", &|b| b["tenant"] = json!(""))), Err(inv("signer-form")));
     cs.add("signer-form-unspecified-enum", &["ENV-121"], "role = ROLE_UNSPECIFIED (the default) emitted explicitly.", dr(fx),
         txt(&form("sf-unspec", &|b| b["message"]["role"] = json!("ROLE_UNSPECIFIED"))), Err(inv("signer-form")));
+    cs.add("signer-form-int32-out-of-range", &["ENV-121"], "configuration.historyLength = 2^31: outside int32, so it has no signer form.", dr(fx),
+        txt(&form("sf-int32", &|b| b["configuration"] = json!({"historyLength": 2147483648u64}))), Err(inv("signer-form")));
     cs.add("signer-form-bytes-unpadded", &["ENV-121"], "Part.raw as base64 without padding.", dr(fx),
         txt(&form("sf-bytes", &|b| b["message"]["parts"][0] = json!({"raw": "aGVsbG8", "mediaType": "text/plain"}))), Err(inv("signer-form")));
 
@@ -975,7 +997,7 @@ impl<'a> Scenario<'a> {
             Outcome::Deliver => json!({"outcome": "deliver"}),
             Outcome::Duplicate { answer } => json!({"outcome": "duplicate", "answer": answer}),
             Outcome::DropDuplicate => json!({"outcome": "drop-duplicate"}),
-            Outcome::Discard => json!({"outcome": "discard", "reason": "unsolicited"}),
+            Outcome::Discard(reason) => json!({"outcome": "discard", "reason": reason}),
             Outcome::Reject(r) => json!({"outcome": "reject", "error": err_json(r, None)}),
         };
         st.insert("expect".into(), ex);
@@ -1102,15 +1124,19 @@ pub fn replay(fx: &Fx) -> J {
         sc.env("R1", resp_t);
         sc.env("R-unsolicited", compact(&fx.sign(&stray)));
         sc.env("R-from-carol", compact(&fx.sign(&forged_from)));
+        let mut unknown_op = fx.response_to(&e1, "replay-unknown-op");
+        unknown_op.op = "FrobnicateTask";
+        sc.env("R-unknown-op", compact(&fx.sign(&unknown_op)));
         let at = resp.ts + SEC;
-        sc.recv("R1", at, "ok", true, Outcome::Discard);
+        sc.recv("R1", at, "ok", true, Outcome::Discard("unsolicited"));
         sc.sent("E1");
         sc.recv("R1", at, "ok", true, Outcome::Deliver);
         sc.recv("R1", at + SEC, "ok", true, Outcome::DropDuplicate);
-        sc.recv("R-unsolicited", at, "ok", true, Outcome::Discard);
-        sc.recv("R-from-carol", at, "ok", true, Outcome::Discard);
-        out.push(sc.finish("answers", &["ENV-401", "ENV-402", "ENV-512"],
-            "A response is delivered only if it answers an envelope the node sent (matching from, to and inReplyTo), at most once, and is never answered with an error."));
+        sc.recv("R-unsolicited", at, "ok", true, Outcome::Discard("unsolicited"));
+        sc.recv("R-from-carol", at, "ok", true, Outcome::Discard("unsolicited"));
+        sc.recv("R-unknown-op", at, "ok", true, Outcome::Discard("unsupported-op"));
+        out.push(sc.finish("answers", &["ENV-401", "ENV-402", "ENV-512", "ENV-022"],
+            "A response is delivered only if it answers an envelope the node sent (matching from, to and inReplyTo), at most once, and is never answered with an error, not even for an unknown op."));
     }
     file("replay", "Stateful scenarios against one receiving node (spec §8). Steps run in order; `purge` removes entries with exp + SKEW < now and raises the watermark.", out)
 }

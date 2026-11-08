@@ -54,6 +54,8 @@ pub struct Ctx<'a> {
     pub now: Nanos,
     pub watermark: Option<Nanos>,
     pub framing_op: Option<&'a str>,
+    /// Extension operations (`<extension URI>#<name>`) this receiver implements (ENV-022).
+    pub extension_ops: &'a [&'a str],
 }
 
 #[derive(Debug, Clone)]
@@ -205,7 +207,7 @@ pub fn verify(input: &[u8], cx: &Ctx) -> Result<Verified, Reject> {
     }
     check_freshness(cx.now, ts, exp, cx.watermark)?;
     // 7. operation, body form, header consistency
-    let known = schema::A2A_OPS.contains(&op) || op.contains('#');
+    let known = schema::A2A_OPS.contains(&op) || cx.extension_ops.contains(&op);
     if !known {
         return Err(Reject { typ: "UnsupportedOperationError", reason: "unsupported-op" });
     }
@@ -269,13 +271,14 @@ pub fn check_freshness(now: Nanos, ts: Nanos, exp: Nanos, watermark: Option<Nano
 
 fn check_prov(env: &Value, body: &Value, part_pats: &[&str]) -> Result<(), Reject> {
     let parts: Vec<String> = part_pats.iter().flat_map(|p| schema::expand(body, p)).collect();
-    let entries = match env.get("prov").map(|p| p.get("parts")) {
+    // `prov.parts` is only required when the body has Parts (ENV-050); other `prov` members are kept and
+    // ignored (ENV-002).
+    let entries = match env.get("prov").and_then(|p| p.get("parts")) {
         None => {
             return if parts.is_empty() { Ok(()) } else { Err(inv("missing-taint")) };
         }
-        Some(None) => return Err(inv("bad-prov")),
-        Some(Some(Value::Object(m))) => m,
-        Some(Some(_)) => return Err(inv("bad-prov")),
+        Some(Value::Object(m)) => m,
+        Some(_) => return Err(inv("bad-prov")),
     };
     for (ptr, _) in entries {
         if !parts.contains(ptr) {
@@ -310,8 +313,8 @@ pub enum Outcome {
     Duplicate { answer: &'static str },
     /// Duplicate answer (response/event/error/ack): dropped silently.
     DropDuplicate,
-    /// Unsolicited answer: discarded, not answered.
-    Discard,
+    /// Answer discarded, not answered (ENV-401 `unsolicited`, ENV-022 `unsupported-op`).
+    Discard(&'static str),
     Reject(Reject),
 }
 
@@ -355,10 +358,17 @@ impl Node {
     /// the transport peer as the sender's node or our mailbox host.
     pub fn receive(&mut self, input: &[u8], now: Nanos, app: &str, authenticated: bool) -> Outcome {
         let hosts = self.hosts.clone();
-        let cx = Ctx { hosts: &hosts, now, watermark: Some(self.watermark), framing_op: None };
+        let cx = Ctx { hosts: &hosts, now, watermark: Some(self.watermark), framing_op: None, extension_ops: &[] };
         let v = match verify(input, &cx) {
             Ok(v) => v,
-            Err(r) => return Outcome::Reject(r),
+            Err(r) => {
+                // ENV-022 / ENV-402: only a request gets an error answer for an unknown op.
+                let typ = json::parse(input).ok().and_then(|e| e.get("typ").and_then(|t| t.as_str().map(String::from)));
+                if r.typ == "UnsupportedOperationError" && typ.as_deref() != Some("request") {
+                    return Outcome::Discard("unsupported-op");
+                }
+                return Outcome::Reject(r);
+            }
         };
         let key = (v.from, v.id.clone());
         if v.typ != "request" {
@@ -366,10 +376,10 @@ impl Node {
                 let solicited =
                     self.sent.iter().any(|(f, t, id)| *t == v.from && *f == v.to && id == irt);
                 if !solicited {
-                    return Outcome::Discard;
+                    return Outcome::Discard("unsolicited");
                 }
             } else if v.typ != "event" {
-                return Outcome::Discard;
+                return Outcome::Discard("unsolicited");
             }
             if self.seen_answers.insert(key, ()).is_some() {
                 return Outcome::DropDuplicate;

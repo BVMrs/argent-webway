@@ -258,7 +258,8 @@ fn scalar_ok(v: &Value, kind: Kind, presence: bool) -> bool {
         Kind::Str => matches!(v, Value::String(s) if presence || !s.is_empty()),
         Kind::Bytes => matches!(v, Value::String(s) if (presence || !s.is_empty()) && is_canonical_b64std(s)),
         Kind::Bool => matches!(v, Value::Bool(b) if presence || *b),
-        Kind::Int32 => matches!(v, Value::Number(n) if n.fract() == 0.0 && (presence || *n != 0.0)),
+        Kind::Int32 => matches!(v, Value::Number(n)
+            if n.fract() == 0.0 && (i32::MIN as f64..=i32::MAX as f64).contains(n) && (presence || *n != 0.0)),
         Kind::Enum(names) => {
             matches!(v, Value::String(s) if names.contains(&s.as_str()) && (presence || !s.ends_with("_UNSPECIFIED")))
         }

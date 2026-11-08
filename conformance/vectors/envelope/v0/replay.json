@@ -463,9 +463,10 @@
       "requirements": [
         "ENV-401",
         "ENV-402",
-        "ENV-512"
+        "ENV-512",
+        "ENV-022"
       ],
-      "description": "A response is delivered only if it answers an envelope the node sent (matching from, to and inReplyTo), at most once, and is never answered with an error.",
+      "description": "A response is delivered only if it answers an envelope the node sent (matching from, to and inReplyTo), at most once, and is never answered with an error, not even for an unknown op.",
       "receiver": {
         "hosts": [
           "wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma"
@@ -476,7 +477,8 @@
         "E1": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-07T13:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:27823ba96bd4d7b3fa5b56261bb41e3fb286348ce22a39fd052f3a736c9e9991\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"VKdtB6-iNnIEIW0WjxC4ZGUmdEe6aFgYZXwUpD7F544m8kW0kfK1NgW3HojUakFnzTe2O0ebXUkiTgWNJu0mAw\"}",
         "R1": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-78f7-84f6-fc9a059fbafa\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"rvjq_bHIMvw0PsS6HDKo0ZrJx5lhIWZym4GOiHIKfJhB2VmqXTsTvcSduHU0W6sGnHu-RPDLi3n4QEJ7hLFTAw\"}",
         "R-unsolicited": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-7a21-85b4-e3ff269ed66f\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-7553-9b1a-a37d4ce61d37\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"_f263e98qkoLOYwpAtRo0WLpudQc_ZQkKiTof8sFIlP6q_S3q3d5IV4x6pxZj2xFfnMvT0TdR8aQzl-3iGo3Dg\"}",
-        "R-from-carol": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:4f2np5caf2lah3mcvkwoi3sprkh2hzg23tooqthf35bo7geuygha\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-78f7-84f6-fc9a059fbafa\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"j2rVJb66j-z9PJqcoknPawMfGXn4rCLcgG7e46YghDQYQWutnjeT7loKk_zuzrsNjLpmk-iI0sk3FGe-PRRPCg\"}"
+        "R-from-carol": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:4f2np5caf2lah3mcvkwoi3sprkh2hzg23tooqthf35bo7geuygha\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-78f7-84f6-fc9a059fbafa\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"j2rVJb66j-z9PJqcoknPawMfGXn4rCLcgG7e46YghDQYQWutnjeT7loKk_zuzrsNjLpmk-iI0sk3FGe-PRRPCg\"}",
+        "R-unknown-op": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"FrobnicateTask\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-7f84-a6b6-897070adcf5a\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-79dd-a4a9-3406e6323249\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"L0BKuA3Q-bwrCK14HkrHf8J8KzJ_hqREtWriOb698_FdRTmB59veZp2w8nHCnQHNsBaZUT-v0fhDVldqeFhBBQ\"}"
       },
       "steps": [
         {
@@ -529,6 +531,16 @@
           "expect": {
             "outcome": "discard",
             "reason": "unsolicited"
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "R-unknown-op",
+          "now": "2026-11-07T12:00:03Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "discard",
+            "reason": "unsupported-op"
           }
         }
       ]

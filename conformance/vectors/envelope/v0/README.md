@@ -47,7 +47,7 @@ Every file except `keys.json` has the same top-level shape:
 |---|---|---|
 | `keys.json` | n/a | Test key pairs (seeds, public keys, `wwa:` IDs, `did:key`s). **Test keys only.** |
 | `jcs.json` | `jcs` | Parse `input` as I-JSON (§4.1) and canonicalise with RFC 8785 (§4.2). Expect `{"result": "canonical", "canonical": "…"}` (compare the UTF-8 bytes) or a rejection. |
-| `envelopes.json` | `envelope-verify` | Run verification steps 1–7 (§9) as a node that hosts `receiver.hosts`, with clock `receiver.now`, optional purge watermark `receiver.watermark` and optional `receiver.framing_op` (the operation named by unsigned framing). Accepted cases also give `from`, `id`, `body_hash`, `signed_header_jcs`, `signing_input_hex` and `header_digest`, for debugging. |
+| `envelopes.json` | `envelope-verify` | Run verification steps 1–7 (§9) as a node that hosts `receiver.hosts`, with clock `receiver.now`, optional purge watermark `receiver.watermark`, optional `receiver.framing_op` (the operation named by unsigned framing) and optional `receiver.extension_ops` (the extension operations it implements, none if absent; it always implements the A2A operations, ENV-022). Accepted cases also give `from`, `id`, `body_hash`, `signed_header_jcs`, `signing_input_hex` and `header_digest`, for debugging. |
 | `header-only.json` | `header-signature` | `input` is a stored signed header with the body removed (ENV-213). Verify the signature only. |
 | `freshness.json` | `freshness` | Pure function of `now`, `ts`, `exp` and an optional `watermark` (§6, ENV-504). |
 | `replay.json` | `replay` | Stateful scenarios, below. |
@@ -71,7 +71,7 @@ Expected outcomes of `receive`:
 | `duplicate` | Not processed. `answer` is `stored` (the stored envelope, byte for byte, ENV-530) or `ack` (the duplicate ack, ENV-531). |
 | `deliver` | A solicited answer, delivered to the local agent. |
 | `drop-duplicate` | A duplicate answer, dropped without a reply (ENV-512). |
-| `discard` | An unsolicited answer, discarded without a reply (ENV-401, ENV-402). |
+| `discard` | An answer discarded without a reply (ENV-402). `reason` is `unsolicited` (ENV-401) or `unsupported-op` (ENV-022). |
 | `reject` | Rejected with `error`. |
 
 ## What the vectors do not cover

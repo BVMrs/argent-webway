@@ -171,9 +171,15 @@ source. If unsigned framing also names an operation and it differs, the receiver
 Several A2A request bodies have the same shape (`GetTaskRequest` and `CancelTaskRequest` both reduce to a task
 name), so an unsigned operation name would let an intermediary turn a read into a cancel. ENV-021 closes that.
 
-**ENV-022** (MUST) A receiver MUST reject an `op` it does not implement as A2A `UnsupportedOperationError`
-(−32004) in step 7 of [§9](#9-verification-procedure), before the signer-form check (which needs the schema). Since
-the signature has been verified by then, the error is a signed `error` envelope (ENV-620).
+**ENV-022** (MUST) A receiver MUST reject an envelope whose `op` it does not implement in step 7 of
+[§9](#9-verification-procedure), before the signer-form check (which needs the schema), with
+`UnsupportedOperationError` (−32004, reason `unsupported-op`). For a `request`, the signature has been verified by
+then, so the error is answered as a signed `error` envelope (ENV-620). An envelope of any other `typ` with an
+unknown `op` is discarded without an answer (ENV-402) and the rejection is recorded (ENV-623).
+
+"Implements" is a property of the receiver: the A2A operations it serves, plus the extension operations
+(`<extension URI>#<name>`) of the extensions it declares in its Agent Card. An extension `op` is not implemented
+just because it is well-formed.
 
 ### 3.4 `ctx`
 
@@ -313,7 +319,8 @@ not subject to the signer form, only to [§4.1](#41-input-rules).
 
 **ENV-121** (MUST) A receiver MUST reject a body in which a field known to the schema is not in the signer form
 (an enum as a number, a field under its proto name instead of its `json_name`, an explicit default value, a
-wrongly encoded `bytes` or 64-bit integer) as `EnvelopeInvalid` (reason `signer-form`). Members the schema does not
+wrongly encoded `bytes` or 64-bit integer, a number outside the field's range such as an `int32` beyond
+±2^31) as `EnvelopeInvalid` (reason `signer-form`). Members the schema does not
 know are kept and ignored (ENV-002, ENV-110).
 
 The check is about rejecting ambiguity, not about schema validation in general: a receiver still validates the
@@ -701,7 +708,7 @@ tested by the black-box harness (T4), not by a pure vector.
 | ENV-012 | SHOULD | choice of `ts`, `exp` | n/a |
 | ENV-020 | MUST | `typ` values | `envelopes.json` |
 | ENV-021 | MUST | operation from signed `typ`/`op` | `envelopes.json`, harness |
-| ENV-022 | MUST | unknown `op` | `envelopes.json` |
+| ENV-022 | MUST | unknown `op` | `envelopes.json`, `replay.json` |
 | ENV-030 | MUST | `ctx` matches body | `envelopes.json` |
 | ENV-031 | MUST | `inReplyTo` on answers | `envelopes.json` |
 | ENV-040 | MUST | tokens only from signed `cap` | `envelopes.json`, harness |
