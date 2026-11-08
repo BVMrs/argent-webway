@@ -1,0 +1,573 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "audit/inclusion",
+  "description": "RFC 9162 inclusion proof with BLAKE3. Input {\"index\", \"size\", \"leaf\", \"root\", \"proof\"}. Accept (no output) or reject ProofInvalid. Uses beta's log.",
+  "spec": "ext/audit.md#53-proofs",
+  "cases": [
+    {
+      "id": "index-0-size-1",
+      "description": "Entry 0 in the tree of size 1",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 0,
+        "size": 1,
+        "leaf": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "root": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "proof": []
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-0-size-12",
+      "description": "Entry 0 in the tree of size 12",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 0,
+        "size": 12,
+        "leaf": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "blake3:c58062fd573cd7170163fe7cd565c0ec05042ce533683cba59e77884668c1594",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-2-size-12",
+      "description": "Entry 2 in the tree of size 12",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 2,
+        "size": 12,
+        "leaf": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-7-size-12",
+      "description": "Entry 7 in the tree of size 12",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-11-size-12",
+      "description": "Entry 11 in the tree of size 12",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 11,
+        "size": 12,
+        "leaf": "blake3:9ab33533ff3888d54e9bdf8de310c0f9b3398752018a5c10e452cf36259128ca",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:f0b62349b285c2b5a9d7f37d74fcfa134e102f6cfa247ec4bb994948ab8254c8",
+          "blake3:7d6a67b5787b0f3efb15187e05dbe4c64f268402e132ac06b5e9f16172ad853a",
+          "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-3-size-4",
+      "description": "Entry 3 in the tree of size 4",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 3,
+        "size": 4,
+        "leaf": "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+        "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-2-size-3",
+      "description": "Entry 2 in the tree of size 3",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 2,
+        "size": 3,
+        "leaf": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+        "root": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "proof": [
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-4-size-5",
+      "description": "Entry 4 in the tree of size 5",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 4,
+        "size": 5,
+        "leaf": "blake3:849264b5fe2f54bca82e943c4254e8242818420328bded71241adea97f0600e5",
+        "root": "blake3:493f1cbc0b5ac6414dcbb73e4bcc3d8c2e436e42ac46eabcea85395681457881",
+        "proof": [
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "index-8-size-9",
+      "description": "Entry 8 in the tree of size 9",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "index": 8,
+        "size": 9,
+        "leaf": "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+        "root": "blake3:3efd60e842672d86addb96c137120baab37fd9b4aa91ea7a7b1c26d196f182f3",
+        "proof": [
+          "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "wrong-leaf",
+      "description": "Proof for entry 7 with entry 6's hash",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "wrong-index",
+      "description": "Proof for entry 7 claimed for index 6",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 6,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "wrong-size",
+      "description": "Proof for size 12 checked against size 8 (a different path shape)",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 8,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "wrong-root",
+      "description": "Root of size 11",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:894540ac6ec7367718035b378377968a7904127e5e92f2e946341d127031bf0c",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "truncated",
+      "description": "Last proof hash missing",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "extra-hash",
+      "description": "One hash too many",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "too-many-hashes",
+      "description": "More than MAX_PROOF_HASHES",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "index-equals-size",
+      "description": "index must be below size",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 12,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "size-zero",
+      "description": "No empty tree",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 0,
+        "size": 0,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "single-with-proof",
+      "description": "A tree of size 1 has an empty proof",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 0,
+        "size": 1,
+        "leaf": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "root": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "proof": [
+          "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "malformed-hash",
+      "description": "Proof element not in blake3: hex form",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "index": 7,
+        "size": 12,
+        "leaf": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "sha256:00"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    }
+  ]
+}

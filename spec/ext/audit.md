@@ -189,7 +189,7 @@ v0 registers the types below. Other extensions register theirs in their own docu
 | `task.transition` | `taskId`, `from` (absent for creation), `to`: A2A task states. `seq`: the event sequence number. `cause` (optional): the header digest of the envelope that caused it. | the task's requester and responder agents |
 | `bridge.crossing` | `bridge`: `a2a-http-in`, `a2a-http-out`, `mcp-facade`, `mcp-in` or `mcp-out` (`profile.md` §12). `hd` (optional): the envelope on the overlay side. `principal` (optional): the edge client or MCP principal. | as known |
 | `checkpoint.peer` | `checkpoint`: a checkpoint of another node's log, verbatim. `result`: `consistent`, `first` (no earlier one held) or `inconsistent`. | none |
-| `anomaly` | `name`: a kebab-case anomaly name ([§7.2](#72-anomalies)). `hd` (optional). `detail` (optional): an object. | as known |
+| `node.anomaly` | `name`: a kebab-case anomaly name ([§7.2](#72-anomalies)). `hd` (optional). `detail` (optional): an object. | as known |
 | `node.event` | `event`: `start`, `stop`, `clock-step` or `restore-detected`. `detail` (optional). | none |
 | `log.retention` | `entriesBefore` (optional): entries with a lower index had their contents deleted. `bodiesBefore` (optional): a time; bodies of envelopes logged before it were deleted. | none |
 
@@ -247,6 +247,10 @@ array.
   over, or whose sizes and index are out of range (i ≥ n, n < 1 or n > m), as `ProofInvalid`.
 - [AUD-121] For a consistency proof from size n to size m with n = m, a verifier MUST accept only the empty proof,
   and only if the two roots are equal.
+
+A proof binds the size only through the shape of the path: for some index and size pairs, a proof for size n also
+verifies for a different size with the same shape. The size is bound by the signed commitment that carries the root,
+so verifiers take sizes and roots only from commitments, never from the party that supplies the proof.
 
 RFC 9162 omits the old root from consistency proofs when n is a power of two. That is unchanged here: the verifier
 always knows the old root from a commitment.
@@ -378,7 +382,7 @@ These rules implement `profile.md` PROF-049, `capability/v0` CAP-190 and `envelo
 - [AUD-402] A node MUST append an `authz.decision` entry for every authorisation decision, a `task.transition`
   entry for every task state change it records, a `statement.issued` entry for every token, mandate, invite,
   certificate or revocation list it signs, a `bridge.crossing` entry for every request that crosses one of its
-  bridges, and an `anomaly` entry for every anomaly named in [§7.2](#72-anomalies) or in another webway document.
+  bridges, and a `node.anomaly` entry for every anomaly named in [§7.2](#72-anomalies) or in another webway document.
 - [AUD-403] A node MUST append a `node.event` `start` entry each time it starts, before it processes any
   envelope.
 
@@ -645,13 +649,23 @@ not itself signed: every piece in it is signed or hash-bound to something signed
 | `statements` | optional | The `capability/v0` statements that attribute the log's node to an owner. |
 
 - [AUD-800] A verifier of an evidence bundle MUST reject it as `EvidenceInvalid` when `v` is not
-  `webway-audit-evidence/0`, a required member is missing, or an entry, receipt or body key does not belong to the
-  bundle's checkpoint (different `log` or `epoch`, `index` ≥ `size`, or a body whose key is not the `body_hash`
-  of a stub in `entries`).
-- [AUD-801] A verifier MUST verify the checkpoint (AUD-201), each entry (AUD-001, AUD-002, AUD-020) and its
-  inclusion proof (AUD-120), each receipt (AUD-201) and its consistency proof, and for each stub in an entry the
-  envelope signature with the rules of `envelope/v0` §5.2; for each body, that `blake3:` + hex of
-  `BLAKE3(JCS(body))` equals its key. It MUST reject the bundle with the error of the first failing check.
+  `webway-audit-evidence/0` (reason `bad-version`), a required member is missing (`missing-field`), an entry or
+  receipt does not belong to the bundle's checkpoint (different `log` or `epoch`, or a size beyond `size`:
+  `foreign-item`), or a body's key is not the `body_hash` of a stub in `entries` (`foreign-item`).
+- [AUD-801] A verifier MUST check, in this order, and reject the bundle with the error of the first failing check:
+  the bundle's `v` and required members (AUD-800); the checkpoint (AUD-201, AUD-202); then each entry in order: the entry itself
+  (AUD-001, AUD-002, AUD-020), that it belongs to the checkpoint, and its inclusion proof (AUD-120); then each
+  receipt in order: the receipt (AUD-201, AUD-202), that it belongs to the checkpoint, its consistency proof from
+  size `index + 1` to the checkpoint size, and, when the bundle has the entry at the receipt's `index`, AUD-302;
+  then each body: that `blake3:` + hex of `BLAKE3(JCS(body))` equals its key (`EvidenceInvalid`, reason
+  `body-mismatch`).
+- [AUD-802] For each entry of type `envelope.sent`, or `envelope.received` with outcome `accepted` or `duplicate`,
+  a verifier of a bundle MUST verify the stub's envelope signature with the rules of `envelope/v0` §5.2, as part of
+  the entry checks of AUD-801, and MUST reject a failure as `EvidenceInvalid` (reason `stub-signature`). Stubs of
+  rejected envelopes are records of what arrived and are not checked.
+
+In a bundle, the inclusion proof that AUD-302 asks for is implied: the entry is included at `index` under the
+checkpoint, and the receipt's root is a prefix of the checkpoint's tree, so it commits to the same entry.
 
 Owner attribution (the `statements`) is verified with `capability/v0`, as of the checkpoint's `time`
 ([open question 4](#19-open-questions)).
@@ -684,7 +698,7 @@ anomaly entries. They are not sent to the node being verified.
 | `CheckpointInvalid` | A checkpoint is malformed or its signature fails. | `missing-field`, `malformed-field`, `bad-version`, `bad-signature`, `weak-key` |
 | `ReceiptInvalid` | A receipt is malformed, its signature fails, or it does not match its envelope or entry. | as `CheckpointInvalid`, plus `envelope-mismatch`, `entry-mismatch` |
 | `LogInconsistent` | Two commitments of one log conflict (AUD-710). | `fork` |
-| `EvidenceInvalid` | A bundle is malformed or mixes logs. | `missing-field`, `bad-version`, `foreign-item`, `body-mismatch` |
+| `EvidenceInvalid` | A bundle is malformed, mixes logs, or claims an accepted envelope whose signature fails. | `missing-field`, `bad-version`, `foreign-item`, `body-mismatch`, `stub-signature` |
 
 - [AUD-900] A verifier reporting a verification result MUST use the names of the table above, so that results
   agree across implementations and the conformance vectors can test them.
@@ -890,7 +904,8 @@ requirement is about node behaviour and is tested by the black-box harness (T4).
 | AUD-710 | comparing commitments | `compare` |
 | AUD-720 | third-party checkpoints | harness |
 | AUD-800 | bundle structure | `evidence` |
-| AUD-801 | bundle verification | `evidence` |
+| AUD-801 | bundle verification order | `evidence` |
+| AUD-802 | stub signatures in bundles | `evidence` |
 | AUD-900 | verification result names | all kinds |
 | AUD-910 | unknown versions | `entry-hash`, `checkpoint`, `receipt`, `evidence` |
 | AUD-920 | constants | harness |

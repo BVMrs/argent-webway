@@ -1,0 +1,413 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "audit/compare",
+  "description": "Compare two commitments (checkpoints or receipts; signatures are not checked here). Input {\"a\", \"b\", \"proof\"}, proof from the smaller size to the larger. Accept: {\"relation\": \"equal\" | \"consistent\" | \"unrelated\"}. Reject: LogInconsistent (equal size, different roots) or ProofInvalid.",
+  "spec": "ext/audit.md#103-fork-and-rollback-evidence",
+  "cases": [
+    {
+      "id": "equal",
+      "description": "The same checkpoint twice",
+      "requirements": [
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "equal"
+        }
+      }
+    },
+    {
+      "id": "receipt-equals-checkpoint",
+      "description": "Receipt at index 7 and checkpoint at size 8 agree",
+      "requirements": [
+        "AUD-211",
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-receipt/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 7,
+          "entry": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:00:05.010Z",
+          "env": "blake3:696c047846b4cccb59a402f90b1efaab59e3bcdffb91bbba1e517ce76f861d9b",
+          "id": "019a5d2f-0a00-7b11-9c22-d33e44f55a66",
+          "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+          "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+          "sig": "bLaZnnzjq8RjuM8w_MC2qwgRTfECOHzvygF6hmH8qDce6Xi-Pgu_lTvOQACIvadmNqHmOBmHjXMCWSCA2Dr3Cg"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "equal"
+        }
+      }
+    },
+    {
+      "id": "consistent",
+      "description": "Checkpoint 4 then checkpoint 12",
+      "requirements": [
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 4,
+          "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "time": "2026-11-07T12:00:02Z",
+          "sig": "NZuhpPWdMnUrY9Ne6pI8E_AGXjzxiiAlGdvfBvZD6pekORHgb5q2SAfYsNr011YgX1p6xfGID8nPn8DMHQmOBQ"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:10:00Z",
+          "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+        },
+        "proof": [
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "consistent"
+        }
+      }
+    },
+    {
+      "id": "consistent-reversed",
+      "description": "Larger commitment first",
+      "requirements": [
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:10:00Z",
+          "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 4,
+          "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "time": "2026-11-07T12:00:02Z",
+          "sig": "NZuhpPWdMnUrY9Ne6pI8E_AGXjzxiiAlGdvfBvZD6pekORHgb5q2SAfYsNr011YgX1p6xfGID8nPn8DMHQmOBQ"
+        },
+        "proof": [
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "consistent"
+        }
+      }
+    },
+    {
+      "id": "receipt-then-checkpoint",
+      "description": "Receipt at index 2 (size 3) and checkpoint 12",
+      "requirements": [
+        "AUD-211",
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-receipt/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "entry": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "root": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+          "time": "2026-11-07T12:00:01.250Z",
+          "env": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+          "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+          "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+          "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+          "sig": "jN9O36pLHgIk0tT5JAiImjiLAS7ooqtPwPkoc5i-NDlGOfvf3lJVJ9fXrfC0fMD14-Biz_bzYnKJNUkm0qtACg"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:10:00Z",
+          "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+        },
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "consistent"
+        }
+      }
+    },
+    {
+      "id": "other-epoch",
+      "description": "Epoch 0 and epoch 1 are not compared",
+      "requirements": [
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 1,
+          "size": 1,
+          "root": "blake3:43f7e3186f08fae87a52a1b7890a7eef0259e41c9f0a36429e78828d6541b040",
+          "time": "2026-11-08T09:00:01Z",
+          "sig": "K9Rx5eqXYK1CkmmUoAlS4GhgWiZpqKyV-ub1FQTlWMKNA9SJwe_876ValhXdQoFz6sLCQSOiFWfczpdjLwgACQ"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "unrelated"
+        }
+      }
+    },
+    {
+      "id": "other-log",
+      "description": "beta's and alpha's logs are not compared",
+      "requirements": [
+        "AUD-710"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+          "epoch": 0,
+          "size": 3,
+          "root": "blake3:bd2af47432d02938fdce1d5cae66fd9f32cf9a8fcbbabbba810773fcf3f63c55",
+          "time": "2026-11-07T12:00:02Z",
+          "sig": "SRjYF0QEBenHcfZ14Z68r-Mr3Knmx_6v4uk2gG9IwHdV7j59B6pqf-pcA8CWkYykzMgPEON5uNsAfCjcao6iBg"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "relation": "unrelated"
+        }
+      }
+    },
+    {
+      "id": "fork",
+      "description": "Two checkpoints of size 8 with different roots: transferable proof of a fork",
+      "requirements": [
+        "AUD-211",
+        "AUD-703",
+        "AUD-710",
+        "AUD-900"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "VOZ34v1wB3b7Sc1myLSSYjjcYa43Hd4zYM_yesS7LyBo0nKxV2DaV7IyoXQWNLvOW0FC2FqqqwMNO_9QYzLCCA"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:531047b7ca356fafaa34e6bf2839120e8a5d7e6e7f0ade02a9ce171d88b4d6fe",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "wsu7gXGa-hi3JN1UaMtLy6_2tdxPFHMugIdXamsobCbcSlmCM_HgeaHhqe1DmLLn4_cW3_0xdt3TZ1rGQ0aEAA"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "LogInconsistent"
+      }
+    },
+    {
+      "id": "fork-against-receipt",
+      "description": "beta's receipt at index 7 against the forked checkpoint of size 8",
+      "requirements": [
+        "AUD-211",
+        "AUD-710",
+        "AUD-900"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-receipt/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 7,
+          "entry": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+          "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+          "time": "2026-11-07T12:00:05.010Z",
+          "env": "blake3:696c047846b4cccb59a402f90b1efaab59e3bcdffb91bbba1e517ce76f861d9b",
+          "id": "019a5d2f-0a00-7b11-9c22-d33e44f55a66",
+          "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+          "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+          "sig": "bLaZnnzjq8RjuM8w_MC2qwgRTfECOHzvygF6hmH8qDce6Xi-Pgu_lTvOQACIvadmNqHmOBmHjXMCWSCA2Dr3Cg"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:531047b7ca356fafaa34e6bf2839120e8a5d7e6e7f0ade02a9ce171d88b4d6fe",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "wsu7gXGa-hi3JN1UaMtLy6_2tdxPFHMugIdXamsobCbcSlmCM_HgeaHhqe1DmLLn4_cW3_0xdt3TZ1rGQ0aEAA"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "LogInconsistent"
+      }
+    },
+    {
+      "id": "fork-needs-proof",
+      "description": "Checkpoint 4 against the forked checkpoint 8, with beta's real proof",
+      "requirements": [
+        "AUD-710",
+        "AUD-900"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 4,
+          "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "time": "2026-11-07T12:00:02Z",
+          "sig": "NZuhpPWdMnUrY9Ne6pI8E_AGXjzxiiAlGdvfBvZD6pekORHgb5q2SAfYsNr011YgX1p6xfGID8nPn8DMHQmOBQ"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 8,
+          "root": "blake3:531047b7ca356fafaa34e6bf2839120e8a5d7e6e7f0ade02a9ce171d88b4d6fe",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "wsu7gXGa-hi3JN1UaMtLy6_2tdxPFHMugIdXamsobCbcSlmCM_HgeaHhqe1DmLLn4_cW3_0xdt3TZ1rGQ0aEAA"
+        },
+        "proof": [
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "no-proof",
+      "description": "Different sizes without a proof are not consistent",
+      "requirements": [
+        "AUD-710",
+        "AUD-900"
+      ],
+      "input": {
+        "a": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 4,
+          "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "time": "2026-11-07T12:00:02Z",
+          "sig": "NZuhpPWdMnUrY9Ne6pI8E_AGXjzxiiAlGdvfBvZD6pekORHgb5q2SAfYsNr011YgX1p6xfGID8nPn8DMHQmOBQ"
+        },
+        "b": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:10:00Z",
+          "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+        },
+        "proof": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    }
+  ]
+}

@@ -1,0 +1,399 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "audit/consistency",
+  "description": "RFC 9162 consistency proof with BLAKE3. Input {\"size1\", \"root1\", \"size2\", \"root2\", \"proof\"}. Accept (no output) or reject ProofInvalid. Uses beta's log.",
+  "spec": "ext/audit.md#53-proofs",
+  "cases": [
+    {
+      "id": "size-1-to-12",
+      "description": "Tree of size 12 extends size 1",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 1,
+        "root1": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "blake3:c58062fd573cd7170163fe7cd565c0ec05042ce533683cba59e77884668c1594",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-3-to-8",
+      "description": "Tree of size 8 extends size 3",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-4-to-12",
+      "description": "Tree of size 12 extends size 4",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 4,
+        "root1": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-8-to-12",
+      "description": "Tree of size 12 extends size 8",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 8,
+        "root1": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-6-to-7",
+      "description": "Tree of size 7 extends size 6",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 6,
+        "root1": "blake3:376c48ded76851539285e1f19d85b6e6acdfa0d47ac54fa2896cd2e9a1458f0d",
+        "size2": 7,
+        "root2": "blake3:6a994a02f078674b12b146884aef0429c38242737520355bceab99f1e0252459",
+        "proof": [
+          "blake3:fdedd57ce40c1005c462578a161949973db879eab6053fd8cc8d8707ec5b82e8",
+          "blake3:17b7505b39be6d65ae481d33647e5b8bb0723a1f9a99ecc2713ba59d525f0952",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-2-to-4",
+      "description": "Tree of size 4 extends size 2",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 2,
+        "root1": "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+        "size2": 4,
+        "root2": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+        "proof": [
+          "blake3:c58062fd573cd7170163fe7cd565c0ec05042ce533683cba59e77884668c1594"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-5-to-11",
+      "description": "Tree of size 11 extends size 5",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 5,
+        "root1": "blake3:493f1cbc0b5ac6414dcbb73e4bcc3d8c2e436e42ac46eabcea85395681457881",
+        "size2": 11,
+        "root2": "blake3:894540ac6ec7367718035b378377968a7904127e5e92f2e946341d127031bf0c",
+        "proof": [
+          "blake3:849264b5fe2f54bca82e943c4254e8242818420328bded71241adea97f0600e5",
+          "blake3:679d9dac659be1fa0f610a2325cf69a712693768ab94f9a376b45f5cbe6c8169",
+          "blake3:71a3e6e9657a343e88aee449d64e312e6fe2a9c8fe8d50b52fd9770018dc1513",
+          "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+          "blake3:7771732a2ac72fcec07c252c7097bc0887832b7bb6451babd0930fa1fc02b5f0"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "size-11-to-12",
+      "description": "Tree of size 12 extends size 11",
+      "requirements": [
+        "AUD-120"
+      ],
+      "input": {
+        "size1": 11,
+        "root1": "blake3:894540ac6ec7367718035b378377968a7904127e5e92f2e946341d127031bf0c",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:f0b62349b285c2b5a9d7f37d74fcfa134e102f6cfa247ec4bb994948ab8254c8",
+          "blake3:9ab33533ff3888d54e9bdf8de310c0f9b3398752018a5c10e452cf36259128ca",
+          "blake3:7d6a67b5787b0f3efb15187e05dbe4c64f268402e132ac06b5e9f16172ad853a",
+          "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+        ]
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "equal-sizes",
+      "description": "Equal sizes and roots, empty proof",
+      "requirements": [
+        "AUD-121",
+        "AUD-701"
+      ],
+      "input": {
+        "size1": 12,
+        "root1": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": []
+      },
+      "expect": {
+        "result": "accept"
+      }
+    },
+    {
+      "id": "wrong-old-root",
+      "description": "root1 is the root of size 2",
+      "requirements": [
+        "AUD-120",
+        "AUD-701",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "wrong-new-root",
+      "description": "root2 is the root of size 9",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:3efd60e842672d86addb96c137120baab37fd9b4aa91ea7a7b1c26d196f182f3",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "truncated",
+      "description": "Last proof hash missing",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "extra-hash",
+      "description": "One hash too many",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+          "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "empty-proof",
+      "description": "Different sizes need a proof",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 3,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "shrinking",
+      "description": "size1 > size2",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 8,
+        "root1": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "size2": 3,
+        "root2": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "size-zero",
+      "description": "size1 must be at least 1",
+      "requirements": [
+        "AUD-120",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 0,
+        "root1": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+        "size2": 8,
+        "root2": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+        "proof": [
+          "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+          "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+          "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "equal-sizes-with-proof",
+      "description": "Equal sizes accept only the empty proof",
+      "requirements": [
+        "AUD-121",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 12,
+        "root1": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "size2": 12,
+        "root2": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "proof": [
+          "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1"
+        ]
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    },
+    {
+      "id": "equal-sizes-different-roots",
+      "description": "Equal sizes, different roots",
+      "requirements": [
+        "AUD-121",
+        "AUD-900"
+      ],
+      "input": {
+        "size1": 12,
+        "root1": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "size2": 12,
+        "root2": "blake3:894540ac6ec7367718035b378377968a7904127e5e92f2e946341d127031bf0c",
+        "proof": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProofInvalid"
+      }
+    }
+  ]
+}
