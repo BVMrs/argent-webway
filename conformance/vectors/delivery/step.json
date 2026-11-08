@@ -6,7 +6,7 @@
   "spec": "profile.md#83-delivery-state-machine-requester-side",
   "cases": [
     {"id":"queued-transmit","description":"transmit in queued gives sent","requirements":["PROF-033"],"input":{"state":"queued","event":"transmit"},"expect":{"result":"accept","output":{"state":"sent"}}},
-    {"id":"queued-custody","description":"custody in queued gives sent","requirements":["PROF-033"],"input":{"state":"queued","event":"custody"},"expect":{"result":"accept","output":{"state":"sent"}}},
+    {"id":"queued-custody","description":"custody in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"custody"},"expect":{"result":"reject"}},
     {"id":"queued-response","description":"response in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"response"},"expect":{"result":"reject"}},
     {"id":"queued-retryable-error","description":"retryable-error in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"retryable-error"},"expect":{"result":"reject"}},
     {"id":"queued-final-error","description":"final-error in queued is illegal","requirements":["PROF-033"],"input":{"state":"queued","event":"final-error"},"expect":{"result":"reject"}},

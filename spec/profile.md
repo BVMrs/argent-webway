@@ -438,7 +438,7 @@ Events and transitions:
 
 | from \ event | transmit | custody | response | retryable error | final error | `now > exp + SKEW` | local cancel |
 |---|---|---|---|---|---|---|---|
-| `queued` | `sent` | `sent` | illegal | illegal | illegal | `expired` | `withdrawn` |
+| `queued` | `sent` | illegal | illegal | illegal | illegal | `expired` | `withdrawn` |
 | `sent` | `sent` | `sent` | `acknowledged` | `sent` (retry with backoff) | `refused` | `expired` | `sent` (cancel held, PROF-035) |
 | `acknowledged` | unchanged | unchanged | unchanged (duplicate) | unchanged | unchanged | unchanged | unchanged (cancel forwarded, PROF-035) |
 | `refused` | unchanged | unchanged | unchanged | unchanged | unchanged | unchanged | unchanged |
@@ -447,7 +447,8 @@ Events and transitions:
 
 `transmit` is the node starting a live attempt or a hand-off. The node records `sent` durably before the first
 transmission (PROF-033), so `queued` really means "never left the node", and a response or error for a `queued`
-or `withdrawn` request is impossible: it is an audit anomaly and is otherwise ignored. A `custody` acknowledgement
+or `withdrawn` request, and a custody acknowledgement for it, are impossible: each is an audit anomaly and is
+otherwise ignored. A `custody` acknowledgement
 or a `rejected` CUSTODY from a mailbox host is per hop: `custody` means `sent`, and a CUSTODY `rejected` is a
 retryable error for that hop whatever its code, because the next path may work. `acknowledged`, `refused`,
 `expired` and `withdrawn` are final. Signals that arrive after a final state come from retries that took another
