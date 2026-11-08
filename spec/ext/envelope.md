@@ -141,7 +141,7 @@ a violation as `EnvelopeInvalid` (reason `exp-not-after-ts` or `ttl-too-long`).
 
 **ENV-012** (SHOULD) A sender SHOULD set `ts` to its current time and SHOULD choose `exp` per operation: short
 (minutes) for interactive requests, longer (up to `MAX_TTL`) for work that may wait in a mailbox while the
-recipient is offline.
+recipient is offline. Answers that may be stored for duplicates are bound by ENV-522 instead.
 
 ### 3.3 `typ` and `op`
 
@@ -307,6 +307,9 @@ reconcile these, because it canonicalises JSON, not protobuf. So v0 pins one spe
   default (`""`, `0`, `false`, the `*_UNSPECIFIED` enum value), and repeated and map fields omitted when empty.
   Fields with explicit presence (`optional` fields, members of a `oneof`, message-typed fields) are emitted when
   set, even to a default value: `{"text": ""}` is a valid Part, and `"historyLength": 0` is a meaningful setting,
+- at most one member of each `oneof` (a Part is text, raw, url *or* data; a `SendMessageResponse` is a task *or* a
+  message). Typed decoders disagree on a body with two (some reject it, others keep the last), so it is rejected
+  before any of them sees it,
 - `bytes` as standard base64 (RFC 4648 §4) with padding,
 - `int64`, `uint64`, `fixed64` and their signed variants as JSON strings in decimal,
 - `google.protobuf.Timestamp` in the timestamp format of [§3.2](#32-field-formats), and the canonical proto3 JSON
@@ -320,7 +323,7 @@ not subject to the signer form, only to [§4.1](#41-input-rules).
 **ENV-121** (MUST) A receiver MUST reject a body in which a field known to the schema is not in the signer form
 (an enum as a number, a field under its proto name instead of its `json_name`, an explicit default value, a
 wrongly encoded `bytes` or 64-bit integer, a number outside the field's range such as an `int32` beyond
-±2^31) as `EnvelopeInvalid` (reason `signer-form`). Members the schema does not
+±2^31, more than one member of a `oneof`) as `EnvelopeInvalid` (reason `signer-form`). Members the schema does not
 know are kept and ignored (ENV-002, ENV-110).
 
 The check is about rejecting ambiguity, not about schema validation in general: a receiver still validates the
@@ -481,6 +484,16 @@ request: the `response`, or a signed `error` for a non-retryable failure in auth
 **ENV-521** (MUST NOT) A receiver MUST NOT create a dedupe entry for a request that failed with a retryable error
 (for example `MailboxFull` or a transient storage failure), so that the sender's retry is processed as new.
 
+**ENV-522** (MUST) The `exp` of an answer that may be stored under ENV-520 MUST be at least the `exp` of the request
+it answers. If that would make the answer's `exp − ts` exceed `MAX_TTL` (the receiver's clock is behind the
+sender's), the receiver MUST set the answer's `ts` to its `exp − MAX_TTL`. That `ts` is no later than the
+request's `ts`, so the sender accepts it (ENV-301).
+
+A stored answer is replayed byte for byte (ENV-530) to every retry until the request's `exp + SKEW`, and the sender
+retries until the request's `exp` (ENV-304). ENV-522 keeps the stored answer fresh for as long as a retry can
+arrive. Without it, a lost response to a long-lived request would be replaced by an expired copy on every retry,
+and the result of work that did run would never be delivered.
+
 ### 8.4 Answering duplicates
 
 **ENV-530** (MUST) A receiver MUST answer a duplicate with the stored envelope byte for byte (same `id`, same
@@ -500,7 +513,9 @@ A receiver handles an incoming envelope in the following steps. Steps 1–7 depe
 receiver's hosted agents, `now` and the watermark `W`. Steps 8–9 use the dedupe store.
 
 1. **Parse** as I-JSON within the size and depth limits (ENV-100, ENV-101).
-2. **Version**: `v` is a string equal to `webway-envelope/0`, otherwise A2A `VersionNotSupportedError` (ENV-800).
+2. **Version**: if `v` is present and is a string other than `webway-envelope/0`, A2A `VersionNotSupportedError`
+   (ENV-800). A missing `v`, or one that is not a string, is a structure error (ENV-001, `missing-field` or
+   `malformed-field`).
 3. **Structure**: required members, types and formats (ENV-001, ENV-010, ENV-011, ENV-020, ENV-031).
 4. **Signature** over the signing input with the `from` key (ENV-210, ENV-211).
 5. **Body binding**: `body_hash` (ENV-212).
@@ -578,8 +593,10 @@ and `data.retryable` alone.
 
 ### 10.3 How errors travel
 
-**ENV-620** (MUST) An error for an envelope that passed step 4 (signature) MUST be sent as an `error` envelope,
-signed by the receiving agent, with `to` = the failed envelope's `from` and `ctx.inReplyTo` = its `id`.
+**ENV-620** (MUST) An error for an envelope that passed step 4 (signature) and whose `to` is an agent the receiver
+hosts MUST be sent as an `error` envelope, signed by that agent, with `to` = the failed envelope's `from` and
+`ctx.inReplyTo` = its `id`. A `wrong-recipient` rejection (ENV-400) cannot be signed, because the node hosts no
+agent it could sign as (ENV-201). It is reported unsigned at the binding level, as in ENV-621.
 
 **ENV-621** (SHOULD NOT) An error for an envelope that failed before or at step 4 SHOULD NOT be sent as a signed
 envelope, because its `from` is unauthenticated. The receiver SHOULD report it as an unsigned error at the binding
@@ -611,8 +628,10 @@ always verifies.
 
 The envelope version is `v`. This document defines `webway-envelope/0`. The extension URI ends in `/v0`.
 
-- **Minor revisions** of v0 may add OPTIONAL header members that a receiver can safely ignore, new `typ` or `op`
-  values that receivers reject cleanly (ENV-022), new error reasons and new test vectors. They never change the
+- **Minor revisions** of v0 may add OPTIONAL header members that a receiver can safely ignore, new `op` values
+  that receivers reject cleanly (ENV-022), new error reasons and new test vectors. New `typ` values are not minor:
+  a v0 receiver rejects an unknown `typ` as `malformed-field` (ENV-020), and answers it (unsigned, ENV-621) rather
+  than ignoring it as ENV-402 does for the known answer types. So a new `typ` needs a major version. They never change the
   signing input rules or the meaning of existing members.
 - **A major revision** (`webway-envelope/1`) is needed for any change a v0 receiver could not safely ignore. A new
   major gets a new signing-input prefix, so a signature can never be valid under two versions.
@@ -748,6 +767,7 @@ tested by the black-box harness (T4), not by a pure vector.
 | ENV-512 | MUST | dedupe answers | `replay.json` |
 | ENV-520 | MUST | stored response | `replay.json` |
 | ENV-521 | MUST NOT | no entry on retryable error | `replay.json` |
+| ENV-522 | MUST | stored answer outlives the request | `replay.json` |
 | ENV-530 | MUST | byte-identical answer | `replay.json` |
 | ENV-531 | MUST | duplicate ack for unauthenticated peers | `replay.json` |
 | ENV-600 | MUST | step order | `replay.json` |
@@ -774,11 +794,16 @@ Locations are JSON Pointer patterns, `*` matching any array index. They follow `
 | `typ` / `op` | Parts at | `taskId` at | `contextId` at |
 |---|---|---|---|
 | `request` `SendMessage`, `SendStreamingMessage` | `/message/parts/*` | `/message/taskId` | `/message/contextId` |
-| `response` `SendMessage`, `SendStreamingMessage` (body is `SendMessageResponse` / `StreamResponse`) | `/message/parts/*`, `/task/status/message/parts/*`, `/task/artifacts/*/parts/*`, `/task/history/*/parts/*` | `/message/taskId`, `/task/id` | `/message/contextId`, `/task/contextId` |
+| `response` `SendMessage`, `SendStreamingMessage`, `SubscribeToTask` (body is `SendMessageResponse` / `StreamResponse`) | `/message/parts/*`, `/task/status/message/parts/*`, `/task/artifacts/*/parts/*`, `/task/history/*/parts/*` | `/message/taskId`, `/task/id` | `/message/contextId`, `/task/contextId` |
 | `event` (body is `StreamResponse`) | as for the response, plus `/statusUpdate/status/message/parts/*`, `/artifactUpdate/artifact/parts/*` | as for the response, plus `/statusUpdate/taskId`, `/artifactUpdate/taskId` | as for the response, plus `/statusUpdate/contextId`, `/artifactUpdate/contextId` |
 | `response` `GetTask`, `CancelTask` (body is `Task`) | `/status/message/parts/*`, `/artifacts/*/parts/*`, `/history/*/parts/*` | `/id` | `/contextId` |
 | `request` `GetTask`, `CancelTask`, `SubscribeToTask` | none | `/id` | none |
+| `response` `ListTasks` (body is `ListTasksResponse`) | `/tasks/*/status/message/parts/*`, `/tasks/*/artifacts/*/parts/*`, `/tasks/*/history/*/parts/*` | none (many tasks) | none |
 | other operations | none | none | none |
+
+In `a2a.proto` v1.0.1 the only bodies that carry Parts are `SendMessageRequest`, `Message`, `Task` (and therefore
+`ListTasksResponse`), `SendMessageResponse`, `StreamResponse` and the two update events. The table covers every
+operation whose request or answer contains one of them.
 
 ## Appendix C. Changes from the due-diligence sketch
 
@@ -789,6 +814,7 @@ Locations are JSON Pointer patterns, `*` matching any array index. They follow `
 | Ed25519 verification pinned to the strict variant. | Implementations otherwise disagree on which signatures are valid ([§5.2](#52-verification)). |
 | Purge watermark. | Keeps the dedupe horizon sound if the receiver's clock steps back ([§8.1](#81-dedupe-key-and-entries)). |
 | `id-reuse` handling for the same `(from, id)` with a different header. | The sketch only covered byte-identical duplicates ([§8.2](#82-classifying-an-envelope)). |
+| A stored answer's `exp` is at least the request's `exp` (ENV-522). | The sketch replays stored answers byte for byte but did not bound their lifetime, so a lost response to a long-lived request could only ever be replayed expired ([§8.3](#83-responses-that-may-be-stored)). |
 | `EnvelopeNotYetValid` (retryable) for `ts` in the future. | It is a clock problem that resolves by waiting, unlike `EnvelopeInvalid`. |
 | Duplicate ack is a signed `ack` envelope with a body. | Keeps "every envelope has a body and a signature" without a special bodiless form ([§8.4](#84-answering-duplicates)). |
 | `prov` is keyed by JSON Pointer into `body`. | Frame-independent addressing of Parts, so taint stays in the signed header ([§3.6](#36-prov)). |

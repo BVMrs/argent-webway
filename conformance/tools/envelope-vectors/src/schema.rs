@@ -25,17 +25,22 @@ pub struct Field {
     pub repeated: bool,
     /// Explicit presence: `optional`, oneof member, or message-typed.
     pub presence: bool,
+    /// The `oneof` this field belongs to: at most one member of a group may be present.
+    pub oneof: Option<&'static str>,
 }
 
 const fn f(json: &'static str, proto: &'static str, kind: Kind) -> Field {
     let presence = matches!(kind, Kind::Msg(_) | Kind::Free | Kind::Timestamp);
-    Field { json, proto, kind, repeated: false, presence }
+    Field { json, proto, kind, repeated: false, presence, oneof: None }
 }
 const fn rep(json: &'static str, proto: &'static str, kind: Kind) -> Field {
-    Field { json, proto, kind, repeated: true, presence: false }
+    Field { json, proto, kind, repeated: true, presence: false, oneof: None }
 }
 const fn opt(json: &'static str, proto: &'static str, kind: Kind) -> Field {
-    Field { json, proto, kind, repeated: false, presence: true }
+    Field { json, proto, kind, repeated: false, presence: true, oneof: None }
+}
+const fn one(json: &'static str, proto: &'static str, kind: Kind, group: &'static str) -> Field {
+    Field { json, proto, kind, repeated: false, presence: true, oneof: Some(group) }
 }
 
 const ROLE: &[&str] = &["ROLE_UNSPECIFIED", "ROLE_USER", "ROLE_AGENT"];
@@ -77,10 +82,10 @@ pub fn message_fields(name: &str) -> &'static [Field] {
             rep("referenceTaskIds", "reference_task_ids", Str),
         ] },
         "Part" => const { &[
-            opt("text", "text", Str),
-            opt("raw", "raw", Bytes),
-            opt("url", "url", Str),
-            opt("data", "data", Free),
+            one("text", "text", Str, "content"),
+            one("raw", "raw", Bytes, "content"),
+            one("url", "url", Str, "content"),
+            one("data", "data", Free, "content"),
             f("metadata", "metadata", Free),
             f("filename", "filename", Str),
             f("mediaType", "media_type", Str),
@@ -106,12 +111,14 @@ pub fn message_fields(name: &str) -> &'static [Field] {
             f("metadata", "metadata", Free),
             rep("extensions", "extensions", Str),
         ] },
-        "SendMessageResponse" => const { &[f("task", "task", Msg("Task")), f("message", "message", Msg("Message"))] },
+        "SendMessageResponse" => const {
+            &[one("task", "task", Msg("Task"), "payload"), one("message", "message", Msg("Message"), "payload")]
+        },
         "StreamResponse" => const { &[
-            f("task", "task", Msg("Task")),
-            f("message", "message", Msg("Message")),
-            f("statusUpdate", "status_update", Msg("TaskStatusUpdateEvent")),
-            f("artifactUpdate", "artifact_update", Msg("TaskArtifactUpdateEvent")),
+            one("task", "task", Msg("Task"), "payload"),
+            one("message", "message", Msg("Message"), "payload"),
+            one("statusUpdate", "status_update", Msg("TaskStatusUpdateEvent"), "payload"),
+            one("artifactUpdate", "artifact_update", Msg("TaskArtifactUpdateEvent"), "payload"),
         ] },
         "TaskStatusUpdateEvent" => const { &[
             f("taskId", "task_id", Str),
@@ -133,6 +140,26 @@ pub fn message_fields(name: &str) -> &'static [Field] {
             opt("historyLength", "history_length", Int32),
         ] },
         "CancelTaskRequest" => const { &[f("tenant", "tenant", Str), f("id", "id", Str), f("metadata", "metadata", Free)] },
+        "ListTasksRequest" => const {
+            &[
+                f("tenant", "tenant", Str),
+                f("contextId", "context_id", Str),
+                f("status", "status", Enum(TASK_STATE)),
+                opt("pageSize", "page_size", Int32),
+                f("pageToken", "page_token", Str),
+                opt("historyLength", "history_length", Int32),
+                f("statusTimestampAfter", "status_timestamp_after", Timestamp),
+                opt("includeArtifacts", "include_artifacts", Bool),
+            ]
+        },
+        "ListTasksResponse" => const {
+            &[
+                rep("tasks", "tasks", Msg("Task")),
+                f("nextPageToken", "next_page_token", Str),
+                f("pageSize", "page_size", Int32),
+                f("totalSize", "total_size", Int32),
+            ]
+        },
         "SubscribeToTaskRequest" => const { &[f("tenant", "tenant", Str), f("id", "id", Str)] },
         other => panic!("no schema for {other}"),
     }
@@ -157,7 +184,9 @@ pub fn body_schema(typ: &str, op: &str) -> Option<&'static str> {
     match (typ, op) {
         ("request", "SendMessage" | "SendStreamingMessage") => Some("SendMessageRequest"),
         ("response", "SendMessage") => Some("SendMessageResponse"),
-        ("response", "SendStreamingMessage") | ("event", _) => Some("StreamResponse"),
+        ("response", "SendStreamingMessage" | "SubscribeToTask") | ("event", _) => Some("StreamResponse"),
+        ("request", "ListTasks") => Some("ListTasksRequest"),
+        ("response", "ListTasks") => Some("ListTasksResponse"),
         ("request", "GetTask") => Some("GetTaskRequest"),
         ("request", "CancelTask") => Some("CancelTaskRequest"),
         ("request", "SubscribeToTask") => Some("SubscribeToTaskRequest"),
@@ -180,7 +209,7 @@ pub fn locations(typ: &str, op: &str) -> (Vec<&'static str>, Vec<&'static str>, 
         ("request", "SendMessage" | "SendStreamingMessage") => {
             (vec![P_MSG], vec!["/message/taskId"], vec!["/message/contextId"])
         }
-        ("response", "SendMessage" | "SendStreamingMessage") => {
+        ("response", "SendMessage" | "SendStreamingMessage" | "SubscribeToTask") => {
             (resp_parts(), vec!["/message/taskId", "/task/id"], vec!["/message/contextId", "/task/contextId"])
         }
         ("event", _) => {
@@ -196,6 +225,11 @@ pub fn locations(typ: &str, op: &str) -> (Vec<&'static str>, Vec<&'static str>, 
             vec!["/status/message/parts/*", "/artifacts/*/parts/*", "/history/*/parts/*"],
             vec!["/id"],
             vec!["/contextId"],
+        ),
+        ("response", "ListTasks") => (
+            vec!["/tasks/*/status/message/parts/*", "/tasks/*/artifacts/*/parts/*", "/tasks/*/history/*/parts/*"],
+            vec![],
+            vec![],
         ),
         ("request", "GetTask" | "CancelTask" | "SubscribeToTask") => (vec![], vec!["/id"], vec![]),
         _ => (vec![], vec![], vec![]),
@@ -230,6 +264,16 @@ pub fn expand(body: &Value, pattern: &str) -> Vec<String> {
 pub fn signer_form_ok(v: &Value, msg: &str) -> bool {
     let Some(members) = v.as_object() else { return false };
     let fields = message_fields(msg);
+    // At most one member of each oneof (ENV-121).
+    for fd in fields.iter().filter(|fd| fd.oneof.is_some()) {
+        let set = fields
+            .iter()
+            .filter(|g| g.oneof == fd.oneof && members.iter().any(|(k, _)| k == g.json || k == g.proto))
+            .count();
+        if set > 1 {
+            return false;
+        }
+    }
     for (k, val) in members {
         if let Some(fd) = fields.iter().find(|fd| fd.json == k) {
             if !field_ok(val, fd) {

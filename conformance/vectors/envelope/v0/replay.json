@@ -544,6 +544,55 @@
           }
         }
       ]
+    },
+    {
+      "id": "long-ttl-lost-response",
+      "requirements": [
+        "ENV-522",
+        "ENV-530"
+      ],
+      "description": "A 6-day request's response is lost; 5 days later a retry is answered with the stored response. Because its exp is at least the request's (ENV-522) it is still fresh and delivered. A stored answer with a 1-hour exp (R-short-exp, violating ENV-522) would be expired and the result lost.",
+      "receiver": {
+        "hosts": [
+          "wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma"
+        ],
+        "initial_watermark": "2026-11-06T12:00:00Z"
+      },
+      "envelopes": {
+        "E-long": "{\"v\":\"webway-envelope/0\",\"typ\":\"request\",\"op\":\"SendMessage\",\"from\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"to\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"id\":\"01a1b5e1-3e00-78e3-b3f7-8424416b136c\",\"ts\":\"2026-11-07T12:00:00Z\",\"exp\":\"2026-11-13T12:00:00Z\",\"ctx\":{\"contextId\":\"ctx-0001\"},\"cap\":{\"access\":\"dGVzdC1hY2Nlc3MtdG9rZW4tbm90LWEtYmlzY3VpdA\"},\"prov\":{\"parts\":{\"/message/parts/0\":{\"taint\":{\"owners\":[\"did:key:z6Mkr8dDS8Uz36BHdAUXnbxRJVGbQL9zsi9hyZA19Gdn45hz\"],\"unverified\":false}}}},\"body_hash\":\"blake3:476d7367e3c0e7ab27cf280d00e236dd423b88d94f1e0d78e61d4b439552160b\",\"body\":{\"message\":{\"messageId\":\"01a1b5e1-3e00-78e3-b3f7-8424416b136c\",\"contextId\":\"ctx-0001\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"Run the test suite on branch main.\"}]}},\"sig\":\"iSArDO4YJAHg81tOgpyzUu4WSNYGVyUEzfgb1j-_O-cO3c3Ji9KepngeomA3SQGQlublMYAp_PalubHRyQjVDQ\"}",
+        "R-stored": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-71bc-9081-f2a628381d82\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-13T12:00:00Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-78e3-b3f7-8424416b136c\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"N4oHAwWaCVyybI2VfQjDEstAv5H6gQzzNE-l-_um_lgCOO43cuMjdHEetyQy-5mQBoS80Dw26f__rxKQ8x3CAA\"}",
+        "R-short-exp": "{\"v\":\"webway-envelope/0\",\"typ\":\"response\",\"op\":\"SendMessage\",\"from\":\"wwa:mfpwgeux2ovbqtqik4wdofg656qn2nasasuvg2om3vnepvrhphzq\",\"to\":\"wwa:56s6x3afbd3hsvlyyuoe6j5xtqr2zecwamvyb32edhjde5aszwma\",\"id\":\"01a1b5e1-45d0-7449-9280-43198cd177f8\",\"ts\":\"2026-11-07T12:00:02Z\",\"exp\":\"2026-11-07T13:00:02Z\",\"ctx\":{\"taskId\":\"task-0001\",\"contextId\":\"ctx-0001\",\"inReplyTo\":\"01a1b5e1-3e00-78e3-b3f7-8424416b136c\"},\"body_hash\":\"blake3:94af32f4e1a3a944ebaabae78ff4c05ab88468d0e12b3ac6e4a16a7c285ce9f1\",\"body\":{\"task\":{\"id\":\"task-0001\",\"contextId\":\"ctx-0001\",\"status\":{\"state\":\"TASK_STATE_SUBMITTED\"}}},\"sig\":\"LzdpWFeYuB1bLRpGzIETZzQQSH-x6knFhRafsiIZXuI-elsDv9XlErQgbNHElQoNg5KgikxCGz1KAfRvHH43Cw\"}"
+      },
+      "steps": [
+        {
+          "action": "sent",
+          "envelope": "E-long"
+        },
+        {
+          "action": "receive",
+          "envelope": "R-short-exp",
+          "now": "2026-11-12T12:00:00Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "reject",
+            "error": {
+              "type": "EnvelopeExpired",
+              "code": -33003,
+              "reason": "expired",
+              "retryable": false
+            }
+          }
+        },
+        {
+          "action": "receive",
+          "envelope": "R-stored",
+          "now": "2026-11-12T12:00:00Z",
+          "transport": "authenticated",
+          "expect": {
+            "outcome": "deliver"
+          }
+        }
+      ]
     }
   ]
 }
