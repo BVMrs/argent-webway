@@ -1,0 +1,19 @@
+[package]
+name = "webway-capgen"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "Reference model and vector generator for spec/ext/capability.md (capability/v0). Prototype, not the node."
+
+# Standalone: not part of any workspace, so it does not conflict with the conformance harness workspace.
+[workspace]
+
+[dependencies]
+biscuit-auth = "=6.0.0"
+ed25519-dalek = "2"
+blake3 = "1"
+data-encoding = "2"
+bs58 = "0.5"
+serde_json = "1"
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+prost = "0.10"
