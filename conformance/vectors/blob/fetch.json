@@ -1,0 +1,2063 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/fetch",
+  "description": "Provider decision for one Fetch whose envelope has passed envelope/v0 verification. Input {\"provider\": {\"node\", \"agents\"}, \"connectionPeer\": wwn, \"bindings\": {wwa: wwn} (agent-certs the provider holds), \"envelope\": {\"from\", \"to\", \"ts\", \"exp\", \"cap\"?: {\"capability\"?}, \"body\"}, \"authorization\": \"allow\" or the capability/v0 error for this request, \"store\": {hash: {\"size\", \"blocks\"?}} (absent blocks = whole blob)}. Output {\"hash\", \"size\", \"ranges\"} of the reply. Identifiers are syntactically valid test values, not real keys.",
+  "spec": "ext/blob.md#73-provider-procedure",
+  "cases": [
+    {
+      "id": "whole",
+      "description": "No ranges: the whole blob",
+      "requirements": [
+        "BLOB-034"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              0,
+              7
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "some",
+      "description": "Requested ranges",
+      "requirements": [
+        "BLOB-034"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "past-end",
+      "description": "Clamped to the blob",
+      "requirements": [
+        "BLOB-034",
+        "BLOB-023"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                5,
+                100
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              5,
+              7
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "size-probe",
+      "description": "A range past the end gets the last block",
+      "requirements": [
+        "BLOB-034",
+        "BLOB-023"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                1000,
+                1001
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              6,
+              7
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "unknown-body-member",
+      "description": "Unknown body members are ignored",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                0,
+                1
+              ]
+            ],
+            "x-priority": 3
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "ttl-max",
+      "description": "exp - ts = MAX_FETCH_TTL",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:10:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "ranges": [
+            [
+              0,
+              7
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "partial-held",
+      "description": "Partial copy with its last block: sends what it has",
+      "requirements": [
+        "BLOB-042"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10"
+          },
+          "cap": {
+            "capability": "blob:blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10",
+          "size": 300001,
+          "ranges": [
+            [
+              0,
+              3
+            ],
+            [
+              18,
+              19
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "partial-held-none-requested",
+      "description": "Partial copy, none of the requested blocks: empty reply",
+      "requirements": [
+        "BLOB-042"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10",
+            "ranges": [
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10",
+          "size": 300001,
+          "ranges": []
+        }
+      }
+    },
+    {
+      "id": "partial-without-last-block",
+      "description": "Partial copy without its last block is not served",
+      "requirements": [
+        "BLOB-042"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa",
+            "ranges": [
+              [
+                0,
+                1
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobNotFound"
+      }
+    },
+    {
+      "id": "not-held",
+      "description": "Authorised, not held",
+      "requirements": [
+        "BLOB-034"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2"
+          },
+          "cap": {
+            "capability": "blob:blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobNotFound"
+      }
+    },
+    {
+      "id": "denied-held",
+      "description": "Denied, blob held",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "CapabilityDenied",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityDenied"
+      }
+    },
+    {
+      "id": "denied-not-held",
+      "description": "Denied, blob not held: same answer (no existence oracle)",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2"
+          },
+          "cap": {
+            "capability": "blob:blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2#read"
+          }
+        },
+        "authorization": "CapabilityDenied",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityDenied"
+      }
+    },
+    {
+      "id": "missing-not-held",
+      "description": "No token, blob not held",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2"
+          },
+          "cap": {
+            "capability": "blob:blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2#read"
+          }
+        },
+        "authorization": "CapabilityMissing",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityMissing"
+      }
+    },
+    {
+      "id": "missing-held",
+      "description": "No token, blob held",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "CapabilityMissing",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityMissing"
+      }
+    },
+    {
+      "id": "invalid",
+      "description": "Token does not verify",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "CapabilityInvalid",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityInvalid"
+      }
+    },
+    {
+      "id": "revoked",
+      "description": "Token revoked",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "CapabilityRevoked",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityRevoked"
+      }
+    },
+    {
+      "id": "revocation-unknown",
+      "description": "Long-lived token without a fresh revocation list",
+      "requirements": [
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "RevocationStatusUnavailable",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "RevocationStatusUnavailable"
+      }
+    },
+    {
+      "id": "no-capability",
+      "description": "cap.capability absent",
+      "requirements": [
+        "BLOB-031",
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityMissing"
+      }
+    },
+    {
+      "id": "capability-other-blob",
+      "description": "Capability names another blob",
+      "requirements": [
+        "BLOB-031",
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:b40b44dfd97e7a84a996a91af8b85188c66c126940ba7aad2e7ae6b385402aa2#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityDenied"
+      }
+    },
+    {
+      "id": "capability-other-op",
+      "description": "Capability is not #read",
+      "requirements": [
+        "BLOB-031",
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#write"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityDenied"
+      }
+    },
+    {
+      "id": "capability-bare-hex",
+      "description": "Capability without the blake3: prefix",
+      "requirements": [
+        "BLOB-031",
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CapabilityDenied"
+      }
+    },
+    {
+      "id": "not-hosted",
+      "description": "to is not an agent of this node",
+      "requirements": [
+        "BLOB-032"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:fa7xhrazu6skkisalcimvy5xpc2ivyrpi7g6w3h4a2jjexdmbj6a",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "RecipientUnknown"
+      }
+    },
+    {
+      "id": "relayed",
+      "description": "from is bound to another node than the connection's peer",
+      "requirements": [
+        "BLOB-032"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "IdentityUntrusted"
+      }
+    },
+    {
+      "id": "unbound",
+      "description": "from has no agent-cert at the provider",
+      "requirements": [
+        "BLOB-032"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:su7cjjwjwgkca6sq7br5mni37v2iijvw7oko2s6c5tlv6cbrbr6a",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "IdentityUntrusted"
+      }
+    },
+    {
+      "id": "ttl-too-long",
+      "description": "exp - ts above MAX_FETCH_TTL",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:10:01Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EnvelopeInvalid"
+      }
+    },
+    {
+      "id": "hash-missing",
+      "description": "Body without hash",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "ranges": [
+              [
+                0,
+                1
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "InvalidParamsError"
+      }
+    },
+    {
+      "id": "hash-uppercase",
+      "description": "Hash not in canonical form",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "BLAKE3:D93C23EEDAF165A7E0BE908BA86F1A7A520D568D2D13CDE787C8580C5C72CC54"
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "InvalidParamsError"
+      }
+    },
+    {
+      "id": "ranges-adjacent",
+      "description": "Non-canonical ranges",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "InvalidParamsError"
+      }
+    },
+    {
+      "id": "ranges-empty",
+      "description": "Empty ranges",
+      "requirements": [
+        "BLOB-031"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": []
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "allow",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "InvalidParamsError"
+      }
+    },
+    {
+      "id": "params-before-authz",
+      "description": "Invalid body and denied token: the body check comes first",
+      "requirements": [
+        "BLOB-031",
+        "BLOB-033"
+      ],
+      "input": {
+        "provider": {
+          "node": "wwn:7y3zn6mjuux4dzmf4tsufqegiw2hyx4e2r2yk5srysvzoiulpocq",
+          "agents": [
+            "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa"
+          ]
+        },
+        "connectionPeer": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+        "bindings": {
+          "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma": "wwn:keldo62bl5ecaggy3fwdeifpvffmsbxz73twtgvjtor22lsmfi2a",
+          "wwa:q6ryaejtqbjcfmd5vdt2wllnbawrojyqf6raumeyxknpcv4hvg7a": "wwn:zwa6tcxx742w6lq3x7tyfrahdlqdhy6sofvz2iq65cpl35iw25oa"
+        },
+        "envelope": {
+          "from": "wwa:7vsxcdxtfjc5yf4yd2ssgghtwx7wxqn4474evlfr5uqvl6re2jma",
+          "to": "wwa:n4qtz5myhbjfgtduqqslcg7kaqhvb6jq2afxlwvr6hixn44pajxa",
+          "ts": "2026-11-07T12:00:00Z",
+          "exp": "2026-11-07T12:05:00Z",
+          "body": {
+            "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+            "ranges": [
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          "cap": {
+            "capability": "blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54#read"
+          }
+        },
+        "authorization": "CapabilityDenied",
+        "store": {
+          "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54": {
+            "size": 100000
+          },
+          "blake3:6cc9dce05d4cff8c5bef5c5a24681e42b13f03e34a0bc5e66f65a91d48c944fa": {
+            "size": 300000,
+            "blocks": [
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "blake3:ac69f8086484814f8b5062bcaa846bde9011e3f931eaa83275c85c4d7f435f10": {
+            "size": 300001,
+            "blocks": [
+              [
+                0,
+                3
+              ],
+              [
+                18,
+                19
+              ]
+            ]
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "InvalidParamsError"
+      }
+    }
+  ]
+}

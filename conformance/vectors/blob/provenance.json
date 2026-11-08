@@ -1,0 +1,364 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/provenance",
+  "description": "Taint and trust of fetched content. Input {\"receiverOwner\", \"reference\": {\"senderOwner\" (verified owner of the envelope that carried the referencing Part), \"taint\"}, \"providerOwner\" (owner of the node the bytes came from), \"otherReferences\": [taint] (earlier Parts that referenced the same hash)}. Output {\"trust\", \"taint\"}. Reject EnvelopeInvalid for a missing or malformed taint.",
+  "spec": "ext/blob.md#9-provenance-of-fetched-content",
+  "cases": [
+    {
+      "id": "foreign",
+      "description": "Artefact from owner B, fetched from B",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "same-owner",
+      "description": "Artefact from another node of A",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "same-owner",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "same-owner-forwarding",
+      "description": "A node forwards B's content to A: stays foreign",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "unverified",
+      "description": "Content that entered through an HTTP edge",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": true
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "unverified-origin",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": true
+          }
+        }
+      }
+    },
+    {
+      "id": "foreign-claims-receiver",
+      "description": "B claims taint.owners = [A]: clamped to foreign",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "third-owner-provider",
+      "description": "Bytes served by C's node: C is not added and does not change trust",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "own-cache",
+      "description": "Bytes already in the receiver's own store: still foreign",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "dedup-no-raise",
+      "description": "Same hash earlier referenced as same-owner content: a foreign reference stays foreign",
+      "requirements": [
+        "BLOB-051"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": [
+          {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "foreign",
+          "taint": {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "dedup-no-lower",
+      "description": "Same hash earlier referenced as unverified content: this reference keeps its own taint",
+      "requirements": [
+        "BLOB-051"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "otherReferences": [
+          {
+            "owners": [
+              "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+            ],
+            "unverified": true
+          }
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "trust": "same-owner",
+          "taint": {
+            "owners": [
+              "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX"
+            ],
+            "unverified": false
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-taint",
+      "description": "Referencing Part without taint",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        },
+        "providerOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EnvelopeInvalid"
+      }
+    },
+    {
+      "id": "empty-owners",
+      "description": "taint.owners empty",
+      "requirements": [
+        "BLOB-050"
+      ],
+      "input": {
+        "receiverOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "reference": {
+          "senderOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "taint": {
+            "owners": [],
+            "unverified": false
+          }
+        },
+        "providerOwner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+        "otherReferences": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EnvelopeInvalid"
+      }
+    }
+  ]
+}

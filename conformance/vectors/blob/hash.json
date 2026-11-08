@@ -1,0 +1,369 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/hash",
+  "description": "Blob hash. Input {\"data\": {\"pattern\": n} | {\"hex\": string}}, where pattern n is the n bytes i mod 251 (the input of the official BLAKE3 test vectors). Output {\"hash\": \"blake3:<hex>\", \"size\", \"blocks\"}.",
+  "spec": "ext/blob.md#3-content-and-hash",
+  "cases": [
+    {
+      "id": "pattern-0",
+      "description": "0 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 0
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+          "size": 0,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-1",
+      "description": "1 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:2d3adedff11b61f14c886e35afa036736dcd87a74d27b5c1510225d0f592e213",
+          "size": 1,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-1023",
+      "description": "1023 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1023
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:10108970eeda3eb932baac1428c7a2163b0e924c9a9e25b35bba72b28f70bd11",
+          "size": 1023,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-1024",
+      "description": "1024 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1024
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:42214739f095a406f3fc83deb889744ac00df831c10daa55189b5d121c855af7",
+          "size": 1024,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-1025",
+      "description": "1025 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1025
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b8444",
+          "size": 1025,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-16383",
+      "description": "16383 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 16383
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:7529418ecb789a30254899f229522ccde05234d2019c5ec5072bc4685a57658d",
+          "size": 16383,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-16384",
+      "description": "16384 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 16384
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:f875d6646de28985646f34ee13be9a576fd515f76b5b0a26bb324735041ddde4",
+          "size": 16384,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "pattern-16385",
+      "description": "16385 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 16385
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:1dabe216be2578830263b049de1639f39f05a4da616b9b78c7a5e4e41662fd1f",
+          "size": 16385,
+          "blocks": 2
+        }
+      }
+    },
+    {
+      "id": "pattern-32768",
+      "description": "32768 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 32768
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:162183d1f9184474f5a5c9e6224e66720cdb6523f822e52d9b1efa30893f48f9",
+          "size": 32768,
+          "blocks": 2
+        }
+      }
+    },
+    {
+      "id": "pattern-32769",
+      "description": "32769 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 32769
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:da589428d9b32c97658a04a21c0c8a38aad2ac402120819d956fd6d62bbfa36e",
+          "size": 32769,
+          "blocks": 3
+        }
+      }
+    },
+    {
+      "id": "pattern-49152",
+      "description": "49152 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 49152
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:88c8baf84eb0b231f985d2be3540430506a9280fd0ec4cec74524bbc33bbc5df",
+          "size": 49152,
+          "blocks": 3
+        }
+      }
+    },
+    {
+      "id": "pattern-65536",
+      "description": "65536 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 65536
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:68d647e619a930e7b1082f74f334b0c65a315725569bdc123f0ee11881717bfe",
+          "size": 65536,
+          "blocks": 4
+        }
+      }
+    },
+    {
+      "id": "pattern-65537",
+      "description": "65537 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 65537
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:7c99f9840a73dfcb6e5bfe4ff6d1558acab7e015640790c26411818bdbe17eca",
+          "size": 65537,
+          "blocks": 5
+        }
+      }
+    },
+    {
+      "id": "pattern-102400",
+      "description": "102400 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 102400
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:bc3e3d41a1146b069abffad3c0d44860cf664390afce4d9661f7902e7943e085",
+          "size": 102400,
+          "blocks": 7
+        }
+      }
+    },
+    {
+      "id": "pattern-1048576",
+      "description": "1048576 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1048576
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:74cb441fd087764ca9c3694da742ebe30cbeb3060a17009ca81825c7a8d10343",
+          "size": 1048576,
+          "blocks": 64
+        }
+      }
+    },
+    {
+      "id": "pattern-1048577",
+      "description": "1048577 bytes of the pattern",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "pattern": 1048577
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:2f053cd7472cf0cd2f9adaf45c1180255b91b9a865404a63671a0ee5f792ed33",
+          "size": 1048577,
+          "blocks": 65
+        }
+      }
+    },
+    {
+      "id": "abc",
+      "description": "The three bytes \"abc\"",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "hex": "616263"
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85",
+          "size": 3,
+          "blocks": 1
+        }
+      }
+    },
+    {
+      "id": "empty",
+      "description": "The empty blob has one empty block",
+      "requirements": [
+        "BLOB-001"
+      ],
+      "input": {
+        "data": {
+          "hex": ""
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+          "size": 0,
+          "blocks": 1
+        }
+      }
+    }
+  ]
+}

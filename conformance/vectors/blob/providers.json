@@ -1,0 +1,342 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/providers",
+  "description": "Which providers listed in a reference a fetcher may contact. Input {\"fetcherOwner\", \"pins\": [owner], \"reference\": url, \"agentCerts\": {wwa: {\"owner\", \"node\"}} (verified agent-certs the fetcher holds), \"grants\": [\"wwn:…/wwa:…\"] (providers for which the fetching agent holds a grant)}. Output {\"contact\": [provider]} in reference order. Reject BlobRefInvalid.",
+  "spec": "ext/blob.md#72-choosing-providers",
+  "cases": [
+    {
+      "id": "granted-pinned",
+      "description": "Provider of a pinned owner with a grant",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-grant",
+      "description": "Provider without a grant is skipped",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": []
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": []
+        }
+      }
+    },
+    {
+      "id": "unpinned-owner",
+      "description": "Granted provider of an owner the fetcher has not pinned is never contacted",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa",
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pinned-third-owner",
+      "description": "Third owner, pinned and granted",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q,wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+          "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+            "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "own-owner",
+      "description": "Provider of the fetcher's own owner with a grant",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq",
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": [
+            "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja/wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq",
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "order-kept",
+      "description": "Reference order is kept",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+          "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+          "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": [
+            "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa",
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "agent-on-other-node",
+      "description": "The agent is certified to another node than the one listed",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:ck47oia2ncfqholttmgbvyhh7jr6vcnjzgqvek7ytqmij2sbohsq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": []
+        }
+      }
+    },
+    {
+      "id": "no-cert",
+      "description": "No verified agent-cert for the provider's agent",
+      "requirements": [
+        "BLOB-041"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+        "agentCerts": {},
+        "grants": [
+          "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+        ]
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "contact": []
+        }
+      }
+    },
+    {
+      "id": "bad-reference",
+      "description": "Malformed reference",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "fetcherOwner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+        "pins": [
+          "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr"
+        ],
+        "reference": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=01",
+        "agentCerts": {
+          "wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q": {
+            "owner": "did:key:z6MkneL7G8orG3FnAG5Cd5zYgQDyWdKqnVyy6pcitAiQ9vNr",
+            "node": "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+          },
+          "wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa": {
+            "owner": "did:key:z6MkvKaqP5uHjT6ne6sS6SgnuZQEc1sUMcfWypTJWe3scx63",
+            "node": "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q"
+          },
+          "wwa:4riablwkjqesi2ap34qwzdmn7wb5yx3v2u7ka5rg3jibnjknu4yq": {
+            "owner": "did:key:z6Mkv1RDijihA3jH3dSn36Eu56kYJTWxYTxBTvPDoDCxErkX",
+            "node": "wwn:tn5fwe7stimuolhtlbcsgdpm2j7ost5helcje4sif6qpnfhcceja"
+          }
+        },
+        "grants": []
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    }
+  ]
+}

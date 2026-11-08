@@ -1,0 +1,595 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/verify",
+  "description": "Verify a Fetch reply stream. Input {\"hash\", \"size\" (from the reply), \"ranges\" (the reply's ranges), \"data\": {\"pattern\": n}, \"mutate\"?: {\"flip\": byte offset} | {\"truncate\": length} | {\"append\": hex}}. The stream is the honest encoding of data for ranges, then mutate applied to it. Output {\"verified\": ranges, \"missing\": ranges, \"complete\": bool}. A stream that ends early is accepted with what was verified. Reject BlobCorrupt (data does not match) or ProtocolError (bytes after the end).",
+  "spec": "ext/blob.md#54-verification",
+  "cases": [
+    {
+      "id": "whole",
+      "description": "Whole blob",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              7
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "scattered",
+      "description": "Two ranges",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            6
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              1,
+              2
+            ],
+            [
+              4,
+              6
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "empty-blob",
+      "description": "Empty blob, empty stream",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+        "size": 0,
+        "ranges": [
+          [
+            0,
+            1
+          ]
+        ],
+        "data": {
+          "pattern": 0
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              1
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "single-block",
+      "description": "Blob of one block",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:1309d44c9edaf51147844a5f38f884225acb365d7a5b4de34ef328671b5c6af5",
+        "size": 300,
+        "ranges": [
+          [
+            0,
+            1
+          ]
+        ],
+        "data": {
+          "pattern": 300
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              1
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "last-block-proves-size",
+      "description": "The last block alone verifies, which proves the size",
+      "requirements": [
+        "BLOB-024"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            6,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              6,
+              7
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "cut",
+      "description": "Stream ends inside block 2: blocks 0 and 1 are kept",
+      "requirements": [
+        "BLOB-021",
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "truncate": 33060
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              2
+            ]
+          ],
+          "missing": [
+            [
+              2,
+              7
+            ]
+          ],
+          "complete": false
+        }
+      }
+    },
+    {
+      "id": "cut-empty",
+      "description": "Nothing arrived",
+      "requirements": [
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "truncate": 0
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              7
+            ]
+          ],
+          "complete": false
+        }
+      }
+    },
+    {
+      "id": "resume",
+      "description": "The missing ranges of the cut case, fetched again (possibly from another provider)",
+      "requirements": [
+        "BLOB-040"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            2,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              2,
+              7
+            ]
+          ],
+          "missing": [],
+          "complete": true
+        }
+      }
+    },
+    {
+      "id": "flip-root-pair",
+      "description": "First parent pair altered",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "flip": 0
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "flip-inner-pair",
+      "description": "Inner parent pair altered",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "flip": 104
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "flip-block",
+      "description": "Data of block 1 altered",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "flip": 16581
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "flip-last-byte",
+      "description": "Last byte altered",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "flip": 100383
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "wrong-hash",
+      "description": "Reply for another blob",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:3e08024a440dfe39cf6f35f46a8c49837834e55b4ccd2f9a76da1a09f8863d4e",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "wrong-hash-single-block",
+      "description": "Single-block blob, other hash",
+      "requirements": [
+        "BLOB-021"
+      ],
+      "input": {
+        "hash": "blake3:aad6ae9c6cc563463a184a2da93d3a8a7c01dc953558e6abca57fb6b6cc23f30",
+        "size": 300,
+        "ranges": [
+          [
+            0,
+            1
+          ]
+        ],
+        "data": {
+          "pattern": 300
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "trailing",
+      "description": "Bytes after the end",
+      "requirements": [
+        "BLOB-022"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 100000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        },
+        "mutate": {
+          "append": "00"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ProtocolError"
+      }
+    },
+    {
+      "id": "size-smaller",
+      "description": "Reply claims 99000 bytes (same block count): the last block fails",
+      "requirements": [
+        "BLOB-024"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 99000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "size-larger-more-blocks",
+      "description": "Reply claims 140000 bytes (9 blocks): the tree shape breaks",
+      "requirements": [
+        "BLOB-024"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 140000,
+        "ranges": [
+          [
+            0,
+            9
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobCorrupt"
+      }
+    },
+    {
+      "id": "size-larger-same-blocks",
+      "description": "Reply claims 110000 bytes (same 7 blocks): blocks 0-5 verify, block 6 can never complete",
+      "requirements": [
+        "BLOB-024"
+      ],
+      "input": {
+        "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+        "size": 110000,
+        "ranges": [
+          [
+            0,
+            7
+          ]
+        ],
+        "data": {
+          "pattern": 100000
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [
+            [
+              0,
+              6
+            ]
+          ],
+          "missing": [
+            [
+              6,
+              7
+            ]
+          ],
+          "complete": false
+        }
+      }
+    },
+    {
+      "id": "size-single-block",
+      "description": "Single-block blob, reply claims one byte more: the block never completes",
+      "requirements": [
+        "BLOB-024"
+      ],
+      "input": {
+        "hash": "blake3:1309d44c9edaf51147844a5f38f884225acb365d7a5b4de34ef328671b5c6af5",
+        "size": 301,
+        "ranges": [
+          [
+            0,
+            1
+          ]
+        ],
+        "data": {
+          "pattern": 300
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "verified": [],
+          "missing": [
+            [
+              0,
+              1
+            ]
+          ],
+          "complete": false
+        }
+      }
+    }
+  ]
+}

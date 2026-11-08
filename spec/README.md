@@ -12,7 +12,7 @@ Planned documents (see roadmap tracks T1–T3, T7–T9, T13–T14):
 | `ext/envelope.md` | Signed envelopes, canonicalisation, replay protection |
 | `ext/capability.md` | Identities, owner bindings, invites, capability tokens, revocation |
 | `ext/mailbox.md` | Store-and-forward, delivery semantics, resumable streams |
-| `ext/blob.md` | Content-addressed artefacts |
+| [`ext/blob.md`](ext/blob.md) | Content-addressed artefacts (**draft v0**: hash, references, verified streaming, fetch, grants, provenance; vectors in `conformance/vectors/blob/`) |
 | `ext/provenance.md` | Trust and provenance labels, prompt-injection boundary rules |
 | `ext/audit.md` | Hash-chained audit log, checkpoints, receipts |
 | `ext/shared-doc.md` | Shared CRDT documents with signed, capability-checked changes |

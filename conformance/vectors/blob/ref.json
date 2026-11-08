@@ -1,0 +1,467 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "blob/ref",
+  "description": "Parse a blob reference URL. Input {\"url\": string}. Output {\"hash\", \"size\", \"providers\": [\"wwn:…/wwa:…\"]} (providers in URL order, [] if absent). Reject BlobRefInvalid.",
+  "spec": "ext/blob.md#4-references",
+  "cases": [
+    {
+      "id": "no-providers",
+      "description": "Size only",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "providers": []
+        }
+      }
+    },
+    {
+      "id": "one-provider",
+      "description": "One provider",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "providers": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+          ]
+        }
+      }
+    },
+    {
+      "id": "four-providers",
+      "description": "MAX_PROVIDERS providers, order kept",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&providers=wwn:ycerwftfn7bzyumaaidzyz32aasme6qstnyjvp6bivuyvi7uykya/wwa:uyocvclqciiu6a7po7rfxjlj25x27rucetmbeo5u7la3fmpckjca,wwn:rr5ndr32ubi3nciqyrbv7zlwbgtak7mrexnbnkccwopkt3dcrhla/wwa:emz6nsi6owknxo2x2asq3zmyrsrbeshbsvdw7mptnk3cran2kfta,wwn:3hyzbywih5bg4vnw53xwj2qecq4gzqr5ltjoechtbhgvgpaffo4a/wwa:fcn65jyes5yanz3vxnlurjodxklrdidbidfy2uyj4wxpcyhirj6q,wwn:qpyvejssxrob7ueypkmw7edfkc754ek6ifbxrztettfrfglexapq/wwa:hgvg7gbhjmqyo54y27rroajfk5kwixz6fad27x4opknzflzcnioa"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "providers": [
+            "wwn:ycerwftfn7bzyumaaidzyz32aasme6qstnyjvp6bivuyvi7uykya/wwa:uyocvclqciiu6a7po7rfxjlj25x27rucetmbeo5u7la3fmpckjca",
+            "wwn:rr5ndr32ubi3nciqyrbv7zlwbgtak7mrexnbnkccwopkt3dcrhla/wwa:emz6nsi6owknxo2x2asq3zmyrsrbeshbsvdw7mptnk3cran2kfta",
+            "wwn:3hyzbywih5bg4vnw53xwj2qecq4gzqr5ltjoechtbhgvgpaffo4a/wwa:fcn65jyes5yanz3vxnlurjodxklrdidbidfy2uyj4wxpcyhirj6q",
+            "wwn:qpyvejssxrob7ueypkmw7edfkc754ek6ifbxrztettfrfglexapq/wwa:hgvg7gbhjmqyo54y27rroajfk5kwixz6fad27x4opknzflzcnioa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "params-reordered",
+      "description": "Parameters in any order",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q,wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa&size=100000"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "providers": [
+            "wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q",
+            "wwn:kufujuqogfu25a6yqtt32nwug6tyztf4c35d5a74xo6c7u4oxi7q/wwa:satl4uuekmywythwo3hp4kvj5ozwu3tlyqe7ppqooneym7e7w3oa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "unknown-param",
+      "description": "An unknown parameter is ignored",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=100000&x-hint=fast"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 100000,
+          "providers": []
+        }
+      }
+    },
+    {
+      "id": "size-zero",
+      "description": "The empty blob",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262?size=0"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+          "size": 0,
+          "providers": []
+        }
+      }
+    },
+    {
+      "id": "size-max",
+      "description": "Largest size, 2^53 - 1",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=9007199254740991"
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54",
+          "size": 9007199254740991,
+          "providers": []
+        }
+      }
+    },
+    {
+      "id": "hash-uppercase",
+      "description": "Hash hex must be lowercase",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:D93C23EEDAF165A7E0BE908BA86F1A7A520D568D2D13CDE787C8580C5C72CC54?size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "hash-short",
+      "description": "63 hex digits",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc5?size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "hash-algorithm",
+      "description": "Unknown hash algorithm",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:sha256:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "hash-0x",
+      "description": "0x prefix",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:0x3c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "scheme-case",
+      "description": "Scheme is lowercase",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "Webway-Blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "no-query",
+      "description": "No size",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "no-size",
+      "description": "Providers but no size",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-leading-zero",
+      "description": "Non-canonical decimal",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=0100"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-too-big",
+      "description": "2^53",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=9007199254740992"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-negative",
+      "description": "Sign",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=-1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-plus",
+      "description": "Sign",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=+1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-percent",
+      "description": "Percent-encoding in a known parameter",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=%31"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "size-twice",
+      "description": "Duplicate parameter",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&size=1"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "empty-param",
+      "description": "Empty parameter",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "param-no-value",
+      "description": "Parameter without =",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&flag"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "fragment",
+      "description": "No fragment",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1#x"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "five-providers",
+      "description": "More than MAX_PROVIDERS",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwn:ycerwftfn7bzyumaaidzyz32aasme6qstnyjvp6bivuyvi7uykya/wwa:uyocvclqciiu6a7po7rfxjlj25x27rucetmbeo5u7la3fmpckjca,wwn:rr5ndr32ubi3nciqyrbv7zlwbgtak7mrexnbnkccwopkt3dcrhla/wwa:emz6nsi6owknxo2x2asq3zmyrsrbeshbsvdw7mptnk3cran2kfta,wwn:3hyzbywih5bg4vnw53xwj2qecq4gzqr5ltjoechtbhgvgpaffo4a/wwa:fcn65jyes5yanz3vxnlurjodxklrdidbidfy2uyj4wxpcyhirj6q,wwn:qpyvejssxrob7ueypkmw7edfkc754ek6ifbxrztettfrfglexapq/wwa:hgvg7gbhjmqyo54y27rroajfk5kwixz6fad27x4opknzflzcnioa,wwn:4r7svfggj4ojhdmrngxnqes6occensdhdieyxft6w6kcsj3ucg4a/wwa:nsvhubm7xly6jlskjcgplpbxrvbz2pqcrmahm2bsmlvvlh3s7jxq"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "provider-twice",
+      "description": "Duplicate provider",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q,wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "provider-node-only",
+      "description": "A provider names node and agent",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "provider-swapped",
+      "description": "Node first, then agent",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2q/wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "provider-uppercase",
+      "description": "Base32 is lowercase",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwn:MXCLDSACYYZ5IMPXTQ652G23Z25TUK7SAEUWYJIKRO6VUZCWXGOQ/wwa:QTGAFMYHXDHBZJ3NUI3NSXHTGQ3KRBKNJ74ZINQEEIS2IBHOFU2Q"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "provider-trailing-bits",
+      "description": "Base32 with non-zero unused bits",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers=wwn:mxcldsacyyz5impxtq652g23z25tuk7saeuwyjikro6vuzcwxgoq/wwa:qtgafmyhxdhbzj3nui3nsxhtgq3krbknj74zinqeeis2ibhofu2r"
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    },
+    {
+      "id": "providers-empty",
+      "description": "Empty providers list",
+      "requirements": [
+        "BLOB-010"
+      ],
+      "input": {
+        "url": "webway-blob:blake3:d93c23eedaf165a7e0be908ba86f1a7a520d568d2d13cde787c8580c5c72cc54?size=1&providers="
+      },
+      "expect": {
+        "result": "reject",
+        "error": "BlobRefInvalid"
+      }
+    }
+  ]
+}
