@@ -1,7 +1,9 @@
 # spec/
 
-The normative argent-webway specification. Nothing here yet: written after the decisions in
-[`docs/due-diligence.md` §8](../docs/due-diligence.md#8-decisions-needed) are made.
+The normative argent-webway specification. Drafts so far: [`profile.md`](profile.md) (Profile of A2A 1.0,
+v0.1) and [`binding-webway-quic.md`](binding-webway-quic.md) (binding `webway-quic/v0`, v0.1). They follow the
+recommendations in [`docs/due-diligence.md` §8](../docs/due-diligence.md#8-decisions-needed) (Rust, iroh, JSON +
+JCS) pending the owner's decisions.
 
 Planned documents (see roadmap tracks T1–T3, T7–T9, T13–T14):
 
