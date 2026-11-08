@@ -10,7 +10,7 @@ Planned documents (see roadmap tracks T1–T3, T7–T9, T13–T14):
 | `profile.md` | argent-webway Profile of A2A 1.0: mandatory features, extra rules, error model, versioning |
 | `binding-webway-quic.md` | A2A custom binding over the QUIC overlay (ALPN, framing, stream mapping) |
 | `ext/envelope.md` | Signed envelopes, canonicalisation, replay protection |
-| `ext/capability.md` | Identities, owner bindings, invites, capability tokens, revocation |
+| `ext/capability.md` | Identities, owner bindings, invites, capability tokens, revocation. **Draft v0** (T3) |
 | `ext/mailbox.md` | Store-and-forward, delivery semantics, resumable streams |
 | `ext/blob.md` | Content-addressed artefacts |
 | `ext/provenance.md` | Trust and provenance labels, prompt-injection boundary rules |

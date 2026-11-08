@@ -118,6 +118,7 @@ the local audit log only (G15).
 | `InviteInvalid` | no | An invite is malformed, badly signed, or inconsistent (§8). |
 | `InviteExpired` | no | An invite is past its `exp`. |
 | `InviteConsumed` | no | A single-use invite has already been redeemed (§8.4). |
+| `MandateRequired` | no | Local only, never on the wire: a node refuses to send a request that needs a mandate it does not hold (CAP-186). |
 
 ## 3. Identifiers and keys
 
@@ -571,6 +572,8 @@ node, pins, issuer-certs of its own owner, held revocation lists, call counters 
 
 The steps run in this order, cheapest first (G15). The first failure decides the error.
 
+0. **Follow-up.** If `cap.access` is absent and the request is a follow-up by the task's creator (§6.4), run
+   only step 2 and step 6 (against the revocation IDs recorded with the task), then allow.
 1. **Presence.** If the operation needs a token and `cap.access` is absent: `CapabilityMissing`.
 2. **Presenter identity** (CAP-041): the `from` agent has a valid agent-cert of a pinned owner or of the
    verifier's own owner, else `CapabilityDenied`.
@@ -582,7 +585,7 @@ The steps run in this order, cheapest first (G15). The first failure decides the
 6. **Revocation** (CAP-170, CAP-171), for the token's revocation IDs and its issuer-cert.
 7. **Mandate**, if `cap.mandate` is present: §7.3, steps M1–M6. A mandate that is present and fails is an error
    for the whole request. It is never ignored.
-8. **Operation** (CAP-102).
+8. **Operation** (CAP-102). For `invite:<id>#redeem`, an already consumed invite: `InviteConsumed` (CAP-203).
 9. **Datalog** (CAP-101): one authoriser for the access token with the request facts (§5.3), including the mandate
    facts when step 7 verified a mandate, then the local policy, then the allow policy of §5.4. Any failed check
    or a matching deny policy: `CapabilityDenied`.
@@ -602,10 +605,11 @@ the request. On deny, the peer gets only the error name (§2.2).
 A task remembers the agent that created it and the authority revocation IDs of the access token (and mandate) that
 created it.
 
-- [CAP-161] A node MUST allow `GetTask`, `SubscribeToTask`, `CancelTask` and continuing `SendMessage` on a task to
-  the agent that created it without a new token, as long as none of the recorded revocation IDs has since been
-  revoked (else `CapabilityRevoked`). Any other agent needs a `task:<id>#…` capability or the original skill
-  capability, through the full algorithm.
+- [CAP-161] A node MUST allow `GetTask`, `SubscribeToTask`, `CancelTask` and continuing `SendMessage` or
+  `SendStreamingMessage` on a task to the agent that created it without a new token, as long as its agent-cert is
+  still valid and none of the recorded revocation IDs has since been revoked (else `CapabilityRevoked`). Any other
+  agent, and the creator on any other task, needs a token (`task:<id>#…` or the original skill capability) and
+  goes through the full algorithm; without one the error is `CapabilityMissing`.
 
 ## 7. Mandates: acting on behalf of someone (S4)
 
@@ -737,11 +741,11 @@ trust); that channel is what authenticates the inviting owner to the invitee.
   (`InviteExpired`); verify each agent-cert against the same chain; check that each grant verifies with `iss`, has
   role `access` and `owner` equal to the invite's `owner`, and satisfies CAP-200 (else `InviteInvalid`). In
   `bound` mode, the accepting agent MUST be `invitee` (else `InviteInvalid`).
-- [CAP-202] Only after these checks, and after the local owner confirms (CAP-060), the node pins `owner` (with
-  `ownerKey` if present), stores the issuer-cert, agent-certs, relays and grants, and, in `redeem` mode, redeems.
-- If `owner` is already pinned, the invite MUST match the pin (same owner identifier; an `ownerKey` with a lower
-  `seq` than the pinned event is ignored). A different key for a known petname is a conflict for the owner to
-  resolve, not an update (CAP-061).
+- [CAP-202] A node MUST NOT pin `owner`, or store or use the invite's grants, before these checks pass and the
+  local owner confirms (CAP-060). Then it pins `owner` (with `ownerKey` if present), stores the issuer-cert,
+  agent-certs, relays and grants, and, in `redeem` mode, redeems. If `owner` is already pinned, the node MUST NOT
+  replace the pinned owner-key state with an `ownerKey` whose `seq` is not higher (a rollback), and MUST treat a
+  known petname offered for a different owner as a conflict for the owner to resolve, not as an update (CAP-061).
 
 ### 8.4 Redemption
 
@@ -836,10 +840,10 @@ A revocation list is a statement of type `webway-revocation+jws`:
   the request unless its local owner policy explicitly allows acting as its own principal for that capability, and
   it MUST record that decision in the audit log. This is the profile rule of threat-model G10 (a). The node knows
   the cause from the task linkage and taint (`provenance/v0`).
-- [CAP-187] A node that re-delegates (§5.5) MUST make the holder block with the key of the agent that currently
-  holds the token, MUST add caveats at least as narrow as the sub-task (task, TTL, calls, arguments) when the
-  owner policy or the delegating agent's request says so, and MUST NOT re-delegate a token to an agent that will
-  present it to the issuer's own owner on behalf of a different principal.
+- [CAP-187] A node MUST re-delegate (§5.5) only a token whose current holder is one of its own agents, with that
+  agent's key, and only when its owner policy allows the delegation; it MUST add the caveats that policy, or the
+  delegating agent's request, asks for (task, TTL, calls, arguments). An agent never sees the token: it asks its
+  node to delegate a capability to a named agent, and the node decides (CAP-151, CAP-185).
 - Issuers SHOULD mint tokens with `calls` limits and TTLs that match the sub-task, and mandates with `calls($n), $n
   < 1` when one task is expected (threat-model DLG-2).
 
@@ -882,10 +886,14 @@ and every token and statement in the vectors is a real one made with `biscuit-au
 | Kind | Input | Output on accept |
 |---|---|---|
 | `identity/id` | `{ "id": string }` | `{ "role": "owner" \| "issuer" \| "node" \| "agent", "key": base64url }` |
-| `identity/statement` | `{ "now", "typ", "statement", "pins": [ { "owner", "key"? } ], "issuerCert"?, "revocations"? }` | the verified claims |
+| `identity/statement` | `{ "now", "typ", "statement", "pins": [ { "owner", "events"? } ], "issuerCert"?, "revocations"? }` | the verified claims |
 | `identity/owner-key` | `{ "pin": { "owner" }, "events": [statement, …] }` (events in `seq` order, from 0) | `{ "key": did, "next": string \| null, "seq": n }` |
-| `capability/authorize` | `{ "now", "verifier", "request", "cap", "state" }`, see below | `{ "holders": [wwa], "mandateHolders"?: [wwa], "principal"?: wwa }` |
+| `capability/authorize` | `{ "now", "verifier", "request", "cap", "state" }`, see below | `{ "holders": [wwa], "mandateHolders"?: [wwa], "principal"?: wwa }`, or `{ "followUp": true }` |
 | `capability/invite` | `{ "now", "invite": string, "acceptingAgent"?: wwa }` | `{ "owner", "node", "mode", "agents": [wwa], "grants": n }` |
+| `capability/outbound` | `{ "now", "node": { "owner" }, "task"?: { "originatorOwner", "onward": [mandate] }, "request": { "targetOwner", "capability" }, "policy"?: { "selfPrincipal": [pattern] } }` | `{ "mandate": index \| null, "selfPrincipal"?: true }`; reject `MandateRequired` |
+
+In `identity/statement`, `pins[].events` are owner-key events (§4.3); without them the pin's current root key is
+the owner identifier itself.
 
 `capability/authorize` input:
 
@@ -902,14 +910,25 @@ and every token and statement in the vectors is a real one made with `biscuit-au
   "request": {
     "presenter": "wwa:…", "operation": "SendMessage", "taskId": "…", "contextId": "…", "args": { }
   },
-  "cap": { "capability": "…", "access": "…", "mandate": { … }, "revocations": [statement] },
-  "state": { "calls": { "access": 0, "mandate": 0 }, "revocations": [statement], "consumedInvites": ["…"] }
+  "cap": { "capability": "…", "access": "…", "mandate": { … }, "onward": [ … ], "revocations": [statement] },
+  "state": {
+    "calls": { "access": 0, "mandate": 0 },
+    "revocations": [statement],
+    "consumedInvites": ["…"],
+    "task": { "taskId": "…", "creator": "wwa:…", "authorizedBy": [ { "owner": "did:key:…", "issuer": "wwi:…", "ids": ["hex"] } ] }
+  }
 }
 ```
 
 `verifier.agentCerts` holds the presenter's agent-cert (the envelope layer has already linked it to `from`), and
-`issuerCerts` the issuer-certs of the presenter's owner and the verifier's own owner. `state.calls` gives the
-counters of this token's authority blocks.
+`issuerCerts` the issuer-certs of the verifier's own owner. A mandate brings its own issuer-cert. `state.calls`
+gives the counters of the token's authority blocks, `state.task` the task a follow-up refers to (§6.4).
+
+The generator and reference model is `conformance/tools/capgen` (Rust, `biscuit-auth` 6.0). `webway-capgen gen
+conformance/vectors` writes the files deterministically, `webway-capgen check conformance/vectors` runs them
+through the model, and `webway-capgen adapter` serves the model over the stdio adapter protocol. The generator
+refuses to write a case whose model verdict differs from the verdict written in the case, so every vector is
+checked once by construction.
 
 ### 12.2 Coverage
 
@@ -917,26 +936,24 @@ counters of this token's authority blocks.
 |---|---|
 | CAP-001 | `identity/id` |
 | CAP-002 | `identity/statement` (`sig-*`, `kid-small-order`) |
-| CAP-010, CAP-011, CAP-012, CAP-013, CAP-014, CAP-015 | `identity/statement` |
+| CAP-010 … CAP-015 | `identity/statement` |
 | CAP-020, CAP-021 | `identity/owner-key`, `identity/statement` (`rotated-*`) |
-| CAP-030, CAP-031 | `capability/authorize` (`scope-*`, `mandate-principal-*`) |
+| CAP-030, CAP-031 | `capability/authorize` (`scope-*`, `issuer-cert-*`, `mandate-*`) |
 | CAP-040 | `identity/statement` (`agent-cert-*`) |
 | CAP-041 | `capability/authorize` (`presenter-*`) |
-| CAP-050 | harness (T4): needs card fixtures from the profile |
-| CAP-060, CAP-061 | harness (T4/T17): local actions, no wire input |
 | CAP-100 … CAP-104, CAP-110, CAP-111, CAP-120, CAP-121, CAP-130 | `capability/authorize` |
-| CAP-140, CAP-150, CAP-151, CAP-185, CAP-186, CAP-187, CAP-190 | harness scenarios (T4, T6) |
-| CAP-160 | `capability/authorize` (`order-*`) |
-| CAP-161, CAP-174 | harness (T6): task state |
-| CAP-170 … CAP-173 | `capability/authorize` (`revoked-*`, `revocation-*`) |
-| CAP-180 … CAP-182 | `capability/authorize` (`mandate-*`) |
+| CAP-160 | `capability/authorize` (`order-*`, `over-attenuated-*`, `*-cannot-widen`) |
+| CAP-161, CAP-174 | `capability/authorize` (`followup-*`); cancelling running tasks (CAP-174 SHOULD) in the harness |
+| CAP-170 … CAP-173 | `capability/authorize` (`revoked-*`, `revocation-*`, `long-lived-*`) |
+| CAP-180 … CAP-182 | `capability/authorize` (`mandate-*`, `on-behalf-*`, `onward-*`) |
+| CAP-186 | `capability/outbound` |
 | CAP-200, CAP-201 | `capability/invite` |
-| CAP-202 | harness (T4) |
-| CAP-203 | `capability/authorize` (`invite-redeem-*`), harness for atomicity |
-| CAP-204 | harness (T4) |
+| CAP-203 | `capability/authorize` (`invite-redeem-*`); atomicity in the harness |
+| CAP-003, CAP-050, CAP-060, CAP-061, CAP-140, CAP-150, CAP-151, CAP-185, CAP-187, CAP-190, CAP-202, CAP-204 | **pending**: harness scenarios (T4, T6, T17) |
 
-Requirements marked "harness" are behaviour of a running node and need the harness scenarios of T4/T6. Until they
-exist, `webway-conformance check` reports them as uncovered.
+The **pending** requirements are behaviour of a running node (key use, card handling, pinning UX, what reaches
+an agent, what is logged), so no pure-function vector can test them. They need harness scenarios against a node
+(T4, T6). Until those exist, `webway-conformance check` (CONV-004) reports these 12 IDs as untested; see §13.
 
 ## 13. Changes from the due diligence, and open questions
 
@@ -963,6 +980,11 @@ Open questions for the owner or later tracks:
   sender's agent-cert (cached per peer, or in the envelope). `envelope/v0` must say which.
 - **Q-CAP-4.** Argument caveats only see top-level scalars of `args`. Richer constraints (paths into nested
   objects) can come later without breaking v0 tokens.
+- **Q-CAP-5.** CONV-004 has no way to mark a `MUST` as "tested by a harness scenario not written yet". The 12
+  pending requirements of §12.2 will fail `webway-conformance check` until T4/T6 add scenarios. Options: a
+  `pending` marker the checker reports as a warning, or keep the check red for `CAP` until then.
+- **Q-CAP-6.** `arg` facts, `cap.capability` and `cap.onward` add members to the envelope and to the A2A message
+  metadata. `envelope/v0` and the profile must take them over as written here, or this section moves there.
 
 [RFC 4648]: https://www.rfc-editor.org/rfc/rfc4648
 [RFC 7515]: https://www.rfc-editor.org/rfc/rfc7515
