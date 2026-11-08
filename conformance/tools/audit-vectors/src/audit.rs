@@ -257,6 +257,9 @@ pub fn check_entry(e: &Value) -> R<H> {
     let Some(o) = e.as_object() else {
         return fail(N, "malformed-field");
     };
+    if !numbers_ok(e) {
+        return fail(N, "not-ijson");
+    }
     for k in ["v", "log", "epoch", "index", "time", "type", "data"] {
         if !o.contains_key(k) {
             return fail(N, "missing-field");
@@ -314,6 +317,19 @@ pub fn check_entry(e: &Value) -> R<H> {
         }
     }
     Ok(entry_hash(e))
+}
+
+/// AUD-001: every number is an integer of magnitude at most 2^53 - 1.
+fn numbers_ok(v: &Value) -> bool {
+    match v {
+        Value::Number(n) => {
+            n.as_u64().is_some_and(|x| x <= MAX_SAFE)
+                || n.as_i64().is_some_and(|x| x.unsigned_abs() <= MAX_SAFE)
+        }
+        Value::Array(a) => a.iter().all(numbers_ok),
+        Value::Object(m) => m.values().all(numbers_ok),
+        _ => true,
+    }
 }
 
 fn valid_type(t: &str) -> bool {
@@ -599,13 +615,17 @@ pub fn verify_evidence(b: &Value) -> R<Value> {
             p,
         )?;
         let ty = e["type"].as_str().unwrap();
-        if let Some(stub) = e["data"].get("stub").and_then(Value::as_object) {
-            let accepted = ty == "envelope.sent"
-                || (ty == "envelope.received"
-                    && matches!(
-                        e["data"]["outcome"].as_str(),
-                        Some("accepted" | "duplicate")
-                    ));
+        let accepted = ty == "envelope.sent"
+            || (ty == "envelope.received"
+                && matches!(
+                    e["data"]["outcome"].as_str(),
+                    Some("accepted" | "duplicate")
+                ));
+        let stub = e["data"].get("stub").and_then(Value::as_object);
+        if accepted && stub.is_none() {
+            return fail(N, "missing-stub");
+        }
+        if let Some(stub) = stub {
             if accepted && !verify_stub_sig(stub) {
                 return fail(N, "stub-signature");
             }
@@ -639,6 +659,9 @@ pub fn verify_evidence(b: &Value) -> R<Value> {
                 if r["entry"] != json!(hash_str(h))
                     || e["type"] != json!("envelope.received")
                     || e["data"]["hd"] != r["env"]
+                    || e["data"]["stub"]["id"] != r["id"]
+                    || e["data"]["stub"]["from"] != r["from"]
+                    || e["data"]["stub"]["to"] != r["to"]
                     || e["time"] != r["time"]
                 {
                     return fail("ReceiptInvalid", "entry-mismatch");

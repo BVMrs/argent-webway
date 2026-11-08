@@ -9,7 +9,7 @@
 | Test vectors | [`conformance/vectors/audit/`](../../conformance/vectors/audit/) |
 | Depends on | `envelope/v0` (JCS, signing rules, header digest), `capability/v0` (identifiers, node certificates), `profile.md` (error range, extension activation), RFC 9162 §2.1 (Merkle tree algorithms), RFC 8785 (JCS), RFC 8032 (Ed25519), BLAKE3 |
 | Requirement R9 | Due diligence [§1.2](../../docs/due-diligence.md#12-requirements-these-imply) and [§4.7.5](../../docs/due-diligence.md#475-audit-log) |
-| Threats closed | Threat model AUD-1…AUD-9, gaps G6 (fork detection between counterparties), G7 (receipts commit to contents), and the AUD-5 and AUD-8 items of §7.1 |
+| Threats closed | Threat model AUD-1…AUD-9 (detection, not prevention), gaps G6 (fork detection between counterparties; witnesses later), G7 (receipts commit to contents), and the AUD-5 and AUD-8 items of §7.1 |
 
 ## Contents
 
@@ -68,6 +68,8 @@ The key words `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` are to be int
 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals. Requirement IDs follow
 [conventions.md](../conventions.md): every requirement block with a `MUST` begins with its tag, such as
 `[AUD-101]`. IDs are grouped by section in blocks of 100.
+
+Threat-model rows AUD-1 … AUD-9 are threat identifiers. Requirement IDs always have three digits (AUD-001).
 
 Terms and notation:
 
@@ -152,14 +154,19 @@ An entry is a JSON object:
 | `data` | object | required | Type-specific members. |
 
 - [AUD-001] An entry MUST be a JSON object with every required member of the table above, of the given type and
-  format, and no `prev` at index 0. A verifier MUST reject an entry that is not, or that contains a value that is
-  not I-JSON as `envelope/v0` ENV-100 defines it, as `EntryInvalid`.
+  format, and no `prev` at index 0. Every number anywhere in an entry MUST be an integer of magnitude at most
+  2^53 − 1 (no fractions or exponents that denote non-integers). A verifier MUST reject an entry that breaks
+  these rules, or that is not I-JSON as `envelope/v0` ENV-100 defines it, as `EntryInvalid` (reason `not-ijson`
+  for the number and I-JSON rules).
 - [AUD-002] A verifier MUST reject as `EntryInvalid` an entry whose `v` is not `webway-audit-entry/0`, or whose
   `JCS` serialisation is longer than `MAX_ENTRY_BYTES`.
 - [AUD-003] A verifier MUST keep unknown members of an entry, at the top level and inside `data`, when it hashes
   the entry, and MUST NOT reject an entry because of them or because its `type` is unknown to it.
 
 Unknown members and types are what let minor versions and other extensions add data ([§13](#13-versioning)).
+Integer-only numbers keep `JCS` of an entry trivial to compute identically everywhere: a value that needs a
+fraction goes in a string. A verifier of entries does not check the type-specific `data` members of
+[§4.3](#43-entry-types). Those are obligations on the node that writes the entry (AUD-402), tested by the harness.
 
 ### 4.2 Bodies and redaction
 
@@ -183,8 +190,10 @@ v0 registers the types below. Other extensions register theirs in their own docu
 |---|---|---|
 | `log.genesis` | `node`: the log ID again. `reason`: `new`, `data-loss` or `rotation` ([§8.2](#82-epochs)). `predecessor` (optional): `{"epoch", "size", "root"}` of the previous epoch, as far as the node knows it. `profile`: the profile version (`webway-profile/0.1`). | none |
 | `envelope.sent` | `hd`: header digest. `stub`: the stub. | `[from, to]` |
-| `envelope.received` | `via`: who handed the envelope over: a `wwn:` node identifier (the authenticated transport peer, possibly a mailbox host), `edge` (A2A HTTP edge, `profile.md` §12.2) or `local` (a hosted agent). `outcome`: `accepted`, `duplicate` or `rejected`. `stub` and `hd`: when the input parsed into a JSON object (optional otherwise). `error` (with `rejected`): `{"type", "reason"}` as in `envelope/v0` §10. `trust` (optional): the trust level the receiver computed per Part (`provenance/v0`), keyed like `prov.parts`. | `[from, to]` when the stub is present |
-| `authz.decision` | `hd`: the envelope decided on. `decision`: `allow` or `deny`. `error` (with `deny`): the error name. The other members of CAP-190 (`reason`, `presenter`, `capability`, `operation`, `access`, `mandate`, `principal`, `revocationLists`) as `capability/v0` §10.1 lists them. | `[presenter]` |
+| `envelope.received` | `via`: who handed the envelope over: a `wwn:` node identifier (the authenticated transport peer, possibly a mailbox host), `edge` (A2A HTTP edge, `profile.md` §12.2) or `local` (a hosted agent). `outcome`: `accepted`, `duplicate` or `rejected`. `stub` and `hd`: present exactly when the envelope passed the input, size and structure checks of `envelope/v0` (ENV-100, ENV-101, ENV-001, ENV-010), absent otherwise. `error` (with `rejected`): `{"type", "reason"}` as in `envelope/v0` §10. `trust` (optional): the trust level the receiver computed per Part (`provenance/v0`), keyed like `prov.parts`. | `[from, to]` when the stub is present |
+| `authn.decision` | `hd`: the envelope. `decision`: `allow` or `deny`. `agent`: the `from` agent. `owner` (optional): the owner its agent-cert chain ends at. `statements` (optional): IDs of the statements used. `error` (with `deny`): the error name (`IdentityUntrusted`, `StatementExpired`, …). `reason` (optional): the detailed local reason. | `[agent]` |
+| `authz.decision` | `hd`: the envelope decided on. `decision`: `allow` or `deny`. `error` (with `deny`): the error name. `reason`: the detailed local reason (string). `presenter`: agent ID. `capability`, `operation`: strings. `access`: `{"revocationIds": [hex…], "holders": [agent IDs]}` of the access token. `mandate` (optional): the same for the mandate, plus `principal` (agent ID) and `owner` (owner ID). `revocationLists`: statement IDs of the lists used. This is CAP-190's list. | `[presenter]` |
+| `authz.outbound` | CAP-186: a request sent on another owner's behalf without a mandate. `hd`: the sent envelope. `capability`. `policy`: the local policy rule that allowed it. | `[from, to]` |
 | `statement.issued` | `id`: the statement or token ID. `typ`: its type. `subject` (optional): the key or agent it is about. | none |
 | `task.transition` | `taskId`, `from` (absent for creation), `to`: A2A task states. `seq`: the event sequence number. `cause` (optional): the header digest of the envelope that caused it. | the task's requester and responder agents |
 | `bridge.crossing` | `bridge`: `a2a-http-in`, `a2a-http-out`, `mcp-facade`, `mcp-in` or `mcp-out` (`profile.md` §12). `hd` (optional): the envelope on the overlay side. `principal` (optional): the edge client or MCP principal. | as known |
@@ -307,7 +316,7 @@ an owner the verifier trusts proves nothing about that owner.
 
 - [AUD-210] A node MUST sign a new checkpoint for its current log whenever `CP_MAX_ENTRIES` entries have been
   appended since the last one, or `CP_MAX_AGE` has passed since the last one and at least one entry has been
-  appended since. It MUST sign a checkpoint only over entries that are durable ([§8.1](#81-durability)).
+  appended since. It MUST publish a checkpoint only over entries that are durable ([§8.1](#81-durability)).
 - [AUD-211] All commitments (checkpoints and receipts) a node signs for one log MUST be commitments to prefixes of
   one sequence of entries: for any two of them, the one with the larger size MUST be consistent with the other,
   and two of equal size MUST have equal roots.
@@ -352,14 +361,15 @@ that entry or anything before it without contradicting its own signature (G7).
 A receipt is a commitment to size `index + 1`.
 
 - [AUD-300] A node MUST issue a receipt only for an `envelope.received` entry that has a stub whose signature
-  verified (`envelope/v0` steps 1–5), only after that entry is durable, and with `entry`, `root`, `time`, `env`,
-  `id`, `from` and `to` taken from that entry. For an envelope logged more than once (duplicates), the receipt
-  MUST be for the first entry.
+  verified (`envelope/v0` steps 1–5), with `entry`, `root`, `time`, `env`, `id`, `from` and `to` taken from that
+  entry. It MUST sign the receipt when it writes the entry, store it with the entry in the same transaction, and
+  always return that stored receipt, so that a receipt never has to be signed later for an old epoch (AUD-510).
+  For an envelope logged more than once (duplicates), the receipt is the one of the first entry.
 - [AUD-301] A verifier that holds the envelope a receipt is for MUST check that `env` is its header digest and
   that `id`, `from` and `to` are its members, and MUST reject a mismatch as `ReceiptInvalid`.
 - [AUD-302] A verifier that is given the entry a receipt names MUST check that its entry hash equals `entry`,
-  that it is an `envelope.received` entry with `data.hd` equal to `env`, with the receipt's `log`, `epoch`,
-  `index` and `time`, and that `entry` is included at `index` under `root` at size `index + 1` (an inclusion
+  that it is an `envelope.received` entry with `data.hd` equal to `env`, whose stub has the receipt's `id`,
+  `from` and `to`, with the receipt's `log`, `epoch`, `index` and `time`, and that `entry` is included at `index` under `root` at size `index + 1` (an inclusion
   proof), and MUST reject a mismatch as `ReceiptInvalid` (or `ProofInvalid` for the proof).
 
 A receipt says the node logged the envelope. Whether it accepted it is in the entry's `outcome` and, for a request,
@@ -376,10 +386,13 @@ These rules implement `profile.md` PROF-049, `capability/v0` CAP-190 and `envelo
   durably and before the first transmission. A retry or a mailbox redelivery of the same envelope is not a new
   entry.
 - [AUD-401] A node MUST append an `envelope.received` entry for every envelope that reaches its verification
-  procedure and parses into a JSON object, whatever the outcome. For a `request` processed as new, the entry MUST
+  procedure, whatever the outcome, with a stub only as [§4.3](#43-entry-types) says. Input that fails before the
+  stub can be kept is logged without `stub`, `hd` and `parties`. For a `request` processed as new, the entry MUST
   be written in the same atomic transaction as the dedupe entry and task effects of `envelope/v0` ENV-503, before
   any response or acknowledgement is sent.
-- [AUD-402] A node MUST append an `authz.decision` entry for every authorisation decision, a `task.transition`
+- [AUD-402] A node MUST append an `authn.decision` entry for every authentication decision (PROF-049), an
+  `authz.decision` entry for every authorisation decision, an `authz.outbound` entry for every decision of
+  CAP-186 to act as its own principal, a `task.transition`
   entry for every task state change it records, a `statement.issued` entry for every token, mandate, invite,
   certificate or revocation list it signs, a `bridge.crossing` entry for every request that crosses one of its
   bridges, and a `node.anomaly` entry for every anomaly named in [§7.2](#72-anomalies) or in another webway document.
@@ -401,6 +414,7 @@ AUD-402 say "every").
 | `log-inconsistent` | Two commitments of one peer log conflict, or a consistency proof fails ([§10.3](#103-fork-and-rollback-evidence)). |
 | `log-epoch-change` | A peer log moved to a higher epoch. |
 | `log-rollback` | A peer log shows a lower epoch than one already held, or a commitment beyond the log's current size. |
+| `audit-unanswered` | A peer leaves a receipt unchecked or refuses monitoring (AUD-706). |
 | `trust-claim-ignored` | A sender put a trust-like field in `prov` (`provenance/v0`). |
 
 Other documents name further anomalies (`profile.md` PROF-016, PROF-017, PROF-034, …). Their names are recorded as
@@ -410,12 +424,15 @@ given there.
 
 ### 8.1 Durability
 
-- [AUD-500] A node MUST make an entry durable before it signs any commitment that covers it, and before it sends
-  anything that depends on the entry (a response, an acknowledgement, a receipt, or the envelope of an
-  `envelope.sent` entry).
+- [AUD-500] A node MUST make an entry durable before it sends or publishes anything that depends on the entry: a
+  commitment that covers it, a response, an acknowledgement, or the envelope of an `envelope.sent` entry. It MAY
+  sign a commitment before the entry is durable (for example inside the transaction that stores the entry and the
+  response that carries its receipt), but MUST discard it if that transaction does not commit.
 - [AUD-501] A node MUST keep, outside the data that a backup restore replaces (the separate store of threat-model
   G5 (a)), its current epoch and the largest size it has signed a commitment for in that epoch. On start, if its
   durable log is shorter than that size, it MUST NOT extend the log and MUST start a new epoch ([§8.2](#82-epochs)).
+  A node that has lost that separate store, and so cannot know its epoch, MUST NOT continue its log at all: it MUST
+  generate a new node key, which starts a new log ID.
 
 Without AUD-501 a node restored from backup would reuse indices it had already committed to with other entries, and
 look exactly like a node that forks on purpose.
@@ -444,8 +461,9 @@ hold remain evidence of everything it committed to.
 ### 8.3 Retention
 
 - [AUD-511] A node MAY delete the contents of entries and bodies under its retention policy, but MUST keep the entry
-  hash of every entry of an epoch for as long as it serves commitments, proofs or receipts for that epoch, and
-  MUST log each deletion of entry contents as a `log.retention` entry.
+  hash of every entry of an epoch for as long as it serves commitments, proofs or receipts for that epoch, MUST
+  keep the contents of every genesis entry and the proofs of the old epoch for at least `EPOCH_OVERLAP` after the
+  next epoch starts, and MUST log each deletion of entry contents as a `log.retention` entry.
 - Owners SHOULD keep entry contents for at least `RETENTION_MIN`, and bodies as long as their dispute horizon
   requires. A request for a deleted entry gets `AuditPruned`.
 
@@ -457,21 +475,20 @@ Leaf hashes cost 32 bytes per entry. A node that must bound them closes the epoc
 
 Audit operations are webway extension operations. A request is an envelope with `typ` `request` and `op`
 `https://github.com/BVMrs/argent-webway/spec/ext/audit/v0#<Name>`, addressed to any agent hosted by the node whose
-log is asked about. The answer is a signed `response` (or `error`) envelope from that agent. So every answer,
-including a proof that does not verify or a refusal, is signed by the answering node's owner and can serve as
-evidence ([§10.3](#103-fork-and-rollback-evidence)).
+log is asked about. The answer is a signed `response` (or `error`) envelope from that agent. Its agent key is bound
+by its agent-cert to that node and to the node's owner. So every answer, including a proof that does not verify or
+a refusal, is attributable to the owner and can serve as evidence ([§10.3](#103-fork-and-rollback-evidence))
+together with the agent-cert.
 
 The extension is active for a request when the requester lists its URI in `a2a-extensions` and the responder
 confirms it (`profile.md` PROF-056).
 
 - [AUD-600] A node that declares `audit/v0` in its Agent Card MUST implement `GetCheckpoint`, `GetConsistency`,
-  `GetInclusion` and `GetReceipts`, and MUST attach receipts to responses as [§9.2](#92-receipts-on-responses)
-  requires.
+  `GetInclusion`, `GetReceipts` and `ExchangeCheckpoints`, and MUST attach receipts to responses as
+  [§9.2](#92-receipts-on-responses) requires.
 - [AUD-601] Bodies of audit requests and responses MUST be JSON objects with the members given below, safe
   integers for sizes, indices and epochs, and the formats of [§2](#2-conventions-and-terms). A responder MUST
   answer a request whose body is not as given with A2A `InvalidParamsError`.
-
-`ExchangeCheckpoints` is optional in v0 ([§10.4](#104-exchanging-third-party-checkpoints)).
 
 ### 9.2 Receipts on responses
 
@@ -486,11 +503,14 @@ When `audit/v0` is active for a request, the response carries the receipt for th
 `rcpt` is part of the signed header (`envelope/v0` ENV-002), so it is also kept in the stored response and replayed
 byte for byte to duplicates. It carries its own `sig`, so it can be taken out and shown without the response.
 
-- [AUD-610] When `audit/v0` is active for a request, a responder MUST include in every `response` envelope, and in
-  every signed `error` envelope sent after the request's entry was logged, a header member `rcpt` with the receipt
-  for that request.
+- [AUD-610] When `audit/v0` is active for a request, a responder MUST include in every `response` envelope a
+  header member `rcpt` with the receipt for that request. It MUST NOT put `rcpt` in an `error` envelope, which
+  `envelope/v0` ENV-611 forbids from carrying signatures over the failed envelope. The sender of a request that
+  failed gets its receipt with `GetReceipts`.
 - [AUD-611] A requester that receives a response with `rcpt` MUST verify the receipt (AUD-201, AUD-202, AUD-301),
-  check that its `id` is the response's `ctx.inReplyTo`, and keep it with the request. On failure it MUST log the
+  check that its `id` is the response's `ctx.inReplyTo` and that its `log` is the `node` of the responding agent's
+  agent-cert (`capability/v0` §4.6), and keep it with the request. A receipt from any other log proves nothing
+  about the responder. On failure it MUST log the
   anomaly `receipt-invalid`, and MUST NOT reject the response for that reason.
 
 ### 9.3 `GetCheckpoint`
@@ -504,7 +524,7 @@ Response body: `{"checkpoint": C, "proofs": [{"size": n, "proof": [...]}, …]}`
   size is at least every `n` in `have` (signing a new one if needed). When `e` equals the current epoch, it MUST
   return one consistency proof from each `n` in `have` to `C.size`, in the order of `have`.
 - [AUD-621] When `e` is the current epoch and some `n` in `have` exceeds the current log size, the responder MUST
-  answer `AuditRangeInvalid` with reason `beyond-size`.
+  answer `AuditBeyondSize`.
 
 AUD-621's answer is a signed admission that the requester holds a commitment the log no longer has: a rollback
 ([§10.3](#103-fork-and-rollback-evidence)).
@@ -528,7 +548,8 @@ AUD-621's answer is a signed admission that the requester holds a commitment the
 
 Request: `{"ids": [uuid, …]}`, at most `MAX_RECEIPT_IDS`. Response: `{"receipts": [R, …], "missing": [uuid, …]}`.
 
-- [AUD-640] A responder MUST return, for each `id` in the request, the receipt of the first `envelope.received`
+- [AUD-640] A responder MUST answer `GetReceipts` only with receipts of its own log (the `node` of the agent-cert
+  of the agent it answers as), and MUST return, for each `id` in the request, the stored receipt of the first `envelope.received`
   entry with a verified stub whose `from` is the requesting envelope's `from` and whose `id` is that `id`, or list
   the `id` in `missing`. It MUST NOT reveal whether an envelope with that `id` from another sender exists.
 
@@ -542,13 +563,18 @@ Audit data about other conversations is sensitive (AUD-8). The rules:
 - Checkpoints, proofs and leaf hashes reveal sizes and hashes only. Any requester whose identity verifies
   (`profile.md` PROF-040) may get them.
 - Receipts are for the sender of the envelope (AUD-640).
-- Entry contents are for the agents and owners in the entry's `parties`, for the genesis entry of each epoch
+- Entry contents are for the agents in the entry's `parties`, and for agents whose owner is in `parties`, for the genesis entry of each epoch
   (anyone), and otherwise only for a requester whose access token grants the capability `audit:read` on this node.
 
 - [AUD-650] A responder MUST disclose entry contents only as the rules above allow.
 
-Owners MAY restrict everything further by local policy (for example refuse audit operations to peers they have
-never exchanged a task with), and SHOULD rate-limit audit operations per peer.
+- [AUD-651] A node MUST NOT refuse `GetCheckpoint`, `GetConsistency`, hash-only `GetInclusion`, `GetReceipts` or
+  `ExchangeCheckpoints` to an agent of an owner whose agents it has exchanged envelopes with during the last
+  `RETENTION_MIN`, other than temporarily with `RateLimited` and a `retryAfter` of at most `GOSSIP_INTERVAL`.
+
+Beyond that, owners MAY restrict audit operations by local policy (for example refuse strangers), and SHOULD
+rate-limit them per peer. Refusing counterparties would let a node stop being monitored, which AUD-706 turns into an
+anomaly anyway.
 
 ## 10. Cross-node consistency
 
@@ -568,19 +594,28 @@ a checkpoint of the same epoch that covers it.
   asked, and verify each returned consistency proof against its held commitment. A checkpoint of the held epoch
   with a smaller size than the held one MUST be accepted only if consistent with it, and does not replace it.
 - [AUD-702] When a new checkpoint verifies and is consistent with the held checkpoint and with every pending
-  receipt it covers, the node MUST replace its held checkpoint, mark those receipts checked, and append a
-  `checkpoint.peer` entry with the new checkpoint and `result` `consistent` (or `first` when it held none).
+  receipt it covers, the node MUST replace its held checkpoint and append a `checkpoint.peer` entry with the new
+  checkpoint and `result` `consistent` (or `first` when it held none). It MUST mark a pending receipt checked only
+  when, in addition, a `GetInclusion` answer for the receipt's `index` at size `index + 1` returned the receipt's
+  `entry` as `leaf` with a proof that verifies under the receipt's `root`. Otherwise it MUST log `receipt-invalid`
+  and keep the receipt and the signed answer as evidence.
 - [AUD-703] When any check of AUD-701 or AUD-702 fails, or two commitments of one epoch have equal size and
   different roots, the node MUST NOT replace its held checkpoint, MUST append an anomaly `log-inconsistent` with the
   conflicting commitments and the signed response envelope's header digest, and MUST keep that response envelope
   and both commitments as evidence.
 - [AUD-704] When a peer's checkpoint has a higher epoch than the held one, the node MUST keep the held checkpoint
-  of the old epoch as evidence, MUST append an anomaly `log-epoch-change`, and SHOULD fetch the new genesis entry
-  (`GetInclusion` index 0) and compare its `predecessor` with what it holds. A `predecessor` with a smaller size
-  than, or the same size and a different root from, the held checkpoint is a rollback: the node MUST then append
-  an anomaly `log-rollback`.
-- [AUD-705] A checkpoint with a lower epoch than one already held, and an `AuditRangeInvalid` `beyond-size` answer
+  and the pending receipts of the old epoch as evidence, MUST append an anomaly `log-epoch-change`, MUST fetch the
+  new genesis entry (`GetInclusion` index 0, with `entry`), and MUST check its `predecessor` against every
+  commitment of the old epoch it holds: the held checkpoint and each pending receipt. For each, it needs a size no
+  larger than `predecessor.size` and a consistency proof in the old epoch (`GetConsistency`) from that commitment
+  to `predecessor`. If any commitment is larger than `predecessor.size`, or any proof is refused or fails, the
+  node MUST append an anomaly `log-rollback`, with the evidence kept as in AUD-703.
+- [AUD-705] A checkpoint with a lower epoch than one already held, and an `AuditBeyondSize` answer
   to AUD-700, MUST be treated as rollback: anomaly `log-rollback`, with the evidence kept as in AUD-703.
+- [AUD-706] When a receipt has stayed pending for `AUDIT_PATIENCE` while the node exchanged envelopes with the
+  peer's node during that time, or when the peer answers an audit operation of AUD-700, AUD-702 or AUD-704 with
+  anything other than a valid answer or `RateLimited`, the node MUST append an anomaly `audit-unanswered` with the
+  receipt and the answers it got.
 
 What a node does after an anomaly (alert the owner, stop accepting work from the peer, stop sending to it) is owner
 policy. The spec only requires that the evidence is kept and logged.
@@ -595,9 +630,11 @@ Transferable evidence a third party can check with the owner's pinned key alone:
 1. **Equal-size fork**: two commitments (checkpoints or receipts) with the same `log`, `epoch` and size, and
    different roots. Self-contained.
 2. **Refused or bad proof**: a commitment C1 held by the holder, a later commitment C2, and the signed response
-   envelope in which the node returned a consistency proof from C1 to C2 that does not verify, or answered
-   `AuditRangeInvalid` `beyond-size` for C1's size. The node signed both the commitments and the answer.
-3. **Rollback across epochs**: a commitment of epoch e, and a genesis entry of epoch e′ > e (with its inclusion
+   envelope (with the answering agent's agent-cert) in which the node returned a consistency proof from C1 to C2 that does not verify, or answered
+   `AuditBeyondSize` for C1's size. The node signed the commitments, and its agent, certified to the node, signed the answer.
+3. **Receipt without its entry**: a receipt, and the node's signed `GetInclusion` answer for its `index` that
+   returns another leaf, a proof that fails under the receipt's `root`, or `AuditNotFound`.
+4. **Rollback across epochs**: a commitment of epoch e, and a genesis entry of epoch e′ > e (with its inclusion
    proof and a checkpoint of e′) whose `predecessor` is inconsistent with it. This is not by itself proof of
    malice. It proves the node lost or discarded what it had committed to, which it has to explain.
 
@@ -614,9 +651,13 @@ two nodes may compare their held checkpoints of third logs.
 `{"checkpoints": [C′, …]}`: the responder's held checkpoint for each log in the request that it holds one for, plus
 its own latest checkpoint.
 
-- Nodes SHOULD exchange checkpoints of logs they both hold with every peer they monitor, at each `GetCheckpoint`
-  contact. For each log both hold, each side compares as in AUD-710 and gets any missing consistency proof from the
-  log's node with `GetConsistency`.
+- [AUD-721] At each `GetCheckpoint` contact of AUD-700, a node MUST also call `ExchangeCheckpoints` with its held
+  checkpoints of third-party logs (up to `MAX_HAVE`, preferring the most recently used), and for each log both
+  hold MUST compare the two as in AUD-710, getting a missing consistency proof from the log's node with
+  `GetConsistency`. A conflict MUST be logged as `log-inconsistent` with the evidence kept as in AUD-703.
+- A responder returns held checkpoints only for logs named in the request. The requester learns that the
+  responder holds a log the requester already knows of: who-talks-to-whom leaks between counterparties, which is
+  the price of fork detection (§15).
 - [AUD-720] A node that implements `ExchangeCheckpoints` MUST verify every received checkpoint (AUD-201) before
   using it, and MUST NOT replace its own held checkpoint of a third log with one received this way unless it has
   checked consistency with the log's node itself.
@@ -660,7 +701,8 @@ not itself signed: every piece in it is signed or hash-bound to something signed
   then each body: that `blake3:` + hex of `BLAKE3(JCS(body))` equals its key (`EvidenceInvalid`, reason
   `body-mismatch`).
 - [AUD-802] For each entry of type `envelope.sent`, or `envelope.received` with outcome `accepted` or `duplicate`,
-  a verifier of a bundle MUST verify the stub's envelope signature with the rules of `envelope/v0` §5.2, as part of
+  a verifier of a bundle MUST reject the bundle as `EvidenceInvalid` (reason `missing-stub`) if the entry has no
+  stub, and MUST verify the stub's envelope signature with the rules of `envelope/v0` §5.2, as part of
   the entry checks of AUD-801, and MUST reject a failure as `EvidenceInvalid` (reason `stub-signature`). Stubs of
   rejected envelopes are records of what arrived and are not checked.
 
@@ -681,7 +723,8 @@ change proposal. Errors carry `ErrorInfo` as PROF-051 requires.
 |---|---|---|---|---|
 | `AuditNotFound` | −30050 | `AUDIT_NOT_FOUND` | no | The entry does not exist or may not be disclosed to the requester. The two cases are not distinguished. |
 | `AuditPruned` | −30051 | `AUDIT_PRUNED` | no | The entry's contents were deleted under retention. Its hash and proofs are still available. |
-| `AuditRangeInvalid` | −30052 | `AUDIT_RANGE_INVALID` | no | An epoch, size or index outside what the log has or keeps, or too many items. Detail reason: `beyond-size`, `bad-range`, `epoch-unavailable`, `too-many`. |
+| `AuditRangeInvalid` | −30052 | `AUDIT_RANGE_INVALID` | no | An epoch, size or index outside what the log keeps, sizes in the wrong order, or too many items. The detailed reason stays in the local log. |
+| `AuditBeyondSize` | −30053 | `AUDIT_BEYOND_SIZE` | no | The requester holds a commitment to a size the current epoch does not have (AUD-621). A separate error, not a detail, because it is evidence of rollback ([§10.3](#103-fork-and-rollback-evidence)) and the requester needs it on the wire. |
 
 A2A `InvalidParamsError` for malformed bodies (AUD-601), and the profile's `RateLimited` for rate limits.
 
@@ -695,10 +738,10 @@ anomaly entries. They are not sent to the node being verified.
 | `EntryInvalid` | An entry is malformed. | `missing-field`, `malformed-field`, `bad-version`, `too-large`, `not-ijson`, `hd-mismatch`, `parties-mismatch` |
 | `ChainBroken` | A sequence of entries is not a valid chain. | `no-genesis`, `index-gap`, `prev-mismatch`, `log-mismatch`, `epoch-mismatch`, `time-decreased` |
 | `ProofInvalid` | An inclusion or consistency proof fails. | `bad-range`, `wrong-length`, `root-mismatch`, `malformed-proof` |
-| `CheckpointInvalid` | A checkpoint is malformed or its signature fails. | `missing-field`, `malformed-field`, `bad-version`, `bad-signature`, `weak-key` |
+| `CheckpointInvalid` | A checkpoint is malformed or its signature fails. | `missing-field`, `malformed-field`, `bad-version`, and the `SignatureInvalid` reasons of `envelope/v0` §10.2: `weak-key`, `non-canonical-signature`, `verification-failed` |
 | `ReceiptInvalid` | A receipt is malformed, its signature fails, or it does not match its envelope or entry. | as `CheckpointInvalid`, plus `envelope-mismatch`, `entry-mismatch` |
 | `LogInconsistent` | Two commitments of one log conflict (AUD-710). | `fork` |
-| `EvidenceInvalid` | A bundle is malformed, mixes logs, or claims an accepted envelope whose signature fails. | `missing-field`, `bad-version`, `foreign-item`, `body-mismatch`, `stub-signature` |
+| `EvidenceInvalid` | A bundle is malformed, mixes logs, or claims an accepted envelope whose signature fails. | `missing-field`, `bad-version`, `foreign-item`, `body-mismatch`, `stub-signature`, `missing-stub` |
 
 - [AUD-900] A verifier reporting a verification result MUST use the names of the table above, so that results
   agree across implementations and the conformance vectors can test them.
@@ -728,6 +771,7 @@ anomaly entries. They are not sent to the node being verified.
 | `MAX_RECEIPT_IDS` | 64 | IDs per `GetReceipts`. |
 | `MAX_PROOF_HASHES` | 128 | Hashes in one proof. Inclusion proofs need at most 53 and consistency proofs at most 54 for safe-integer sizes. |
 | `MAX_ENTRY_BYTES` | 1 179 648 | `JCS(entry)`: the largest stub (`envelope/v0` `MAX_ENVELOPE_BYTES`) plus 128 KiB. |
+| `AUDIT_PATIENCE` | 86 400 s | How long a receipt may stay pending while the peer is reachable before AUD-706 fires. |
 | `EPOCH_OVERLAP` | 30 days | Proofs for a rotated-out epoch stay available at least this long. |
 | `RETENTION_MIN` | 400 days | Recommended minimum for entry contents. Matches the longest certificate validity (`capability/v0` `MAX_CERT_TTL`). |
 
@@ -823,7 +867,8 @@ they exchanged are consistent. Planned harness scenarios:
   impossible to confuse with TLS `CertificateVerify` content, JWS statements, envelopes or Biscuit blocks
   ([§6.1](#61-signing-rules)). Proposed text: "the node key signs the TLS handshake and the audit/v0 objects
   `webway-checkpoint/0` and `webway-receipt/0`, nothing else".
-- **`profile.md` §10.3**: register `AuditNotFound`, `AuditPruned` and `AuditRangeInvalid` (−30050…−30052).
+- **`profile.md` §10.3**: register `AuditNotFound`, `AuditPruned`, `AuditRangeInvalid` and `AuditBeyondSize`
+  (−30050…−30053).
 - **`profile.md` §5 or capability names**: the capability `audit:read` ([§9.6](#96-disclosure)).
 - **`envelope/v0`**: `rcpt` is a header member defined by an extension. ENV-002 already makes receivers keep and
   sign it. Nothing to change, but §3.1 could list it as reserved.
@@ -890,19 +935,22 @@ requirement is about node behaviour and is tested by the black-box harness (T4).
 | AUD-610 | `rcpt` on responses | harness |
 | AUD-611 | requester verifies `rcpt` | `receipt`, harness |
 | AUD-620 | `GetCheckpoint` | harness |
-| AUD-621 | `beyond-size` | harness |
+| AUD-621 | `AuditBeyondSize` | harness |
 | AUD-630 | `GetConsistency`, `GetInclusion` ranges | harness |
 | AUD-631 | `GetInclusion` disclosure | harness |
 | AUD-640 | `GetReceipts` | harness |
 | AUD-650 | disclosure rules | harness |
+| AUD-651 | no refusing counterparties | harness |
 | AUD-700 | monitoring cadence | harness |
 | AUD-701 | checkpoint and proof checks | `checkpoint`, `consistency`, harness |
 | AUD-702 | replacing the held checkpoint | harness |
 | AUD-703 | inconsistency evidence | `compare`, harness |
 | AUD-704 | epoch change | harness |
 | AUD-705 | rollback | harness |
+| AUD-706 | unanswered monitoring | harness |
 | AUD-710 | comparing commitments | `compare` |
 | AUD-720 | third-party checkpoints | harness |
+| AUD-721 | exchanging and comparing | harness |
 | AUD-800 | bundle structure | `evidence` |
 | AUD-801 | bundle verification order | `evidence` |
 | AUD-802 | stub signatures in bundles | `evidence` |

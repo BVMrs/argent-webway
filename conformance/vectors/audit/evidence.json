@@ -1835,8 +1835,8 @@
       }
     },
     {
-      "id": "receipt-other-log",
-      "description": "alpha's checkpoint is not a receipt of beta's log",
+      "id": "checkpoint-as-receipt",
+      "description": "alpha's checkpoint in the receipts list is not a receipt",
       "requirements": [
         "AUD-801",
         "AUD-900"
@@ -2014,6 +2014,533 @@
       "expect": {
         "result": "reject",
         "error": "ReceiptInvalid"
+      }
+    },
+    {
+      "id": "receipt-other-log",
+      "description": "A valid receipt of alpha's log in beta's bundle",
+      "requirements": [
+        "AUD-800",
+        "AUD-900"
+      ],
+      "input": {
+        "bundle": {
+          "v": "webway-audit-evidence/0",
+          "checkpoint": {
+            "v": "webway-checkpoint/0",
+            "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "epoch": 0,
+            "size": 12,
+            "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+            "time": "2026-11-07T12:10:00Z",
+            "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+          },
+          "entries": [
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 2,
+                "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+                "time": "2026-11-07T12:00:01.250Z",
+                "type": "envelope.received",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+                ],
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "accepted",
+                  "trust": {
+                    "/message/parts/0": "foreign"
+                  },
+                  "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                  "stub": {
+                    "v": "webway-envelope/0",
+                    "typ": "request",
+                    "op": "SendMessage",
+                    "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                    "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                    "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                    "ts": "2026-11-07T12:00:00Z",
+                    "exp": "2026-11-07T13:00:00Z",
+                    "ctx": {
+                      "contextId": "ctx-42"
+                    },
+                    "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+                    "prov": {
+                      "parts": {
+                        "/message/parts/0": {
+                          "taint": {
+                            "owners": [
+                              "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                            ],
+                            "unverified": false
+                          }
+                        }
+                      }
+                    },
+                    "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+                  }
+                }
+              },
+              "proof": [
+                "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+                "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+                "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+              ]
+            },
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 3,
+                "prev": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "time": "2026-11-07T12:00:01.251Z",
+                "type": "authz.decision",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama"
+                ],
+                "data": {
+                  "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                  "decision": "allow",
+                  "presenter": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "capability": "skill:run-tests",
+                  "operation": "SendMessage"
+                }
+              },
+              "proof": [
+                "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+                "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+                "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+              ]
+            },
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 9,
+                "prev": "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+                "time": "2026-11-07T12:00:06.500Z",
+                "type": "envelope.received",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+                ],
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "rejected",
+                  "error": {
+                    "type": "SignatureInvalid",
+                    "reason": "verification-failed"
+                  },
+                  "hd": "blake3:4a333d658c0c28af6eec149d1ad7c8b79315d7787c7cedc7d19f0423fe24026a",
+                  "stub": {
+                    "v": "webway-envelope/0",
+                    "typ": "request",
+                    "op": "CancelTask",
+                    "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                    "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                    "id": "019a5d2f-1b00-7c22-a033-e44f55a66b77",
+                    "ts": "2026-11-07T12:00:06Z",
+                    "exp": "2026-11-07T12:05:06Z",
+                    "ctx": {
+                      "taskId": "task-7"
+                    },
+                    "body_hash": "blake3:a5b3210f439de8e51f1e5cf57476681b44618791bfdc066b3edb83ba1c1d7a8c",
+                    "sig": "qnWlDPcYR1Y2hz--aBoi7vm9rbcCz_mUSPgpKcJABcds6Ju2ZuHj35V834w9bsmjXhS1_oJOcZwcXf6W6XLxDg"
+                  }
+                }
+              },
+              "proof": [
+                "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+                "blake3:5bb3e5c56198ddcdf9b997c316d9b0f8187e90cb5be71bc142798cfab7a71189",
+                "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+              ]
+            }
+          ],
+          "receipts": [
+            {
+              "receipt": {
+                "v": "webway-receipt/0",
+                "log": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                "epoch": 0,
+                "index": 2,
+                "entry": "blake3:443f45d146f064577af4a96fe8cdf426682cdc8261964a27cf35c65f329178df",
+                "root": "blake3:bd2af47432d02938fdce1d5cae66fd9f32cf9a8fcbbabbba810773fcf3f63c55",
+                "time": "2026-11-07T12:00:01.400Z",
+                "env": "blake3:ea27d754e356ec4097513c8e497ed96f65fd300f398b8861e4d3b8628e70c599",
+                "id": "019a5d2e-7d10-7a01-8b2c-3d4e5f60718a",
+                "from": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                "to": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                "sig": "9puJsjh2QaIHHv4BJjigYS0alUNk_H3NVz-rSAPdbLf97ePSSPHHaBfl6TBEgpIVp4UROhRUW7YhWlyIWr6ICA"
+              },
+              "proof": []
+            }
+          ],
+          "bodies": {
+            "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec": {
+              "message": {
+                "messageId": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                "role": "ROLE_USER",
+                "parts": [
+                  {
+                    "text": "run the tests"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EvidenceInvalid"
+      }
+    },
+    {
+      "id": "receipt-beyond-checkpoint",
+      "description": "Receipt at index 7 (size 8) with a checkpoint of size 4",
+      "requirements": [
+        "AUD-800",
+        "AUD-900"
+      ],
+      "input": {
+        "bundle": {
+          "v": "webway-audit-evidence/0",
+          "checkpoint": {
+            "v": "webway-checkpoint/0",
+            "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "epoch": 0,
+            "size": 4,
+            "root": "blake3:b04b96890c793ffdf6e55acaf29ea3c569e2ed866be19d85e5588e37b2697fab",
+            "time": "2026-11-07T12:00:02Z",
+            "sig": "NZuhpPWdMnUrY9Ne6pI8E_AGXjzxiiAlGdvfBvZD6pekORHgb5q2SAfYsNr011YgX1p6xfGID8nPn8DMHQmOBQ"
+          },
+          "entries": [
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 2,
+                "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+                "time": "2026-11-07T12:00:01.250Z",
+                "type": "envelope.received",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+                ],
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "accepted",
+                  "trust": {
+                    "/message/parts/0": "foreign"
+                  },
+                  "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                  "stub": {
+                    "v": "webway-envelope/0",
+                    "typ": "request",
+                    "op": "SendMessage",
+                    "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                    "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                    "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                    "ts": "2026-11-07T12:00:00Z",
+                    "exp": "2026-11-07T13:00:00Z",
+                    "ctx": {
+                      "contextId": "ctx-42"
+                    },
+                    "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+                    "prov": {
+                      "parts": {
+                        "/message/parts/0": {
+                          "taint": {
+                            "owners": [
+                              "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                            ],
+                            "unverified": false
+                          }
+                        }
+                      }
+                    },
+                    "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+                  }
+                }
+              },
+              "proof": [
+                "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc"
+              ]
+            }
+          ],
+          "receipts": [
+            {
+              "receipt": {
+                "v": "webway-receipt/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 7,
+                "entry": "blake3:c191c7d4576c83192aed1146560d46bdc0be5d1952419492e5587308b4b1c356",
+                "root": "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f",
+                "time": "2026-11-07T12:00:05.010Z",
+                "env": "blake3:696c047846b4cccb59a402f90b1efaab59e3bcdffb91bbba1e517ce76f861d9b",
+                "id": "019a5d2f-0a00-7b11-9c22-d33e44f55a66",
+                "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                "sig": "bLaZnnzjq8RjuM8w_MC2qwgRTfECOHzvygF6hmH8qDce6Xi-Pgu_lTvOQACIvadmNqHmOBmHjXMCWSCA2Dr3Cg"
+              },
+              "proof": []
+            }
+          ]
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EvidenceInvalid"
+      }
+    },
+    {
+      "id": "receipt-id-mismatch",
+      "description": "Signed receipt with the right entry hash but another envelope id",
+      "requirements": [
+        "AUD-302",
+        "AUD-900"
+      ],
+      "input": {
+        "bundle": {
+          "v": "webway-audit-evidence/0",
+          "checkpoint": {
+            "v": "webway-checkpoint/0",
+            "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "epoch": 0,
+            "size": 12,
+            "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+            "time": "2026-11-07T12:10:00Z",
+            "sig": "uDe4oUMtNLJAYign1WRKfZOgcdpPSCNOAr3AFBaulkb5pkNVkLmyEnEYniPr31X1RpdGcQ2gmslfZUnP1WKGDQ"
+          },
+          "entries": [
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 2,
+                "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+                "time": "2026-11-07T12:00:01.250Z",
+                "type": "envelope.received",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+                ],
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "accepted",
+                  "trust": {
+                    "/message/parts/0": "foreign"
+                  },
+                  "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                  "stub": {
+                    "v": "webway-envelope/0",
+                    "typ": "request",
+                    "op": "SendMessage",
+                    "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                    "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                    "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                    "ts": "2026-11-07T12:00:00Z",
+                    "exp": "2026-11-07T13:00:00Z",
+                    "ctx": {
+                      "contextId": "ctx-42"
+                    },
+                    "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+                    "prov": {
+                      "parts": {
+                        "/message/parts/0": {
+                          "taint": {
+                            "owners": [
+                              "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                            ],
+                            "unverified": false
+                          }
+                        }
+                      }
+                    },
+                    "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+                  }
+                }
+              },
+              "proof": [
+                "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+                "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+                "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+              ]
+            },
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 3,
+                "prev": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "time": "2026-11-07T12:00:01.251Z",
+                "type": "authz.decision",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama"
+                ],
+                "data": {
+                  "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                  "decision": "allow",
+                  "presenter": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "capability": "skill:run-tests",
+                  "operation": "SendMessage"
+                }
+              },
+              "proof": [
+                "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+                "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+                "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+              ]
+            },
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 9,
+                "prev": "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+                "time": "2026-11-07T12:00:06.500Z",
+                "type": "envelope.received",
+                "parties": [
+                  "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                  "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+                ],
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "rejected",
+                  "error": {
+                    "type": "SignatureInvalid",
+                    "reason": "verification-failed"
+                  },
+                  "hd": "blake3:4a333d658c0c28af6eec149d1ad7c8b79315d7787c7cedc7d19f0423fe24026a",
+                  "stub": {
+                    "v": "webway-envelope/0",
+                    "typ": "request",
+                    "op": "CancelTask",
+                    "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                    "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                    "id": "019a5d2f-1b00-7c22-a033-e44f55a66b77",
+                    "ts": "2026-11-07T12:00:06Z",
+                    "exp": "2026-11-07T12:05:06Z",
+                    "ctx": {
+                      "taskId": "task-7"
+                    },
+                    "body_hash": "blake3:a5b3210f439de8e51f1e5cf57476681b44618791bfdc066b3edb83ba1c1d7a8c",
+                    "sig": "qnWlDPcYR1Y2hz--aBoi7vm9rbcCz_mUSPgpKcJABcds6Ju2ZuHj35V834w9bsmjXhS1_oJOcZwcXf6W6XLxDg"
+                  }
+                }
+              },
+              "proof": [
+                "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+                "blake3:5bb3e5c56198ddcdf9b997c316d9b0f8187e90cb5be71bc142798cfab7a71189",
+                "blake3:013fd6df6e74ad89639e60209d729f0885431e5288dddcf8ac86fcc77205157f"
+              ]
+            }
+          ],
+          "receipts": [
+            {
+              "receipt": {
+                "v": "webway-receipt/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 2,
+                "entry": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "root": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+                "time": "2026-11-07T12:00:01.250Z",
+                "env": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+                "id": "019a5d2f-0a00-7b11-9c22-d33e44f55a66",
+                "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+                "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+                "sig": "tg9qIoBkBkHs_nNTYMSBUZJWqqkqTO_-ctGwBEayP-bl-Gd2u3P1m1u7nWLqOByx3mt53ZvKIIGIGLPIoxbBBw"
+              },
+              "proof": [
+                "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+                "blake3:62d85849857a1438164545ce38878dd93cb9977b4249bfbb2d2d0db762f3942d",
+                "blake3:dfb21b0dc789d447b566197564296ba3bd04d7b75304f588bcc72b20b4156fcc",
+                "blake3:cce38cad61131e20f5768da01f087a0847298c1e2ff1f843901ad532a4e09e18",
+                "blake3:ae1ad4338860e18ff9a7b9b1288a79530bf9432d5bcd766adf8809ef4da36d2a"
+              ]
+            }
+          ],
+          "bodies": {
+            "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec": {
+              "message": {
+                "messageId": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                "role": "ROLE_USER",
+                "parts": [
+                  {
+                    "text": "run the tests"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "ReceiptInvalid"
+      }
+    },
+    {
+      "id": "missing-stub",
+      "description": "The log claims an accepted envelope but kept no stub",
+      "requirements": [
+        "AUD-802",
+        "AUD-900"
+      ],
+      "input": {
+        "bundle": {
+          "v": "webway-audit-evidence/0",
+          "checkpoint": {
+            "v": "webway-checkpoint/0",
+            "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "epoch": 0,
+            "size": 2,
+            "root": "blake3:cc919ffaf1de7c880d6fe597aa4d8c1c4d09e19787d65bd9d62b9ed0a3ed95d5",
+            "time": "2026-11-07T12:00:02Z",
+            "sig": "uHUKbrlMwZm1rjAFfES1XrrlpjYxQ0xu6YMBG_eTQaSrIvvll0r3U0UScMFpnunvqolPAzDpVI-QawQEQ7YvDw"
+          },
+          "entries": [
+            {
+              "entry": {
+                "v": "webway-audit-entry/0",
+                "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+                "epoch": 0,
+                "index": 1,
+                "prev": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1",
+                "time": "2026-11-07T12:00:01Z",
+                "type": "envelope.received",
+                "data": {
+                  "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+                  "outcome": "accepted"
+                }
+              },
+              "proof": [
+                "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1"
+              ]
+            }
+          ]
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EvidenceInvalid"
       }
     },
     {

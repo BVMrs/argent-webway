@@ -522,6 +522,22 @@ fn entry_hash_file(w: &World) -> File {
         ),
         case(
             &f,
+            "fraction-in-data",
+            "Numbers in entries are integers",
+            &["AUD-001"],
+            json!({"entry": set(e2, &["data", "detail"], json!(1.5))}),
+            Want::Reject("EntryInvalid"),
+        ),
+        case(
+            &f,
+            "unsafe-integer-in-data",
+            "Integers in entries are at most 2^53 - 1, at any depth",
+            &["AUD-001"],
+            json!({"entry": set(e2, &["data", "detail"], json!({"n": [9007199254740992u64]}))}),
+            Want::Reject("EntryInvalid"),
+        ),
+        case(
+            &f,
             "prev-at-genesis",
             "No prev at index 0",
             &["AUD-001"],
@@ -1377,6 +1393,26 @@ fn evidence_file(w: &World, bk: &SigningKey) -> File {
         bk,
         RECEIPT_V,
     );
+    let wrong_id_receipt = resign(
+        &set(&b.receipt(2), &["id"], w.e3["id"].clone()),
+        bk,
+        RECEIPT_V,
+    );
+    let mut ns = Log::new(&key("beta-node"), 0);
+    ns.append(
+        "2026-11-07T12:00:00Z",
+        "log.genesis",
+        None,
+        json!({"node": nid(&key("beta-node")), "reason": "new", "profile": "webway-profile/0.1"}),
+    );
+    ns.append(
+        "2026-11-07T12:00:01Z",
+        "envelope.received",
+        None,
+        json!({"via": nid(&key("alpha-node")), "outcome": "accepted"}),
+    );
+    let nostub_bundle = json!({"v": EVIDENCE_V, "checkpoint": ns.checkpoint(2, "2026-11-07T12:00:02Z"),
+        "entries": [{"entry": ns.entries[1], "proof": ns.incl(1, 2)}]});
     let bs = &w.badstub;
     let badstub = json!({"v": EVIDENCE_V, "checkpoint": bs.checkpoint(2, "2026-11-07T12:00:02Z"), "entries": [item(bs, 1, 2)]});
     let cases = vec![
@@ -1494,11 +1530,44 @@ fn evidence_file(w: &World, bk: &SigningKey) -> File {
         ),
         case(
             &f,
-            "receipt-other-log",
-            "alpha's checkpoint is not a receipt of beta's log",
+            "checkpoint-as-receipt",
+            "alpha's checkpoint in the receipts list is not a receipt",
             &["AUD-801"],
             json!({"bundle": set(&good, &["receipts"], json!([{"receipt": w.alpha.checkpoint(3, "2026-11-07T12:00:02Z"), "proof": []}]))}),
             Want::Reject("ReceiptInvalid"),
+        ),
+        case(
+            &f,
+            "receipt-other-log",
+            "A valid receipt of alpha's log in beta's bundle",
+            &["AUD-800"],
+            json!({"bundle": set(&good, &["receipts"], json!([{"receipt": w.alpha.receipt(2), "proof": []}]))}),
+            Want::Reject("EvidenceInvalid"),
+        ),
+        case(
+            &f,
+            "receipt-beyond-checkpoint",
+            "Receipt at index 7 (size 8) with a checkpoint of size 4",
+            &["AUD-800"],
+            json!({"bundle": {"v": EVIDENCE_V, "checkpoint": b.checkpoint(4, "2026-11-07T12:00:02Z"),
+                "entries": [item(b, 2, 4)], "receipts": [{"receipt": b.receipt(7), "proof": []}]}}),
+            Want::Reject("EvidenceInvalid"),
+        ),
+        case(
+            &f,
+            "receipt-id-mismatch",
+            "Signed receipt with the right entry hash but another envelope id",
+            &["AUD-302"],
+            json!({"bundle": set(&good, &["receipts"], json!([{"receipt": wrong_id_receipt, "proof": b.cons(3, 12)}]))}),
+            Want::Reject("ReceiptInvalid"),
+        ),
+        case(
+            &f,
+            "missing-stub",
+            "The log claims an accepted envelope but kept no stub",
+            &["AUD-802"],
+            json!({"bundle": nostub_bundle}),
+            Want::Reject("EvidenceInvalid"),
         ),
         case(
             &f,

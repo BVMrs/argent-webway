@@ -320,6 +320,136 @@
       }
     },
     {
+      "id": "fraction-in-data",
+      "description": "Numbers in entries are integers",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            },
+            "detail": 1.5
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "unsafe-integer-in-data",
+      "description": "Integers in entries are at most 2^53 - 1, at any depth",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            },
+            "detail": {
+              "n": [
+                9007199254740992
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
       "id": "prev-at-genesis",
       "description": "No prev at index 0",
       "requirements": [
