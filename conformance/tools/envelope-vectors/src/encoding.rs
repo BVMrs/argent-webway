@@ -212,8 +212,7 @@ fn base58btc(bytes: &[u8]) -> String {
         }
     }
     let zeros = bytes.iter().take_while(|&&b| b == 0).count();
-    std::iter::repeat('1')
-        .take(zeros)
+    std::iter::repeat_n('1', zeros)
         .chain(digits.iter().rev().map(|&d| B58[d as usize] as char))
         .collect()
 }
