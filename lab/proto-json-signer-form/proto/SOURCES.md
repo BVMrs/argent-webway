@@ -1,0 +1,2 @@
+- `a2a.proto`: https://github.com/a2aproject/A2A/blob/v1.0.1/specification/a2a.proto (sha256 e195bf96ab630c69797851970203e1b2b6b19528f2e9803b7d904b91a5104016), Apache-2.0.
+- `google/api/*.proto`: https://github.com/googleapis/googleapis (master, 2026-11-09), Apache-2.0. Imports only; they do not affect the JSON mapping.

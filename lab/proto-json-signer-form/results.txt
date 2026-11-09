@@ -1,0 +1,135 @@
+### probe
+parse {"metadata":{"a":null}}
+  prost-reflect bin: [32, 09, 0a, 07, 0a, 01, 61, 12, 02, 08, 00]
+  pbjson bin:        [32, 05, 0a, 03, 0a, 01, 61]  same=false
+parse {"metadata":{"a":[null]}}
+  prost-reflect bin: [32, 0d, 0a, 0b, 0a, 01, 61, 12, 06, 32, 04, 0a, 02, 08, 00]
+  pbjson bin:        [32, 0b, 0a, 09, 0a, 01, 61, 12, 04, 32, 02, 0a, 00]  same=false
+parse {"metadata":{"a":1}}
+  prost-reflect bin: [32, 10, 0a, 0e, 0a, 01, 61, 12, 09, 11, 00, 00, 00, 00, 00, 00, f0, 3f]
+  pbjson bin:        [32, 10, 0a, 0e, 0a, 01, 61, 12, 09, 11, 00, 00, 00, 00, 00, 00, f0, 3f]  same=true
+SendMessageRequest{message.parts[0].data = Value{} (no kind)}
+  prost-reflect: Ok("{\"message\":{\"parts\":[{\"data\":null}]}}")
+  pbjson:        Ok("{\"message\":{\"parts\":[{\"data\":null}]}}")
+SendMessageConfiguration{historyLength: 0}
+  prost-reflect: Ok("{\"historyLength\":0}")
+  pbjson:        Err("n/a")
+Part{text: ""}
+  prost-reflect: Ok("{\"text\":\"\"}")
+  pbjson:        Err("n/a")
+Task{status.timestamp nanos=0}
+  prost-reflect: Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00Z\"}}")
+  pbjson:        Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00+00:00\"}}")
+Task{status.timestamp nanos=120000000}
+  prost-reflect: Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.120Z\"}}")
+  pbjson:        Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.120+00:00\"}}")
+Task{status.timestamp nanos=123456000}
+  prost-reflect: Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.123456Z\"}}")
+  pbjson:        Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.123456+00:00\"}}")
+Task{status.timestamp nanos=1}
+  prost-reflect: Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.000000001Z\"}}")
+  pbjson:        Ok("{\"status\":{\"timestamp\":\"2025-11-09T00:00:00.000000001+00:00\"}}")
+
+### A2A §8.4.1 example and realistic cards through a2a-js canonicalizeAgentCard
+{"spec":"{\"capabilities\":{\"pushNotifications\":false,\"streaming\":false},\"description\":\"\",\"name\":\"Example Agent\",\"skills\":[]}","a2a_js":"{\"capabilities\":{\"pushNotifications\":false,\"streaming\":false},\"name\":\"Example Agent\"}","equal":false}
+{"with_unknown":"{\"capabilities\":{\"streaming\":true},\"name\":\"X\"}","without":"{\"capabilities\":{\"streaming\":true},\"name\":\"X\"}"}
+{"card":"typical card","equal":true,"generic_len":424,"a2a_js_len":424}
+{"card":"no optional capabilities (`capabilities: {}`)","equal":false,"generic_len":408,"a2a_js_len":390}
+{"card":"capability explicitly false","equal":true,"generic_len":451,"a2a_js_len":451}
+{"card":"extension with params {mode: \"\"}","equal":false,"generic_len":541,"a2a_js_len":520}
+{"card":"REQUIRED description empty","equal":false,"generic_len":389,"a2a_js_len":372}
+{"card":"webway field from a newer card schema","equal":false,"generic_len":449,"a2a_js_len":424}
+
+### differential (N=120000, seed 1)
+cases: 120000
+
+## prost-reflect
+  emitted 119356/120000 (644 refused)
+    refused: non-finite double in Value: 402
+    refused: timestamp out of range: 242
+  pinned form: 118357/119356 pass (99.16 %)
+    enum-number: 996 cases (0.83 %)   e.g. case 158 ListTasksRequest at $.status = 77
+    ts-syntax: 3 cases (0.00 %)   e.g. case 31613 ListTasksRequest at $.statusTimestampAfter = "+10000-01-01T00:00:00Z"
+  JCS-equal to prost-reflect: 119356 / differ: 0
+
+## pbjson
+  emitted 118365/120000 (1635 refused)
+    refused: invalid variant : 1002
+    refused: non-finite double in Value: 398
+    refused: timestamp out of range: 235
+  pinned form: 106424/118365 pass (89.91 %)
+    ts-offset: 11818 cases (9.98 %)   e.g. case 5 ListTasksRequest at $.statusTimestampAfter = "0001-01-01T00:00:00+00:00"
+    ts-syntax: 124 cases (0.10 %)   e.g. case 4214 StreamResponse at $.statusUpdate.status.timestamp = "+10000-01-01T00:00:00.288+00:00"
+  JCS-equal to prost-reflect: 106424 / differ: 11706
+    first diff: case 5: 
+      ref: …atusTimestampAfter":"0001-01-01T00:00:00Z"}
+      got: …atusTimestampAfter":"0001-01-01T00:00:00+00:00"}
+
+## bufbuild
+  emitted 119109/120000 (891 refused)
+    refused: non-finite double in Value: 401
+    refused: timestamp out of range: 490
+  pinned form: 118116/119109 pass (99.17 %)
+    enum-number: 993 cases (0.83 %)   e.g. case 158 ListTasksRequest at $.status = 77
+  JCS-equal to prost-reflect: 119109 / differ: 0
+
+## protobufjs
+  emitted 120000/120000 (0 refused)
+  pinned form: 106757/120000 pass (88.96 %)
+    enum-number: 1005 cases (0.84 %)   e.g. case 158 ListTasksRequest at $.status = 77
+    ts-not-string: 12568 cases (10.47 %)   e.g. case 5 ListTasksRequest at $.statusTimestampAfter = {"seconds":"-62135596800"}
+  JCS-equal to prost-reflect: 79378 / differ: 39978
+    first diff: case 0: 
+      ref: …age":{"messageId":"task-1","metadata":{"TASK_STATE_WORKING":[]},"taskId":"\"q\""}}
+      got: …age":{"messageId":"task-1","metadata":{"fields":{"TASK_STATE_WORKING":{"listValue":{}}}},"
+
+## a2a-js
+  emitted 120000/120000 (0 refused)
+  pinned form: 113955/120000 pass (94.96 %)
+    enum-unknown-name: 1005 cases (0.84 %)   e.g. case 158 ListTasksRequest at $.status = "UNRECOGNIZED"
+    ts-frac-not-minimal: 5016 cases (4.18 %)   e.g. case 5 ListTasksRequest at $.statusTimestampAfter = "0001-01-01T00:00:00.000Z"
+    ts-syntax: 147 cases (0.12 %)   e.g. case 2300 ListTasksRequest at $.statusTimestampAfter = "+010000-01-01T00:00:00.000Z"
+  JCS-equal to prost-reflect: 108780 / differ: 10576
+    first diff: case 5: 
+      ref: …atusTimestampAfter":"0001-01-01T00:00:00Z"}
+      got: …atusTimestampAfter":"0001-01-01T00:00:00.000Z"}
+
+## typed JSON -> JSON round trip of 118357 pinned-form inputs (JCS-identical = signature survives)
+  prost-reflect  identical 118354/118357 (100.00 %), changed 0, error 3
+  pbjson         identical 105992/118357 (89.55 %), changed 12365, error 0
+    first change: case 5: 
+      ref: …atusTimestampAfter":"0001-01-01T00:00:00Z"}
+      got: …atusTimestampAfter":"0001-01-01T00:00:00+00:00"}
+  bufbuild       identical 118354/118357 (100.00 %), changed 0, error 3
+  a2a-js         identical 117822/118357 (99.55 %), changed 535, error 0
+    first change: case 30: 
+      ref: …s":[{"mediaType":"ynenpqp","text":""},{"data":null,"metadata":{"":"mnbiro","line\nbreak":f
+      got: …s":[{"mediaType":"ynenpqp","text":""},{"metadata":{"":"mnbiro","line\nbreak":false}}],"ref
+
+## A2A §8.4.1 card canonicalisation (a2a-js canonicalizeAgentCard) vs JCS(pinned card minus signatures)
+  13301 AgentCards: equal 728 (5.47 %), differ 12573, a2a-js error 0
+    differing cards containing empty list inside Struct: 84
+    differing cards containing empty message/Struct (e.g. `capabilities: {}`): 9405
+    differing cards containing empty string inside Struct or map: 5513
+    differing cards containing null inside Struct: 299
+    first diff (ours vs a2a-js): case 4: 
+      ref: …lse},"defaultInputModes":["a","\"q\""],"documentationUrl":"","name":"é","provider":{},"sup
+      got: …lse},"defaultInputModes":["a","\"q\""],"name":"é","supportedInterfaces":[{"tenant":"😀"}]}
+  mutated cards whose a2a-js canonical form is unchanged (a signature over the original still verifies):
+    implicit-presence-default-emitted      3359/3359   (100.0 %)
+    null-for-absent                        3351/3351   (100.0 %)
+    snake-case-name                        3322/3322   (100.0 %)
+    unknown-field                          3359/3359   (100.0 %)
+
+## parsers on 239236 mutants (accepted = parsed without error; same = decodes to the original message)
+  mutation                                  n  checker            prost-reflect                   pbjson                 bufbuild                   a2a-js
+  bytes-urlsafe-unpadded                  501     501r           501a      500s           501a      229s           501a      500s           501a      449s
+  enum-number                            1772    1772r          1772a     1759s          1772a     1437s          1772a     1759s          1772a     1395s
+  identity (control)                   118357       0r        118354a   118116s        118357a   103860s        118354a   118116s        118357a   112126s
+  implicit-presence-default-emitted     27751   27751r         27751a    27684s         27751a    24146s         27751a    27684s         27751a    26232s
+  int32-as-string                        7320    7320r          7320a     7289s          7320a     6846s          7320a     7289s          7320a     6528s
+  null-for-absent                       28624   28624r         28623a    28560s          6904a     6034s         28623a    28560s         28624a    27087s
+  snake-case-name                       19973   19973r         19973a    19926s         19973a    16917s         19973a    19926s         19973a    18527s
+  ts-frac-not-minimal                    2181    2181r          2181a     2154s          2181a     1828s          2181a     2154s          2181a     1616s
+  ts-offset                              3106    3106r          3106a     3051s          3106a     2541s          3106a     3051s          3106a     1633s
+  unknown-field                         29651   29651r             0a        0s             0a        0s             0a        0s         29651a    28109s

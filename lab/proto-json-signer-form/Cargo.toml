@@ -1,0 +1,28 @@
+[package]
+name = "proto-json-signer-form"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: do real proto3-JSON serializers emit the envelope/v0 pinned signer form for A2A 1.0 messages?"
+
+[dependencies]
+prost = "0.14"
+prost-types = "0.14"
+prost-reflect = { version = "0.16", features = ["serde"] }
+pbjson = "0.9"
+pbjson-types = "0.9"
+serde = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }
+serde_json_canonicalizer = "0.3"
+base64 = "0.22"
+rand = "0.8"
+rand_chacha = "0.3"
+
+[build-dependencies]
+protox = "0.10"
+prost = "0.14"
+prost-types = "0.14"
+prost-build = "0.14"
+pbjson-build = "0.9"
+
+[workspace]
