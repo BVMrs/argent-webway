@@ -113,8 +113,9 @@ multi-tenancy ([spec][a2a-spec]).
 - **Operations** (§3): `SendMessage`, `SendStreamingMessage`, `GetTask`, `ListTasks`, `CancelTask`,
   `SubscribeToTask`, push-notification-config CRUD, `GetExtendedAgentCard`.
 - **Task model** (§4.1): states `submitted`, `working`, `input-required`, `auth-required`, `completed`, `failed`,
-  `canceled`, `rejected`. The last four are terminal, and the `*-required` ones are interrupted states. Messages carry `Part`s
-  (text, file, structured data). Outputs are `Artifact`s.
+  `canceled`, `rejected`. The last four are terminal, and the `*-required` ones are interrupted states. Messages carry `Part`s.
+  In 1.0 a `Part` is one message type with `oneof content { text, raw, url, data }`, plus optional `filename`,
+  `mediaType` and `metadata` ([`a2a.proto`][a2a-proto]). Outputs are `Artifact`s.
 - **Streaming**: server-sent event streams of `Task`, `Message`, `TaskStatusUpdateEvent` and
   `TaskArtifactUpdateEvent`, in order. `SubscribeToTask` re-attaches to a running task.
 - **Push notifications**: the agent POSTs to a client-supplied **webhook**, authenticated with a scheme or
@@ -391,16 +392,23 @@ Envelope {
   is known to match.
 
   **One canonicalisation rule for v0** ([Q5](#q5-wire-encoding)): the envelope is JSON (the proto3 JSON mapping of
-  `a2a.proto` for `body`). `canonical(x)` is JCS ([RFC 8785][rfc8785]). The signer signs JCS(envelope minus `sig`).
+  `a2a.proto` for `body`). `canonical(x)` is JCS ([RFC 8785][rfc8785]). The signer signs JCS(envelope minus `sig` and minus `body`), the
+  signed header, exactly as in the envelope sketch above. The body is bound through `body_hash`.
   The verifier **parses into a generic JSON value (not typed structs), keeps unknown fields, re-canonicalises with
   JCS, and verifies**. The received bytes are never used directly, so an intermediary that re-serialises *generic
   JSON* (whitespace, key order) does not break signatures.
   - **Pinned signer form.** The proto3 JSON mapping allows several encodings of one message, so v0 fixes one:
-    `lowerCamelCase` field names, enums as their string names, fields with default or empty values omitted,
-    `bytes` as standard base64 with padding, `int64`/`uint64` as strings, `Timestamp` as RFC 3339 UTC with `Z`,
-    and the canonical forms the mapping defines for the other well-known types. Signers MUST emit this form.
-    Receivers MUST reject known fields that are not in this form (enum numbers, original snake_case names, explicit
-    defaults) as `EnvelopeInvalid`.
+    `lowerCamelCase` field names, enums as their string names, `bytes` as standard base64 with padding,
+    `int64`/`uint64` as strings, `Timestamp` as RFC 3339 UTC with `Z`, and the canonical forms the mapping defines
+    for the other well-known types.
+    - **Defaults depend on field presence.** *Implicit-presence* fields (plain proto3 scalars, repeated and map
+      fields) are omitted when at their default. *Explicit-presence* fields (`optional` scalars, `oneof` members,
+      message-typed fields) are emitted whenever they are set, even at their default. For those, set-to-default and
+      unset mean different things. Examples: `historyLength: 0` asks for no history while an absent `historyLength`
+      means no limit, and `Part{text: ""}` is a text part while `{}` has no content case.
+    - Signers MUST emit this form. Receivers MUST reject known fields that are not in it, as `EnvelopeInvalid`.
+      That covers enum numbers, original snake_case names, and an implicit-presence field written at its default.
+      An explicit-presence field at its default is valid and MUST be preserved.
   - **No typed round-trips of signed data.** Verifiers, gateways, mailboxes and forwarders MUST operate on the
     generic JSON value and forward it as received. They MUST NOT decode a signed body into `a2a.proto` types and
     re-encode it, because typed decoding loses unknown fields and may change form. Typed decoding is for
@@ -420,13 +428,23 @@ Envelope {
   `ProvenancePolicyViolation`. Every error carries `retryable: bool` and an optional `retryAfter`, so offline handling
   is mechanical.
 - **Duplicates are not errors.** A lost ack makes the outbox resend a byte-identical envelope, and the receiver
-  cannot tell that apart from a replay. So a duplicate `(from, id)` inside the dedupe horizon MUST NOT be processed
-  again, and MUST be answered with the **stored original response** (the same Task or ack, the same signed response
-  envelope). The response is `to`-bound to the original sender, so a third party replaying a captured envelope learns
-  nothing new it could not already see in transit. If the duplicate arrives over a connection not authenticated as
-  the sender's node or its mailbox host, the receiver returns only a bodiless `duplicate` ack with the original
-  response's `body_hash`. A replay *outside* the horizon is already `EnvelopeExpired`. There is no `Replayed`
-  error.
+  cannot tell that apart from a replay. So a duplicate inside the dedupe horizon MUST NOT be processed again, and
+  MUST be answered with the **stored original response** (the same Task or ack, the same signed response envelope).
+  - **What counts as a duplicate**: the same `(from, id)` *and* the same `body_hash`. The same `(from, id)` with a
+    different `body_hash` is a reused id, not a retry, and is rejected as `EnvelopeInvalid` without touching the
+    original task.
+  - **The stored response stays valid for every acceptable duplicate.** A receiver MUST give a response envelope an
+    `exp` of at least the request's `exp + skew`. Senders stop retrying at the request's `exp`, so any duplicate the
+    receiver can still accept gets a response the sender will still accept. A stored response that has expired
+    anyway is a receiver bug, caught by a vector.
+  - **Routing**: the response is `to`-bound to the original sender and travels like any response, directly to the
+    sender's node or, if it is offline, to the sender's mailbox host. It does not go back to whoever delivered the
+    duplicate. A duplicate delivered by the *receiver's own* mailbox host (a queued copy arriving after a direct retry
+    succeeded) is acknowledged to that host so it drops the copy, and the stored response goes to the sender as
+    above. On any other connection (not the sender's node and not the receiver's own mailbox host), the receiver
+    answers only with a bodiless `duplicate` ack carrying the original response's `body_hash`. A third party
+    replaying a captured envelope therefore learns nothing new.
+  - A replay *outside* the horizon is already `EnvelopeExpired`. There is no `Replayed` error.
 
 ### 4.5 Delivery, offline peers, streaming and artefacts
 
@@ -456,8 +474,9 @@ Backpressure comes from QUIC flow control.
 
 **Artefacts (`blob/v0`)**, R4:
 
-- Large `Part`s and `Artifact`s are sent **by reference**: a `FilePart` whose URL is
-  `webway-blob:blake3:<hash>?size=…&providers=wwn:…,wwn:…`. The A2A data model stays unchanged.
+- Large `Part`s and `Artifact`s are sent **by reference**: a `Part` whose `url` is
+  `webway-blob:blake3:<hash>?size=…&providers=wwn:…,wwn:…` (instead of inline `raw` bytes), with `mediaType` and
+  `filename` as usual. The A2A data model stays unchanged.
   Non-webway peers at the HTTP edge get an HTTPS URL to the gateway instead.
 - Transfer uses **BLAKE3 verified streaming** (`iroh-blobs` / bao ([BLAKE3][blake3], [iroh-blobs][iroh-blobs])):
   chunks are checked as they arrive, transfers resume, and several providers can serve one blob.
@@ -510,11 +529,21 @@ least privilege per capability, end-to-end verifiability, deny by default.
       asserts `holder(<C>, n+1)` and may add attenuating checks. Ordinary attenuation blocks are signed with
       ephemeral keys and do not identify who attenuated, so they cannot change the holder.
     - The **authorizer** (node code, before running Datalog) walks the holder blocks in order. It requires each
-      holder block at depth `n+1` to be third-party-signed by the key named at depth `n`, rejects gaps or forks, and
-      injects `current_holder(<last holder>)` and `presenter(<verified envelope from key>)`. Only the last holder
-      can present the token. Earlier holders cannot, even though they once held it.
-    - The exact Datalog and block schema are written in T3 with vectors: valid chain of 3 hops; presenter is a
-      previous holder; holder block signed by the wrong key; ephemeral-key block trying to set `holder`.
+      holder block at depth `n+1` to be third-party-signed by the key named at depth `n`, rejects gaps, and injects
+      `current_holder(<last holder in this token>)` and `presenter(<verified envelope from key>)`. So *this token*
+      can be presented only by its last holder. Someone who copies it without the key cannot use it.
+    - **Delegation copies authority, it does not transfer it.** Biscuit is append-only, so B keeps the shorter
+      token in which B is still the last holder. B can also make several independent chains (to C and to D), and
+      no single token shows that. The protocol therefore promises only *attenuation* (every copy is at most what B
+      had) and *identification* (every hop is signed), not exclusivity. Whoever needs B to stop must revoke B's token
+      or let it expire. Revoking an earlier block's revocation ID cuts off every chain derived from it.
+    - **Stateful caveats are counted at the verifier, per root token.** A caveat such as `max_calls=5` is enforced
+      by the resource owner's node counting uses per *authority-block revocation ID*, summed over all chains derived
+      from it. Re-delegation cannot multiply the budget: B and C together get 5 calls, not 5 each.
+    - The exact Datalog and block schema are written in T3 with vectors: valid chain of 3 hops; holder block signed
+      by the wrong key; ephemeral-key block trying to set `holder`; this token presented by a key that is not its
+      last holder; B still using its shorter token after delegating (accepted, by copy semantics); B and C together
+      exceeding `max_calls` (the 6th call rejected).
   - **short-lived** by default, with **revocation** by revocation ID lists published by the owner and checked on use.
 - **Acting on behalf of someone (S4: A → B → C).** A token rooted in C's owner says what *B* may do at C. It does not
   say that B is acting for A, or within what A allowed. So a delegated request carries **two proofs**, and C's
@@ -528,7 +557,8 @@ least privilege per capability, end-to-end verifiability, deny by default.
   before, and that the mandate is rooted in an owner C recognises as the principal. C records both proof chains in
   its audit log. The exact Biscuit encoding (block schema, presenter facts, mandate-to-request matching, revocation)
   is specified in T3 with S4 vectors (valid chain; missing mandate; mandate broader than A's grant; hop without an
-  identity block; stolen token presented by another key; mandate presented by a previous holder). T3 prototypes
+  identity block; stolen token presented by another key; a re-delegated mandate presented by a key that is not its
+  last holder). T3 prototypes
   the holder chain in `biscuit-rust` first. If it turns out awkward, mandates use UCAN-style chained delegation
   instead, where each hop is a delegation signed by the issuer to an explicit `aud`, so rebinding is native
   ([Q4](#q4-capability-token-format)).
@@ -677,7 +707,7 @@ exercised from day one.
 
 1. Owners A and B generate keys. B issues A an **invite** containing beta's NodeId, beta's signed Agent Card, the
    relay address, and a Biscuit capability `skill:run-tests` attenuated to `ttl=1h, max_calls=5`, bound to
-   `planner`'s key.
+   `planner`'s key. `beta` counts `max_calls` per root revocation ID.
 2. `alpha` verifies the card signature against B's pinned key (**reject a tampered card**).
 3. `planner` → `SendStreamingMessage` (A2A 1.0 shapes) inside a signed envelope with the capability.
 4. `beta` verifies signature, freshness, recipient and capability (**reject**: no token, expired token, token for
@@ -709,7 +739,8 @@ exercised from day one.
   (including I-JSON number limits), envelope signatures (valid and invalid), freshness cases with an explicit clock
   (fresh; mailbox dwell longer than `skew` but before `exp`, accepted; after `exp + skew`, rejected; `ts` in the
   future, rejected; duplicate `id` just before `exp + skew`, deduplicated and answered with the original response;
-  lost ack then retry, same task and no failure), provenance cases as pure functions `(receiver owner, verified
+  lost ack then retry, same task and no failure; a late duplicate just before `exp + skew` gets a stored response
+  that is still unexpired; the same `(from, id)` with a different `body_hash` is rejected), provenance cases as pure functions `(receiver owner, verified
   sender, taint) → trust`:
   - a sender-declared `trust` is ignored
   - **same-owner forwarding**: content with `taint.owners = [A, B]`, received by an A node from an A node, gives
@@ -719,8 +750,12 @@ exercised from day one.
   - a missing taint is rejected
   - derivation unions the taint of all inputs
 
-  It also covers JSON signer-form cases (an enum as a name verifies; an enum as a number, a snake_case field name,
-  or an explicit default value is rejected), `body_hash` mismatch (rejected), holder-chain cases (see
+  It also covers JSON signer-form cases:
+  - an enum as a name verifies
+  - an enum as a number, a snake_case field name, or an implicit-presence field at its default is rejected
+  - `historyLength: 0` and `Part{text: ""}` verify, and stay distinct from the field being absent
+
+  It also covers an exact signing-input vector (the signed-header bytes for a fixed envelope), `body_hash` mismatch (rejected), holder-chain cases (see
   [§4.7.2](#472-authorisation-per-capability)), capability chains (allow and deny), task state transition tables
   (legal and illegal), error mapping. Any implementation, in any language, must pass them.
 - `conformance/harness/`: a Rust black-box harness that drives nodes **only through their wire interfaces and a
@@ -842,6 +877,7 @@ Critical path: T0 → T1/T2 → T5 → T7/T8/T9 + T10 → M1.
 
 [a2a-spec]: https://a2a-protocol.org/latest/specification/
 [a2a-releases]: https://github.com/a2aproject/A2A/releases
+[a2a-proto]: https://github.com/a2aproject/A2A/blob/main/specification/a2a.proto
 [a2a-roadmap]: https://a2a-protocol.org/latest/roadmap/
 [a2a-rust-crate]: https://docs.rs/crate/a2a-rust/latest
 [lf-a2a]: https://www.linuxfoundation.org/press/linux-foundation-launches-the-agent2agent-protocol-project-to-enable-secure-intelligent-communication-between-ai-agents
@@ -905,7 +941,7 @@ Critical path: T0 → T1/T2 → T5 → T7/T8/T9 + T10 → M1.
 [rfc9449]: https://www.rfc-editor.org/rfc/rfc9449
 
 Protocols and specifications:
-- A2A: [specification 1.0][a2a-spec], [releases][a2a-releases], [roadmap][a2a-roadmap], [LF launch][lf-a2a], [ACP merge][acp-merge]
+- A2A: [specification 1.0][a2a-spec], [`a2a.proto`][a2a-proto], [releases][a2a-releases], [roadmap][a2a-roadmap], [LF launch][lf-a2a], [ACP merge][acp-merge]
 - MCP: [specification 2026-07-28][mcp-spec], [changelog][mcp-changelog], [Rust SDK][rmcp]
 - ANP: [white paper][anp-wp], [repo][anp-repo]. AGNTCY SLIM: [IETF draft -02][slim-draft], [repo][slim-repo]
 - Agent Client Protocol: [site][zed-acp]. IBM ACP: [repo][acp-repo]. Matrix: [spec][matrix-spec]. AT Protocol: [specs][atproto]
