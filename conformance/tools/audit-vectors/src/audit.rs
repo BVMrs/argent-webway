@@ -1,8 +1,7 @@
 //! A reference verifier for audit/v0 (spec/ext/audit.md), plus the signing helpers the generator needs.
 //! Every function returns the vector output on success, or the error name and reason of §12.2.
 
-use crate::jcs::jcs;
-use crate::merkle::{self, Blake3, H};
+use crate::merkle::{self, H};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
@@ -29,44 +28,29 @@ fn fail<T>(name: &'static str, reason: &'static str) -> R<T> {
 
 // ---------- encodings ----------
 
-const B32: &[u8; 32] = b"abcdefghijklmnopqrstuvwxyz234567";
-
-pub fn base32(b: &[u8]) -> String {
-    let mut out = String::new();
-    let (mut buf, mut bits) = (0u32, 0u32);
-    for &x in b {
-        buf = (buf << 8) | x as u32;
-        bits += 8;
-        while bits >= 5 {
-            out.push(B32[((buf >> (bits - 5)) & 31) as usize] as char);
-            bits -= 5;
-        }
-    }
-    if bits > 0 {
-        out.push(B32[((buf << (5 - bits)) & 31) as usize] as char);
-    }
-    out
+/// RFC 8785 JCS, via `serde_json_canonicalizer`.
+pub fn jcs(v: &Value) -> Vec<u8> {
+    serde_json_canonicalizer::to_vec(v).expect("JCS of a serde_json value")
 }
 
-/// Strict lowercase, unpadded base32 decode of a 32-byte key (52 characters, zero trailing bits).
+/// Lowercase, unpadded RFC 4648 base32 (`data-encoding`). Decoding is strict: wrong case, padding or
+/// non-zero trailing bits are errors.
+static B32: std::sync::LazyLock<data_encoding::Encoding> = std::sync::LazyLock::new(|| {
+    let mut s = data_encoding::Specification::new();
+    s.symbols.push_str("abcdefghijklmnopqrstuvwxyz234567");
+    s.encoding().unwrap()
+});
+
+pub fn base32(b: &[u8]) -> String {
+    B32.encode(b)
+}
+
+/// A 32-byte key in base32 (52 characters, zero trailing bits).
 fn base32_key(s: &str) -> Option<[u8; 32]> {
     if s.len() != 52 {
         return None;
     }
-    let (mut buf, mut bits, mut out) = (0u64, 0u32, Vec::with_capacity(33));
-    for c in s.bytes() {
-        let v = B32.iter().position(|&x| x == c)? as u64;
-        buf = (buf << 5) | v;
-        bits += 5;
-        if bits >= 8 {
-            out.push(((buf >> (bits - 8)) & 0xff) as u8);
-            bits -= 8;
-        }
-    }
-    if buf & ((1 << bits) - 1) != 0 {
-        return None;
-    }
-    out.try_into().ok()
+    B32.decode(s.as_bytes()).ok()?.try_into().ok()
 }
 
 pub fn node_id(k: &VerifyingKey) -> String {
@@ -105,82 +89,43 @@ fn safe_int(v: &Value) -> Option<u64> {
     (n <= MAX_SAFE).then_some(n)
 }
 
-/// envelope/v0 §3.2 timestamp: YYYY-MM-DDTHH:MM:SS[.f{3,6,9}]Z. Returns a comparable value.
-pub fn parse_time(v: &Value) -> Option<(u64, u64)> {
-    let s = v.as_str()?.as_bytes();
-    if s.len() < 20 || *s.last()? != b'Z' {
-        return None;
-    }
-    let digits = |r: std::ops::Range<usize>| -> Option<u64> {
-        let p = s.get(r)?;
-        if !p.iter().all(u8::is_ascii_digit) {
-            return None;
+/// envelope/v0 §3.2 timestamp: YYYY-MM-DDTHH:MM:SS[.f{3,6,9}]Z, with no leap second. That profile is checked
+/// here. Calendar validity and the instant come from `time`'s RFC 3339 parser. Returns Unix nanoseconds.
+pub fn parse_time(v: &Value) -> Option<i128> {
+    let s = v.as_str()?;
+    let b = s.as_bytes();
+    let shape = |i: usize, c: u8| {
+        if c == b'#' {
+            b[i].is_ascii_digit()
+        } else {
+            b[i] == c
         }
-        std::str::from_utf8(p).ok()?.parse().ok()
     };
-    if s[4] != b'-' || s[7] != b'-' || s[10] != b'T' || s[13] != b':' || s[16] != b':' {
-        return None;
-    }
-    let (y, mo, d, h, mi, se) = (
-        digits(0..4)?,
-        digits(5..7)?,
-        digits(8..10)?,
-        digits(11..13)?,
-        digits(14..16)?,
-        digits(17..19)?,
-    );
-    let leap = (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
-    let mdays = [
-        31,
-        if leap { 29 } else { 28 },
-        31,
-        30,
-        31,
-        30,
-        31,
-        31,
-        30,
-        31,
-        30,
-        31,
-    ];
-    if !(1..=12).contains(&mo)
-        || d < 1
-        || d > mdays[(mo - 1) as usize]
-        || h > 23
-        || mi > 59
-        || se > 59
+    let frac = b.len().checked_sub(20)?;
+    if !b"####-##-##T##:##:##"
+        .iter()
+        .enumerate()
+        .all(|(i, &c)| shape(i, c))
+        || *b.last()? != b'Z'
+        || ![0, 4, 7, 10].contains(&frac)
+        || (frac > 0 && (b[19] != b'.' || !b[20..b.len() - 1].iter().all(u8::is_ascii_digit)))
+        || &b[17..19] == b"60"
     {
         return None;
     }
-    let frac = &s[19..s.len() - 1];
-    let nanos = if frac.is_empty() {
-        0
-    } else {
-        if frac[0] != b'.' || ![4, 7, 10].contains(&frac.len()) {
-            return None;
-        }
-        let f = digits(20..s.len() - 1)?;
-        f * 10u64.pow(9 - (frac.len() as u32 - 1))
-    };
-    // days since year 0, good enough for ordering
-    let days = y * 366 * 31 + mo * 31 + d; // monotone in (y, mo, d), not a calendar count
-    Some((((days * 24 + h) * 60 + mi) * 60 + se, nanos))
+    let t = time::OffsetDateTime::parse(s, &time::format_description::well_known::Rfc3339).ok()?;
+    Some(t.unix_timestamp_nanos())
 }
 
+/// A lowercase, hyphenated RFC 9562 UUID of version 7 (`uuid`).
 fn is_uuid7(v: &Value) -> bool {
     let Some(s) = v.as_str() else { return false };
-    let b = s.as_bytes();
-    if b.len() != 36 {
+    let Ok(u) = uuid::Uuid::try_parse(s) else {
         return false;
-    }
-    for (i, &c) in b.iter().enumerate() {
-        let dash = matches!(i, 8 | 13 | 18 | 23);
-        if dash != (c == b'-') || (!dash && !(c.is_ascii_digit() || (b'a'..=b'f').contains(&c))) {
-            return false;
-        }
-    }
-    b[14] == b'7' && matches!(b[19], b'8' | b'9' | b'a' | b'b')
+    };
+    u.hyphenated().to_string() == s
+        && u.get_version_num() == 7
+        && u.get_variant() == uuid::Variant::RFC4122
 }
 
 fn hashes(v: &Value) -> Option<Vec<H>> {
@@ -248,7 +193,7 @@ fn verify_stub_sig(stub: &Map<String, Value>) -> bool {
 // ---------- entries ----------
 
 pub fn entry_hash(e: &Value) -> H {
-    merkle::leaf::<Blake3>(&jcs(e))
+    merkle::leaf(&jcs(e))
 }
 
 /// AUD-001, AUD-002, AUD-003, AUD-020, AUD-910. Returns the entry hash.
@@ -380,7 +325,7 @@ pub fn verify_chain(entries: &[Value]) -> R<Value> {
     }
     Ok(json!({
         "log": entries[0]["log"], "epoch": entries[0]["epoch"], "size": entries.len(),
-        "root": hash_str(&merkle::root::<Blake3>(&leaves)), "head": hash_str(leaves.last().unwrap()),
+        "root": hash_str(&merkle::root(&merkle::tree(entries.iter().map(jcs)))), "head": hash_str(leaves.last().unwrap()),
     }))
 }
 
@@ -415,7 +360,7 @@ pub fn verify_inclusion(
         return fail("ProofInvalid", "malformed-proof");
     };
     let p = proof_list(proof)?;
-    if merkle::verify_inclusion::<Blake3>(i, n, &l, &p, &r) {
+    if merkle::verify_inclusion(i, n, &l, &p, &r) {
         Ok(())
     } else {
         fail("ProofInvalid", "root-mismatch")
@@ -434,7 +379,7 @@ pub fn verify_consistency(n1: &Value, r1: &Value, n2: &Value, r2: &Value, proof:
         return fail("ProofInvalid", "malformed-proof");
     };
     let p = proof_list(proof)?;
-    if merkle::verify_consistency::<Blake3>(a, b, &x, &y, &p) {
+    if merkle::verify_consistency(a, b, &x, &y, &p) {
         Ok(())
     } else {
         fail("ProofInvalid", "root-mismatch")
@@ -683,4 +628,75 @@ pub fn verify_evidence(b: &Value) -> R<Value> {
         }
     }
     Ok(json!({"entries": entries.len()}))
+}
+
+/// Pin the library behaviour audit/v0 depends on, so a dependency update that changes it fails here.
+#[cfg(test)]
+mod encoding_tests {
+    use super::*;
+
+    #[test]
+    fn jcs_sorts_and_escapes() {
+        let v = json!({"b": 1, "a": [true, null, "x\n\u{1}é"], "\u{e9}": 0, "A": -3});
+        assert_eq!(
+            String::from_utf8(jcs(&v)).unwrap(),
+            "{\"A\":-3,\"a\":[true,null,\"x\\n\\u0001é\"],\"b\":1,\"é\":0}"
+        );
+    }
+
+    #[test]
+    fn jcs_utf16_order() {
+        // U+1F600 (surrogates D83D DE00) sorts before U+FF61 in UTF-16, after it in UTF-8/code points.
+        let v = json!({"\u{ff61}": 1, "\u{1f600}": 2});
+        assert_eq!(
+            String::from_utf8(jcs(&v)).unwrap(),
+            "{\"\u{1f600}\":2,\"\u{ff61}\":1}"
+        );
+    }
+
+    #[test]
+    fn base32_strict() {
+        let k = [0xffu8; 32];
+        let s = base32(&k);
+        assert_eq!(s.len(), 52);
+        assert_eq!(base32_key(&s), Some(k));
+        assert_eq!(base32_key(&s.to_uppercase()), None);
+        // last character carries 2 data bits; '7' sets the 3 trailing bits too
+        assert_eq!(base32_key(&format!("{}7", &s[..51])), None);
+    }
+
+    #[test]
+    fn time_profile() {
+        for ok in [
+            "2026-11-07T10:00:00Z",
+            "2024-02-29T23:59:59.123Z",
+            "2026-11-07T10:00:00.123456789Z",
+        ] {
+            assert!(parse_time(&json!(ok)).is_some(), "{ok}");
+        }
+        for bad in [
+            "2026-11-07T10:00:00+00:00",
+            "2026-11-07t10:00:00Z",
+            "2026-11-07T10:00:00.12Z",
+            "2026-11-07T23:59:60Z",
+            "2025-02-29T10:00:00Z",
+            "2026-13-01T10:00:00Z",
+            "2026-11-07T24:00:00Z",
+        ] {
+            assert!(parse_time(&json!(bad)).is_none(), "{bad}");
+        }
+        assert!(
+            parse_time(&json!("2026-11-07T10:00:00Z"))
+                < parse_time(&json!("2026-11-07T10:00:00.001Z"))
+        );
+    }
+
+    #[test]
+    fn uuid7_shape() {
+        assert!(is_uuid7(&json!("0190b5a6-7e4c-7abc-8def-0123456789ab")));
+        assert!(!is_uuid7(&json!("0190B5A6-7E4C-7ABC-8DEF-0123456789AB")));
+        assert!(!is_uuid7(&json!("0190b5a67e4c7abc8def0123456789ab")));
+        assert!(!is_uuid7(&json!("0190b5a6-7e4c-4abc-8def-0123456789ab")));
+        assert!(!is_uuid7(&json!("0190b5a6-7e4c-7abc-cdef-0123456789ab")));
+    }
 }

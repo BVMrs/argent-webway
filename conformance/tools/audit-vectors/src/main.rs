@@ -2,7 +2,6 @@
 //! `audit-vectors --check [DIR]` regenerates them in memory and fails if the files on disk differ.
 
 mod audit;
-mod jcs;
 mod merkle;
 mod scenario;
 

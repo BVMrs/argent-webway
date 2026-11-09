@@ -4,8 +4,7 @@
 //! the one the case states.
 
 use crate::audit::{self, *};
-use crate::jcs::jcs;
-use crate::merkle::{self, Blake3, H};
+use crate::merkle::{self, H};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use ed25519_dalek::{Signer, SigningKey};
@@ -29,31 +28,10 @@ fn obj(v: Value) -> Map<String, Value> {
     v.as_object().unwrap().clone()
 }
 
-fn base58btc(b: &[u8]) -> String {
-    const A: &[u8] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    let mut digits: Vec<u8> = vec![];
-    for &x in b {
-        let mut carry = x as u32;
-        for d in digits.iter_mut() {
-            carry += (*d as u32) << 8;
-            *d = (carry % 58) as u8;
-            carry /= 58;
-        }
-        while carry > 0 {
-            digits.push((carry % 58) as u8);
-            carry /= 58;
-        }
-    }
-    let zeros = b.iter().take_while(|&&x| x == 0).count();
-    std::iter::repeat_n('1', zeros)
-        .chain(digits.iter().rev().map(|&d| A[d as usize] as char))
-        .collect()
-}
-
 fn did_key(k: &SigningKey) -> String {
     let mut b = vec![0xed, 0x01];
     b.extend(k.verifying_key().as_bytes());
-    format!("did:key:z{}", base58btc(&b))
+    format!("did:key:z{}", bs58::encode(&b).into_string())
 }
 
 fn nid(k: &SigningKey) -> String {
@@ -141,8 +119,12 @@ impl Log {
             Value::Object(data),
         )
     }
+    /// The Merkle tree over the first `size` entries (leaf value = JCS(entry), leaf hash = entry hash).
+    fn tree(&self, size: usize) -> merkle::Tree {
+        merkle::tree(self.entries[..size].iter().map(jcs))
+    }
     pub fn root(&self, size: usize) -> H {
-        merkle::root::<Blake3>(&self.leaves[..size])
+        merkle::root(&self.tree(size))
     }
     fn checkpoint(&self, size: usize, time: &str) -> Value {
         let mut c = obj(
@@ -164,10 +146,10 @@ impl Log {
         Value::Object(r)
     }
     fn incl(&self, index: usize, size: usize) -> Value {
-        hl(&merkle::path::<Blake3>(index, &self.leaves[..size]))
+        hl(&merkle::path(&self.tree(size), index))
     }
     fn cons(&self, from: usize, to: usize) -> Value {
-        hl(&merkle::consistency::<Blake3>(from, &self.leaves[..to]))
+        hl(&merkle::consistency(&self.tree(to), from))
     }
 }
 
