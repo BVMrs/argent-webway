@@ -2,14 +2,14 @@
 //! `audit-vectors --check [DIR]` regenerates them in memory and fails if the files on disk differ.
 
 mod audit;
-mod gen;
 mod jcs;
 mod merkle;
+mod scenario;
 
 use serde_json::{json, Value};
 use std::process::ExitCode;
 
-fn render(f: &gen::File) -> String {
+fn render(f: &scenario::File) -> String {
     let doc = json!({
         "$schema": "../vector.schema.json",
         "format": "webway-vectors/v0",
@@ -51,8 +51,8 @@ fn main() -> ExitCode {
         .cloned()
         .unwrap_or("conformance/vectors/audit".into());
     if args.iter().any(|a| a == "--keys") {
-        for n in gen::KEY_NAMES {
-            let k = gen::key(n);
+        for n in scenario::KEY_NAMES {
+            let k = scenario::key(n);
             println!(
                 "| `{n}` | `{}` | `{}` |",
                 hex::encode(k.to_bytes()),
@@ -62,7 +62,7 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
     let mut ok = true;
-    for f in gen::files() {
+    for f in scenario::files() {
         let path = format!("{dir}/{}.json", f.name);
         let text = render(&f);
         if check {
