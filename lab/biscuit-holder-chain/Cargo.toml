@@ -1,0 +1,13 @@
+[package]
+name = "biscuit-holder-chain"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: prototype of the capability/v0 holder chain (third-party blocks) in biscuit-auth"
+
+[dependencies]
+biscuit-auth = "6.0.0"
+rand = "0.8"
+biscuit-parser = "0.2.0"
+
+[workspace]
