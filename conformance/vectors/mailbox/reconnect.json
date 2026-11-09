@@ -1,0 +1,16 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/reconnect",
+  "description": "What a requester node does for one proxy task after a restart or reconnect, once its own mailbox is drained (spec \u00a711). Input: the profile delivery state, whether the remote task was seen terminal, the highest applied seq, whether the responder node is reachable. Accept with {\"action\": none | wait | subscribe, \"fromSeq\"}.",
+  "spec": "ext/mailbox.md#11-resumable-streams",
+  "cases": [
+    {"id":"subscribe","description":"Acknowledged, running, reachable: resume from applied + 1","requirements":["MBX-091"],"input":{"delivery":"acknowledged","remoteTerminal":false,"applied":4,"responderReachable":true},"expect":{"result":"accept","output":{"action":"subscribe","fromSeq":5}}},
+    {"id":"subscribe-after-snapshot","description":"Only the creating snapshot (seq 0) applied","requirements":["MBX-091"],"input":{"delivery":"acknowledged","remoteTerminal":false,"applied":0,"responderReachable":true},"expect":{"result":"accept","output":{"action":"subscribe","fromSeq":1}}},
+    {"id":"unreachable","description":"Responder unreachable: keep the proxy task, wait","requirements":["MBX-091"],"input":{"delivery":"acknowledged","remoteTerminal":false,"applied":4,"responderReachable":false},"expect":{"result":"accept","output":{"action":"wait"}}},
+    {"id":"terminal","description":"Remote task already terminal: nothing to resume","requirements":["MBX-091"],"input":{"delivery":"acknowledged","remoteTerminal":true,"applied":4,"responderReachable":true},"expect":{"result":"accept","output":{"action":"none"}}},
+    {"id":"not-acknowledged","description":"Request still in delivery: the outbox handles it","requirements":["MBX-091"],"input":{"delivery":"sent","remoteTerminal":false,"applied":4,"responderReachable":true},"expect":{"result":"accept","output":{"action":"none"}}},
+    {"id":"queued","description":"Never transmitted","requirements":["MBX-091"],"input":{"delivery":"queued","remoteTerminal":false,"applied":4,"responderReachable":true},"expect":{"result":"accept","output":{"action":"none"}}},
+    {"id":"expired","description":"Delivery expired","requirements":["MBX-091"],"input":{"delivery":"expired","remoteTerminal":false,"applied":4,"responderReachable":true},"expect":{"result":"accept","output":{"action":"none"}}}
+  ]
+}

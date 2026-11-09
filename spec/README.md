@@ -1,7 +1,8 @@
 # spec/
 
-The normative argent-webway specification. Nothing here yet: written after the decisions in
-[`docs/due-diligence.md` §8](../docs/due-diligence.md#8-decisions-needed) are made.
+The normative argent-webway specification, written after the decisions in
+[`docs/due-diligence.md` §8](../docs/due-diligence.md#8-decisions-needed). Drafts so far on this branch:
+`ext/mailbox.md` (issue #9). Other documents are drafted on their own branches.
 
 Planned documents (see roadmap tracks T1–T3, T7–T9, T13–T14):
 
@@ -11,7 +12,7 @@ Planned documents (see roadmap tracks T1–T3, T7–T9, T13–T14):
 | `binding-webway-quic.md` | A2A custom binding over the QUIC overlay (ALPN, framing, stream mapping) |
 | `ext/envelope.md` | Signed envelopes, canonicalisation, replay protection |
 | `ext/capability.md` | Identities, owner bindings, invites, capability tokens, revocation |
-| `ext/mailbox.md` | Store-and-forward, delivery semantics, resumable streams |
+| `ext/mailbox.md` | Store-and-forward: outbox, mailbox hosts, deposit tokens, resumable streams (**draft v0**) |
 | `ext/blob.md` | Content-addressed artefacts |
 | `ext/provenance.md` | Trust and provenance labels, prompt-injection boundary rules |
 | `ext/audit.md` | Hash-chained audit log, checkpoints, receipts |

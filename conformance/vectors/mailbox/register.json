@@ -1,0 +1,19 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/register",
+  "description": "#Register at a mailbox host (spec \u00a76). Input: host time, requested leaseUntil, the result of authorising mailbox:<host agent>#register, and whether agentCert certifies the envelope's from. Accept with the granted {\"leaseUntil\"}: the earlier of the request and now + LEASE_MAX (30 days).",
+  "spec": "ext/mailbox.md#6-registration-with-a-mailbox-host",
+  "cases": [
+    {"id":"granted-as-asked","description":"Lease within LEASE_MAX is granted as requested","requirements":["MBX-030","MBX-031"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-20T00:00:00Z","capability":"ok","certifiesFrom":true},"expect":{"result":"accept","output":{"leaseUntil":"2026-11-20T00:00:00Z"}}},
+    {"id":"capped","description":"Lease longer than LEASE_MAX is shortened to now + 30 days","requirements":["MBX-031"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2027-01-01T00:00:00Z","capability":"ok","certifiesFrom":true},"expect":{"result":"accept","output":{"leaseUntil":"2026-12-08T12:00:00Z"}}},
+    {"id":"exactly-max","description":"Lease of exactly LEASE_MAX","requirements":["MBX-031"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-12-08T12:00:00Z","capability":"ok","certifiesFrom":true},"expect":{"result":"accept","output":{"leaseUntil":"2026-12-08T12:00:00Z"}}},
+    {"id":"just-future","description":"Lease ending 1 ms from now","requirements":["MBX-030","MBX-031"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-08T12:00:00.001Z","capability":"ok","certifiesFrom":true},"expect":{"result":"accept","output":{"leaseUntil":"2026-11-08T12:00:00.001Z"}}},
+    {"id":"now","description":"leaseUntil = now is not in the future","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-08T12:00:00Z","capability":"ok","certifiesFrom":true},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"past","description":"leaseUntil in the past","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-08T11:00:00Z","capability":"ok","certifiesFrom":true},"expect":{"result":"reject","error":"InvalidParamsError"}},
+    {"id":"no-capability","description":"No access token for #register","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-20T00:00:00Z","capability":"missing","certifiesFrom":true},"expect":{"result":"reject","error":"CapabilityMissing"}},
+    {"id":"capability-denied","description":"Token does not grant mailbox:<host agent>#register","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-20T00:00:00Z","capability":"denied","certifiesFrom":true},"expect":{"result":"reject","error":"CapabilityDenied"}},
+    {"id":"capability-revoked","description":"Token revoked","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-20T00:00:00Z","capability":"revoked","certifiesFrom":true},"expect":{"result":"reject","error":"CapabilityRevoked"}},
+    {"id":"cert-other-agent","description":"agentCert certifies another agent than from","requirements":["MBX-030"],"input":{"now":"2026-11-08T12:00:00Z","leaseUntil":"2026-11-20T00:00:00Z","capability":"ok","certifiesFrom":false},"expect":{"result":"reject","error":"IdentityUntrusted"}}
+  ]
+}

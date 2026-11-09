@@ -1,0 +1,22 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/order",
+  "description": "Per-task order of outbox entries to one recipient (spec \u00a79.5). Input: entries in production order with their order key (or null), whether they are requests, and state. Accept with the indexes that may be transmitted now: not final, and no earlier entry with the same key is queued or pending, or is a request in stored.",
+  "spec": "ext/mailbox.md#95-order",
+  "cases": [
+    {"id":"empty","description":"No entries","requirements":["MBX-068"],"input":{"entries":[]},"expect":{"result":"accept","output":{"eligible":[]}}},
+    {"id":"different-keys","description":"Different tasks are independent","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"queued"},{"key":"t2","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"same-key-queued","description":"Second entry of a task waits for the first","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"queued"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0]}}},
+    {"id":"same-key-pending","description":"Pending (no custody yet) still blocks","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"pending"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0]}}},
+    {"id":"request-after-host-custody","description":"A request stored at a host still blocks the next request: it could overtake it direct","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"stored"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0]}}},
+    {"id":"answer-after-host-custody","description":"An event stored at a host releases the next event","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":false,"state":"stored"},{"key":"t1","request":false,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"after-recipient-custody","description":"Received by the recipient releases the next one","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"received"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"after-delivered","description":"Final entries are not eligible and do not block","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"delivered"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[1]}}},
+    {"id":"after-expired","description":"An expired entry does not block","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"expired"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[1]}}},
+    {"id":"null-keys","description":"Entries without an order key are not ordered","requirements":["MBX-068"],"input":{"entries":[{"key":null,"request":true,"state":"queued"},{"key":null,"request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"mixed","description":"Only the blocked entries of t1 wait","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"pending"},{"key":"t2","request":true,"state":"queued"},{"key":"t1","request":true,"state":"queued"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"chain","description":"Answers: blocked by the nearest earlier queued or pending entry","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":false,"state":"stored"},{"key":"t1","request":false,"state":"pending"},{"key":"t1","request":false,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[0,1]}}},
+    {"id":"finals-skipped","description":"Refused and withdrawn entries neither run nor block","requirements":["MBX-068"],"input":{"entries":[{"key":"t1","request":true,"state":"refused"},{"key":"t1","request":true,"state":"withdrawn"},{"key":"t1","request":true,"state":"queued"}]},"expect":{"result":"accept","output":{"eligible":[2]}}}
+  ]
+}

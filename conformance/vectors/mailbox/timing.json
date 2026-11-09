@@ -1,0 +1,21 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/timing",
+  "description": "What exp and SKEW allow each role to do (spec \u00a78, \u00a79.2, \u00a710). Input: role (outbox, host, recipient), now, ts, exp. Outbox: attempt while now \u2264 exp, await an answer while now \u2264 exp + SKEW, then expire. Host: deliver while now \u2264 exp, then stop. Recipient: accept, or the freshness error of envelope/v0 \u00a76.",
+  "spec": "ext/mailbox.md#92-entry-state-machine",
+  "cases": [
+    {"id":"outbox-before-exp","description":"Outbox attempts before exp","requirements":["MBX-062"],"input":{"role":"outbox","now":"2026-11-08T11:00:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"attempt"}}},
+    {"id":"outbox-at-exp","description":"Outbox may still attempt at exp","requirements":["MBX-062"],"input":{"role":"outbox","now":"2026-11-08T12:00:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"attempt"}}},
+    {"id":"outbox-after-exp","description":"1 ms after exp: no attempt, still waiting for an answer","requirements":["MBX-062"],"input":{"role":"outbox","now":"2026-11-08T12:00:00.001Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"await"}}},
+    {"id":"outbox-at-exp-plus-skew","description":"At exp + SKEW: still waiting","requirements":["MBX-062"],"input":{"role":"outbox","now":"2026-11-08T12:05:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"await"}}},
+    {"id":"outbox-expire","description":"After exp + SKEW: expired","requirements":["MBX-062"],"input":{"role":"outbox","now":"2026-11-08T12:05:00.001Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"expire"}}},
+    {"id":"host-at-exp","description":"Host delivers at exp","requirements":["MBX-053"],"input":{"role":"host","now":"2026-11-08T12:00:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"deliver"}}},
+    {"id":"host-after-exp","description":"Host stops 1 ms after exp","requirements":["MBX-053"],"input":{"role":"host","now":"2026-11-08T12:00:00.001Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"stop"}}},
+    {"id":"recipient-long-dwell","description":"Envelope held 6 days, exp not passed: fresh","requirements":["MBX-080"],"input":{"role":"recipient","now":"2026-11-08T12:00:00Z","ts":"2026-11-02T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"action":"accept"}}},
+    {"id":"recipient-dwell-past-skew","description":"Held longer than SKEW, before exp: fresh","requirements":["MBX-080"],"input":{"role":"recipient","now":"2026-11-08T11:59:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"accept"}}},
+    {"id":"recipient-at-exp-plus-skew","description":"now = exp + SKEW: fresh","requirements":["MBX-080"],"input":{"role":"recipient","now":"2026-11-08T12:05:00Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"accept","output":{"action":"accept"}}},
+    {"id":"recipient-expired","description":"now > exp + SKEW: rejected even if it was in custody in time","requirements":["MBX-080"],"input":{"role":"recipient","now":"2026-11-08T12:05:00.001Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"reject","error":"EnvelopeExpired"}},
+    {"id":"recipient-future","description":"ts > now + SKEW","requirements":["MBX-080"],"input":{"role":"recipient","now":"2026-11-08T09:54:59.999Z","ts":"2026-11-08T10:00:00Z","exp":"2026-11-08T12:00:00Z"},"expect":{"result":"reject","error":"EnvelopeNotYetValid"}}
+  ]
+}

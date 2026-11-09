@@ -1,0 +1,22 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "mailbox/backoff",
+  "description": "Retry schedule (spec \u00a79.4). Input: number of failed attempts n \u2265 1, the random draw r in [0, 1), now, the envelope's exp, and retryAfterMs if the failure carried one. Accept with {\"next\": earliest time of the next attempt, or null if it would be after exp}.",
+  "spec": "ext/mailbox.md#94-retry-schedule",
+  "cases": [
+    {"id":"first-r0","description":"n=1, r=0: d=1 s, delay=500 ms","requirements":["MBX-067"],"input":{"attempt":1,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:00.500Z"}}},
+    {"id":"first-r-half","description":"n=1, r=0.5: 750 ms","requirements":["MBX-067"],"input":{"attempt":1,"r":0.5,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:00.750Z"}}},
+    {"id":"second","description":"n=2, r=0: d=2 s, delay=1 s","requirements":["MBX-067"],"input":{"attempt":2,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:01Z"}}},
+    {"id":"third","description":"n=3, r=0.75: d=4 s, delay=3.5 s","requirements":["MBX-067"],"input":{"attempt":3,"r":0.75,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:03.500Z"}}},
+    {"id":"ninth","description":"n=9: d=256 s, delay=128 s","requirements":["MBX-067"],"input":{"attempt":9,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:02:08Z"}}},
+    {"id":"tenth-capped","description":"n=10: d capped at RETRY_MAX=300 s, delay=150 s","requirements":["MBX-067"],"input":{"attempt":10,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:02:30Z"}}},
+    {"id":"capped-high-r","description":"n=10, r=0.9921875: floor(150000 + 148828.125) ms","requirements":["MBX-067"],"input":{"attempt":10,"r":0.9921875,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:04:58.828Z"}}},
+    {"id":"many-attempts","description":"n=50, r=0.5: still capped, 225 s","requirements":["MBX-067"],"input":{"attempt":50,"r":0.5,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:03:45Z"}}},
+    {"id":"retry-after-longer","description":"retryAfterMs 60000 exceeds the jittered delay","requirements":["MBX-067"],"input":{"attempt":1,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z","retryAfterMs":60000},"expect":{"result":"accept","output":{"next":"2026-11-08T12:01:00Z"}}},
+    {"id":"retry-after-shorter","description":"retryAfterMs 1000 is below the jittered delay (n=5: 8 s)","requirements":["MBX-067"],"input":{"attempt":5,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-09T12:00:00Z","retryAfterMs":1000},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:08Z"}}},
+    {"id":"past-exp","description":"Next attempt would be after exp: no further attempt","requirements":["MBX-067"],"input":{"attempt":1,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-08T12:00:00.400Z"},"expect":{"result":"accept","output":{"next":null}}},
+    {"id":"at-exp","description":"Next attempt exactly at exp is allowed","requirements":["MBX-067"],"input":{"attempt":1,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-08T12:00:00.500Z"},"expect":{"result":"accept","output":{"next":"2026-11-08T12:00:00.500Z"}}},
+    {"id":"retry-after-past-exp","description":"retryAfterMs pushes the attempt past exp","requirements":["MBX-067"],"input":{"attempt":1,"r":0.0,"now":"2026-11-08T12:00:00Z","exp":"2026-11-08T12:00:30Z","retryAfterMs":60000},"expect":{"result":"accept","output":{"next":null}}}
+  ]
+}
