@@ -1,0 +1,379 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "audit/checkpoint",
+  "description": "Verify a checkpoint's form and signature. Input {\"checkpoint\": C}. Accept: {\"log\", \"epoch\", \"size\", \"root\"}. Reject: CheckpointInvalid.",
+  "spec": "ext/audit.md#62-checkpoints",
+  "cases": [
+    {
+      "id": "valid",
+      "description": "beta's checkpoint at size 12",
+      "requirements": [
+        "AUD-200",
+        "AUD-201",
+        "AUD-202",
+        "AUD-701"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg"
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc"
+        }
+      }
+    },
+    {
+      "id": "valid-size-1",
+      "description": "Checkpoint of a log of size 1 (beta, epoch 1)",
+      "requirements": [
+        "AUD-200",
+        "AUD-201"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 1,
+          "size": 1,
+          "root": "blake3:43f7e3186f08fae87a52a1b7890a7eef0259e41c9f0a36429e78828d6541b040",
+          "time": "2026-11-08T09:00:01Z",
+          "sig": "K9Rx5eqXYK1CkmmUoAlS4GhgWiZpqKyV-ub1FQTlWMKNA9SJwe_876ValhXdQoFz6sLCQSOiFWfczpdjLwgACQ"
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 1,
+          "size": 1,
+          "root": "blake3:43f7e3186f08fae87a52a1b7890a7eef0259e41c9f0a36429e78828d6541b040"
+        }
+      }
+    },
+    {
+      "id": "unknown-member",
+      "description": "An unknown member is signed and kept",
+      "requirements": [
+        "AUD-202"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "mvXGt6b0KtrzN0iywwcaHawUh6UhWEeFzEOBBpHsFcp-LrOoeN2YAEPry55nTWTYjoQVuTGIPbTZnScGCMHCDQ",
+          "note": "unknown member, signed"
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc"
+        }
+      }
+    },
+    {
+      "id": "unknown-member-added",
+      "description": "An unknown member added after signing breaks the signature",
+      "requirements": [
+        "AUD-201",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg",
+          "note": "added"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "bad-signature",
+      "description": "One signature bit flipped",
+      "requirements": [
+        "AUD-201",
+        "AUD-701",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPXRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "other-signer",
+      "description": "Signed by a key other than log",
+      "requirements": [
+        "AUD-200",
+        "AUD-201",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "cAGtGGaK2fgIkECVpXGYkLqsW8m-myx-ddyQQnAAv9HE_1QzbwNF6DfY8UjZTnP6bb2Llf0iSCQMJ9tCAGpwCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "size-changed",
+      "description": "size changed after signing",
+      "requirements": [
+        "AUD-201",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 11,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "non-canonical-s",
+      "description": "S + L instead of S",
+      "requirements": [
+        "AUD-201",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5e7WNFzNiUVwlG5ncKS3aESvBZ6fR9lW-tIFMn-a9YGg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "weak-key",
+      "description": "log is the identity point",
+      "requirements": [
+        "AUD-201",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:aeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "padded-signature",
+      "description": "sig with base64 padding",
+      "requirements": [
+        "AUD-202",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "H6mT0NfFg_5WMPTRVI5hrqgjzNFRs9C7hIRMqKUAEd5xGW7osXWC_zKp7tQrUZdvSvBZ6fR9lW-tIFMn-a9YCg=="
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "missing-root",
+      "description": "root is required",
+      "requirements": [
+        "AUD-202",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "sig": "y_gTocpmHb1m5TNPnRqsZTqX4XAo6BCjFrd9ZZsFiJQtud0q6wicl0Xi3oouLtH2AYA4nNy7HwsM8Gdqsd7ACQ",
+          "time": "2026-11-07T12:05:00Z"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "size-zero",
+      "description": "size is at least 1, even when signed",
+      "requirements": [
+        "AUD-202",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 0,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "TB2-kaVwbeQq--T1X62PclPk1orGvaOGAdCPxqB8FUqFWzyH52H_ASAHgHhRIdBxJ2__HYFd0Zbpw6H_XvZsCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "size-string",
+      "description": "size is an integer",
+      "requirements": [
+        "AUD-202",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": "12",
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "sB4i_Ct27Jx_BiT1YV56n0VsktGQeigGvfAYERJD9pqPNfVInVXl_Y0M9yyiZgCfwTeAEqgdnVVN21WqCMZeCg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "unknown-version",
+      "description": "v is webway-checkpoint/1",
+      "requirements": [
+        "AUD-202",
+        "AUD-910",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-checkpoint/1",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "size": 12,
+          "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+          "time": "2026-11-07T12:05:00Z",
+          "sig": "xFCSiVBHMCunJu0SxV2lbQ4GEBzif3Pzx1TWZT4wCps1VK5GHlL6vtG1WIiQGSBnR-h-6c1WLCpS2fhN_uzTCQ"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    },
+    {
+      "id": "receipt-as-checkpoint",
+      "description": "A receipt is not a checkpoint",
+      "requirements": [
+        "AUD-202",
+        "AUD-900"
+      ],
+      "input": {
+        "checkpoint": {
+          "v": "webway-receipt/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "entry": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a",
+          "root": "blake3:d2088c316dafb73070639cbd951064489e473ce14a78bd217716e443b396f35b",
+          "time": "2026-11-07T12:00:01.250Z",
+          "env": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+          "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+          "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+          "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+          "sig": "jN9O36pLHgIk0tT5JAiImjiLAS7ooqtPwPkoc5i-NDlGOfvf3lJVJ9fXrfC0fMD14-Biz_bzYnKJNUkm0qtACg"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "CheckpointInvalid"
+      }
+    }
+  ]
+}

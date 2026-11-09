@@ -1,0 +1,1315 @@
+{
+  "$schema": "../vector.schema.json",
+  "format": "webway-vectors/v0",
+  "kind": "audit/entry-hash",
+  "description": "Entry well-formedness and entry hash. Input {\"entry\": E}. Accept: {\"hash\": entry hash}. Reject: EntryInvalid.",
+  "spec": "ext/audit.md#4-entries",
+  "cases": [
+    {
+      "id": "genesis",
+      "description": "Genesis entry at index 0, no prev",
+      "requirements": [
+        "AUD-001"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 0,
+          "time": "2026-11-07T12:00:00Z",
+          "type": "log.genesis",
+          "data": {
+            "node": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "reason": "new",
+            "profile": "webway-profile/0.1"
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:28f4875daa45f25bb3e6aff9822409d7f2073a24d257524fdbb885eacedee8e1"
+        }
+      }
+    },
+    {
+      "id": "envelope-received",
+      "description": "Received envelope with stub, hd and parties",
+      "requirements": [
+        "AUD-001",
+        "AUD-020"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:3ee9b9f804c8ec5127fbd874d2f1f0b5f89b5991650cbeaab24251445d49477a"
+        }
+      }
+    },
+    {
+      "id": "envelope-sent",
+      "description": "Sent envelope entry",
+      "requirements": [
+        "AUD-001",
+        "AUD-020"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 5,
+          "prev": "blake3:849264b5fe2f54bca82e943c4254e8242818420328bded71241adea97f0600e5",
+          "time": "2026-11-07T12:00:01.300Z",
+          "type": "envelope.sent",
+          "parties": [
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama"
+          ],
+          "data": {
+            "hd": "blake3:ea27d754e356ec4097513c8e497ed96f65fd300f398b8861e4d3b8628e70c599",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "response",
+              "op": "SendMessage",
+              "from": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "to": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "id": "019a5d2e-7d10-7a01-8b2c-3d4e5f60718a",
+              "ts": "2026-11-07T12:00:01Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "inReplyTo": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+                "taskId": "task-7",
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:43d381ed8ecde0e0469ea08a7878e05077d87b2ad83deca03d0a45e160370760",
+              "sig": "SQ6rhn81tFEPmm-QxnPHrpjwrTIYCJX8_NsZZdGOe0f-U9vtTD2iMOard34DASEvyDIeTdXI_aFuu5Ns2XdpCA"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:679d9dac659be1fa0f610a2325cf69a712693768ab94f9a376b45f5cbe6c8169"
+        }
+      }
+    },
+    {
+      "id": "rejected-with-forged-stub",
+      "description": "A rejected envelope's stub is a record, its signature is not checked here",
+      "requirements": [
+        "AUD-001",
+        "AUD-020"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 9,
+          "prev": "blake3:3d99e7569c5c5ee7b8d64a3e3dc085dd623797a8437c0f97bdfef076b6184afd",
+          "time": "2026-11-07T12:00:06.500Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "rejected",
+            "error": {
+              "type": "SignatureInvalid",
+              "reason": "verification-failed"
+            },
+            "hd": "blake3:4a333d658c0c28af6eec149d1ad7c8b79315d7787c7cedc7d19f0423fe24026a",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "CancelTask",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2f-1b00-7c22-a033-e44f55a66b77",
+              "ts": "2026-11-07T12:00:06Z",
+              "exp": "2026-11-07T12:05:06Z",
+              "ctx": {
+                "taskId": "task-7"
+              },
+              "body_hash": "blake3:a5b3210f439de8e51f1e5cf57476681b44618791bfdc066b3edb83ba1c1d7a8c",
+              "sig": "qnWlDPcYR1Y2hz--aBoi7vm9rbcCz_mUSPgpKcJABcds6Ju2ZuHj35V834w9bsmjXhS1_oJOcZwcXf6W6XLxDg"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:66d7db064dc88d91756bcedde33619d866f2b542b11d3a475c46e8b7f99d21f9"
+        }
+      }
+    },
+    {
+      "id": "unknown-type-and-members",
+      "description": "Unknown type and unknown members are kept and hashed",
+      "requirements": [
+        "AUD-003"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 11,
+          "prev": "blake3:f0b62349b285c2b5a9d7f37d74fcfa134e102f6cfa247ec4bb994948ab8254c8",
+          "time": "2026-11-07T12:00:07Z",
+          "type": "example.custom",
+          "data": {
+            "anything": [
+              1,
+              2,
+              3
+            ]
+          },
+          "x-extra": "unknown top-level member"
+        }
+      },
+      "expect": {
+        "result": "accept",
+        "output": {
+          "hash": "blake3:9ab33533ff3888d54e9bdf8de310c0f9b3398752018a5c10e452cf36259128ca"
+        }
+      }
+    },
+    {
+      "id": "missing-time",
+      "description": "time is required",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          },
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ]
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "missing-data",
+      "description": "data is required",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ]
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "fraction-in-data",
+      "description": "Numbers in entries are integers",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            },
+            "detail": 1.5
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "unsafe-integer-in-data",
+      "description": "Integers in entries are at most 2^53 - 1, at any depth",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            },
+            "detail": {
+              "n": [
+                9007199254740992
+              ]
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "prev-at-genesis",
+      "description": "No prev at index 0",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 0,
+          "time": "2026-11-07T12:00:00Z",
+          "type": "log.genesis",
+          "data": {
+            "node": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+            "reason": "new",
+            "profile": "webway-profile/0.1"
+          },
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae"
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "missing-prev",
+      "description": "prev is required at index > 0",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          },
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ]
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "index-string",
+      "description": "index must be an integer",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": "2",
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "index-unsafe",
+      "description": "index above 2^53 - 1",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 9007199254740992,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "prev-uppercase",
+      "description": "Hashes are lowercase hex",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535ABAA44458A3DF08BEF45D9B5ED9CE219DD9CC12271A64D9B34F17F06169AE",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "time-offset",
+      "description": "Times are UTC with Z",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T13:00:01.250+01:00",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "time-two-fraction-digits",
+      "description": "Fractions have 3, 6 or 9 digits",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.25Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "type-uppercase",
+      "description": "type is lowercase area.name",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "Envelope.Received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "type-no-area",
+      "description": "type needs a dot",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "log-is-agent",
+      "description": "log is a node identifier",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "data-not-object",
+      "description": "data is an object",
+      "requirements": [
+        "AUD-001",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": []
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "unknown-version",
+      "description": "v must be webway-audit-entry/0",
+      "requirements": [
+        "AUD-002",
+        "AUD-910",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/1",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "hd-mismatch",
+      "description": "data.hd must be the stub's header digest",
+      "requirements": [
+        "AUD-020",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:ea27d754e356ec4097513c8e497ed96f65fd300f398b8861e4d3b8628e70c599",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "stub-changed",
+      "description": "A changed stub no longer matches hd",
+      "requirements": [
+        "AUD-020",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T14:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    },
+    {
+      "id": "parties-mismatch",
+      "description": "parties must be [from, to] of the stub",
+      "requirements": [
+        "AUD-020",
+        "AUD-900"
+      ],
+      "input": {
+        "entry": {
+          "v": "webway-audit-entry/0",
+          "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+          "epoch": 0,
+          "index": 2,
+          "prev": "blake3:535abaa44458a3df08bef45d9b5ed9ce219dd9cc12271a64d9b34f17f06169ae",
+          "time": "2026-11-07T12:00:01.250Z",
+          "type": "envelope.received",
+          "parties": [
+            "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+            "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama"
+          ],
+          "data": {
+            "via": "wwn:seelnm5gxc72a3uupa5axj4nes75ykvm6vqhvoqcmmmnc7q3hzna",
+            "outcome": "accepted",
+            "trust": {
+              "/message/parts/0": "foreign"
+            },
+            "hd": "blake3:f2874fe719f9722024e684013499852e7ebeda2100d9aa84a9cbc95fb1727f93",
+            "stub": {
+              "v": "webway-envelope/0",
+              "typ": "request",
+              "op": "SendMessage",
+              "from": "wwa:iili2xrclycypgfitvbhyizgvb62wdojy4h3wg5hfnw5xbrgkama",
+              "to": "wwa:qhlgzbiicawksoxhlm76lxjykaht4r4ay2zifrmysruw72rkdg4q",
+              "id": "019a5d2e-7b40-7c3a-9d1e-0a1b2c3d4e5f",
+              "ts": "2026-11-07T12:00:00Z",
+              "exp": "2026-11-07T13:00:00Z",
+              "ctx": {
+                "contextId": "ctx-42"
+              },
+              "body_hash": "blake3:40fa46beebfbc79b0fa91f756b77de635d489689fdc46be131b4f7d222c6bdec",
+              "prov": {
+                "parts": {
+                  "/message/parts/0": {
+                    "taint": {
+                      "owners": [
+                        "did:key:z6Mkw4YvLi1ycLVzjaNvt3N1UyGUiZeeGPgD9U53gVJ9wBzp"
+                      ],
+                      "unverified": false
+                    }
+                  }
+                }
+              },
+              "sig": "41fVq5xaiQcNfrjTcyT6emNWAawsOxUVyhd0967q_44MbJLIococFsEBSKuDkVhKr6QSAkok96_qe6c3PvaHCw"
+            }
+          }
+        }
+      },
+      "expect": {
+        "result": "reject",
+        "error": "EntryInvalid"
+      }
+    }
+  ]
+}
