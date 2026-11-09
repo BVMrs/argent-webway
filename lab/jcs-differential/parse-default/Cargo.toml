@@ -1,0 +1,11 @@
+[package]
+name = "parse-default"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: serde_json's default (no float_roundtrip) f64 parser vs correctly rounded std parse"
+
+[dependencies]
+serde_json = "1"
+
+[workspace]

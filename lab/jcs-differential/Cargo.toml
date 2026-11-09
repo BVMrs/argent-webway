@@ -1,0 +1,22 @@
+[package]
+name = "jcs-differential"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: differential tests of Rust RFC 8785 (JCS) crates against an ECMAScript oracle, for envelope/v0"
+
+[features]
+float_roundtrip = ["serde_json/float_roundtrip"]
+arbitrary_precision = ["serde_json/arbitrary_precision"]
+
+[dependencies]
+serde_json = { version = "1", features = ["preserve_order"] }
+sjc03 = { package = "serde_json_canonicalizer", version = "0.3" }
+sjc04 = { package = "serde_json_canonicalizer", version = "0.4" }
+serde_jcs = "0.2"
+jcs_canonicalize = { package = "jcs-canonicalize", version = "0.2" }
+serde = "1"
+rand = "0.8"
+rand_chacha = "0.3"
+
+[workspace]

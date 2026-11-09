@@ -1,0 +1,304 @@
+### cmp (default features; float_roundtrip on via the canonicaliser crates)
+category         crate                          n     agree  differ  rustErr oraclErr   both  !idem
+depth-1000       lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-1000       lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-1000       lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-1000       strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-1000       strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-1000       strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-127        lax+serde_jcs-0.2              1         1       0        0        0      0      0
+depth-127        lax+sjc-0.3                    1         1       0        0        0      0      0
+depth-127        lax+sjc-0.4                    1         1       0        0        0      0      0
+depth-127        strict+serde_jcs-0.2           1         1       0        0        0      0      0
+depth-127        strict+sjc-0.3                 1         1       0        0        0      0      0
+depth-127        strict+sjc-0.4                 1         1       0        0        0      0      0
+depth-128        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-128        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-128        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-128        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-128        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-128        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-129        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-129        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-129        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-129        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-129        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-129        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-200        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-200        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-200        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-200        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-200        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-200        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-5000       lax+serde_jcs-0.2              1         0       0        0        0      1      0
+depth-5000       lax+sjc-0.3                    1         0       0        0        0      1      0
+depth-5000       lax+sjc-0.4                    1         0       0        0        0      1      0
+depth-5000       strict+serde_jcs-0.2           1         0       0        0        0      1      0
+depth-5000       strict+sjc-0.3                 1         0       0        0        0      1      0
+depth-5000       strict+sjc-0.4                 1         0       0        0        0      1      0
+depth-64         lax+serde_jcs-0.2              1         1       0        0        0      0      0
+depth-64         lax+sjc-0.3                    1         1       0        0        0      0      0
+depth-64         lax+sjc-0.4                    1         1       0        0        0      0      0
+depth-64         strict+serde_jcs-0.2           1         1       0        0        0      0      0
+depth-64         strict+sjc-0.3                 1         1       0        0        0      0      0
+depth-64         strict+sjc-0.4                 1         1       0        0        0      0      0
+ijson            lax+serde_jcs-0.2              8         0       0        0        3      5      0
+ijson            lax+sjc-0.3                    8         0       0        0        3      5      0
+ijson            lax+sjc-0.4                    8         0       0        0        3      5      0
+ijson            strict+serde_jcs-0.2           8         0       0        0        0      8      0
+ijson            strict+sjc-0.3                 8         0       0        0        0      8      0
+ijson            strict+sjc-0.4                 8         0       0        0        0      8      0
+int-2^53..2^63   lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-2^53..2^63   lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-2^53..2^63   lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+sjc-0.4            100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+sjc-0.4            100000    100000       0        0        0      0      0
+int->2^64        lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int->2^64        lax+sjc-0.3               100000    100000       0        0        0      0      0
+int->2^64        lax+sjc-0.4               100000    100000       0        0        0      0      0
+int->2^64        strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int->2^64        strict+sjc-0.3            100000    100000       0        0        0      0      0
+int->2^64        strict+sjc-0.4            100000    100000       0        0        0      0      0
+int-le2^53       lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-le2^53       lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-le2^53       lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-le2^53       strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-le2^53       strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-le2^53       strict+sjc-0.4            100000    100000       0        0        0      0      0
+keys             lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+keys             lax+sjc-0.3               200000    200000       0        0        0      0      0
+keys             lax+sjc-0.4               200000    200000       0        0        0      0      0
+keys             strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+keys             strict+sjc-0.3            200000    200000       0        0        0      0      0
+keys             strict+sjc-0.4            200000    200000       0        0        0      0      0
+num-bits         lax+serde_jcs-0.2        1000000   1000000       0        0        0      0      0
+num-bits         lax+sjc-0.3              1000000   1000000       0        0        0      0      0
+num-bits         lax+sjc-0.4              1000000   1000000       0        0        0      0      0
+num-bits         strict+serde_jcs-0.2     1000000   1000000       0        0        0      0      0
+num-bits         strict+sjc-0.3           1000000   1000000       0        0        0      0      0
+num-bits         strict+sjc-0.4           1000000   1000000       0        0        0      0      0
+num-dec          lax+serde_jcs-0.2         300000    294193       0        0        0   5807      0
+num-dec          lax+sjc-0.3               300000    294193       0        0        0   5807      0
+num-dec          lax+sjc-0.4               300000    294193       0        0        0   5807      0
+num-dec          strict+serde_jcs-0.2      300000    294193       0        0        0   5807      0
+num-dec          strict+sjc-0.3            300000    294193       0        0        0   5807      0
+num-dec          strict+sjc-0.4            300000    294193       0        0        0   5807      0
+num-edge         lax+serde_jcs-0.2             24        21       0        0        0      3      0
+num-edge         lax+sjc-0.3                   24        21       0        0        0      3      0
+num-edge         lax+sjc-0.4                   24        21       0        0        0      3      0
+num-edge         strict+serde_jcs-0.2          24        21       0        0        0      3      0
+num-edge         strict+sjc-0.3                24        21       0        0        0      3      0
+num-edge         strict+sjc-0.4                24        21       0        0        0      3      0
+num-mid          lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+num-mid          lax+sjc-0.3               200000    200000       0        0        0      0      0
+num-mid          lax+sjc-0.4               200000    200000       0        0        0      0      0
+num-mid          strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+num-mid          strict+sjc-0.3            200000    200000       0        0        0      0      0
+num-mid          strict+sjc-0.4            200000    200000       0        0        0      0      0
+num-short        lax+serde_jcs-0.2         300000    300000       0        0        0      0      0
+num-short        lax+sjc-0.3               300000    300000       0        0        0      0      0
+num-short        lax+sjc-0.4               300000    300000       0        0        0      0      0
+num-short        strict+serde_jcs-0.2      300000    300000       0        0        0      0      0
+num-short        strict+sjc-0.3            300000    300000       0        0        0      0      0
+num-short        strict+sjc-0.4            300000    300000       0        0        0      0      0
+str              lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+str              lax+sjc-0.3               200000    200000       0        0        0      0      0
+str              lax+sjc-0.4               200000    200000       0        0        0      0      0
+str              strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+str              strict+sjc-0.3            200000    200000       0        0        0      0      0
+str              strict+sjc-0.4            200000    200000       0        0        0      0      0
+
+examples of disagreement:
+  [ijson / lax+serde_jcs-0.2] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+serde_jcs-0.2] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+serde_jcs-0.2] in {"x":{"b":1,"b":1}}  rust {"x":{"b":1}}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.3] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.3] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.3] in {"x":{"b":1,"b":1}}  rust {"x":{"b":1}}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.4] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.4] in {"a":1,"a":2}  rust {"a":2}  oracle ERR "duplicate key"
+  [ijson / lax+sjc-0.4] in {"x":{"b":1,"b":1}}  rust {"x":{"b":1}}  oracle ERR "duplicate key"
+
+### cmp (serde_json arbitrary_precision on)
+category         crate                          n     agree  differ  rustErr oraclErr   both  !idem
+depth-1000       lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-1000       lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-1000       lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-1000       strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-1000       strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-1000       strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-127        lax+serde_jcs-0.2              1         1       0        0        0      0      0
+depth-127        lax+sjc-0.3                    1         1       0        0        0      0      0
+depth-127        lax+sjc-0.4                    1         1       0        0        0      0      0
+depth-127        strict+serde_jcs-0.2           1         1       0        0        0      0      0
+depth-127        strict+sjc-0.3                 1         1       0        0        0      0      0
+depth-127        strict+sjc-0.4                 1         1       0        0        0      0      0
+depth-128        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-128        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-128        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-128        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-128        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-128        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-129        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-129        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-129        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-129        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-129        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-129        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-200        lax+serde_jcs-0.2              1         0       0        1        0      0      0
+depth-200        lax+sjc-0.3                    1         0       0        1        0      0      0
+depth-200        lax+sjc-0.4                    1         0       0        1        0      0      0
+depth-200        strict+serde_jcs-0.2           1         0       0        1        0      0      0
+depth-200        strict+sjc-0.3                 1         0       0        1        0      0      0
+depth-200        strict+sjc-0.4                 1         0       0        1        0      0      0
+depth-5000       lax+serde_jcs-0.2              1         0       0        0        0      1      0
+depth-5000       lax+sjc-0.3                    1         0       0        0        0      1      0
+depth-5000       lax+sjc-0.4                    1         0       0        0        0      1      0
+depth-5000       strict+serde_jcs-0.2           1         0       0        0        0      1      0
+depth-5000       strict+sjc-0.3                 1         0       0        0        0      1      0
+depth-5000       strict+sjc-0.4                 1         0       0        0        0      1      0
+depth-64         lax+serde_jcs-0.2              1         1       0        0        0      0      0
+depth-64         lax+sjc-0.3                    1         1       0        0        0      0      0
+depth-64         lax+sjc-0.4                    1         1       0        0        0      0      0
+depth-64         strict+serde_jcs-0.2           1         1       0        0        0      0      0
+depth-64         strict+sjc-0.3                 1         1       0        0        0      0      0
+depth-64         strict+sjc-0.4                 1         1       0        0        0      0      0
+ijson            lax+serde_jcs-0.2              8         0       0        0        3      5      0
+ijson            lax+sjc-0.3                    8         0       0        0        3      5      0
+ijson            lax+sjc-0.4                    8         0       0        0        3      5      0
+ijson            strict+serde_jcs-0.2           8         0       0        0        0      8      0
+ijson            strict+sjc-0.3                 8         0       0        0        0      8      0
+ijson            strict+sjc-0.4                 8         0       0        0        0      8      0
+int-2^53..2^63   lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-2^53..2^63   lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-2^53..2^63   lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-2^53..2^63   strict+sjc-0.4            100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-2^63..2^64   lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-2^63..2^64   strict+sjc-0.4            100000    100000       0        0        0      0      0
+int->2^64        lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int->2^64        lax+sjc-0.3               100000    100000       0        0        0      0      0
+int->2^64        lax+sjc-0.4               100000    100000       0        0        0      0      0
+int->2^64        strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int->2^64        strict+sjc-0.3            100000    100000       0        0        0      0      0
+int->2^64        strict+sjc-0.4            100000    100000       0        0        0      0      0
+int-le2^53       lax+serde_jcs-0.2         100000    100000       0        0        0      0      0
+int-le2^53       lax+sjc-0.3               100000    100000       0        0        0      0      0
+int-le2^53       lax+sjc-0.4               100000    100000       0        0        0      0      0
+int-le2^53       strict+serde_jcs-0.2      100000    100000       0        0        0      0      0
+int-le2^53       strict+sjc-0.3            100000    100000       0        0        0      0      0
+int-le2^53       strict+sjc-0.4            100000    100000       0        0        0      0      0
+keys             lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+keys             lax+sjc-0.3               200000    200000       0        0        0      0      0
+keys             lax+sjc-0.4               200000    200000       0        0        0      0      0
+keys             strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+keys             strict+sjc-0.3            200000    200000       0        0        0      0      0
+keys             strict+sjc-0.4            200000    200000       0        0        0      0      0
+num-bits         lax+serde_jcs-0.2        1000000   1000000       0        0        0      0      0
+num-bits         lax+sjc-0.3              1000000   1000000       0        0        0      0      0
+num-bits         lax+sjc-0.4              1000000   1000000       0        0        0      0      0
+num-bits         strict+serde_jcs-0.2     1000000   1000000       0        0        0      0      0
+num-bits         strict+sjc-0.3           1000000   1000000       0        0        0      0      0
+num-bits         strict+sjc-0.4           1000000   1000000       0        0        0      0      0
+num-dec          lax+serde_jcs-0.2         300000    294193       0        0        0   5807      0
+num-dec          lax+sjc-0.3               300000    294193       0        0        0   5807      0
+num-dec          lax+sjc-0.4               300000    294193       0        0        0   5807      0
+num-dec          strict+serde_jcs-0.2      300000    294193       0        0        0   5807      0
+num-dec          strict+sjc-0.3            300000    294193       0        0        0   5807      0
+num-dec          strict+sjc-0.4            300000    294193       0        0        0   5807      0
+num-edge         lax+serde_jcs-0.2             24        21       0        0        0      3      0
+num-edge         lax+sjc-0.3                   24        21       0        0        0      3      0
+num-edge         lax+sjc-0.4                   24        21       0        0        0      3      0
+num-edge         strict+serde_jcs-0.2          24        21       0        0        0      3      0
+num-edge         strict+sjc-0.3                24        21       0        0        0      3      0
+num-edge         strict+sjc-0.4                24        21       0        0        0      3      0
+num-mid          lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+num-mid          lax+sjc-0.3               200000    200000       0        0        0      0      0
+num-mid          lax+sjc-0.4               200000    200000       0        0        0      0      0
+num-mid          strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+num-mid          strict+sjc-0.3            200000    200000       0        0        0      0      0
+num-mid          strict+sjc-0.4            200000    200000       0        0        0      0      0
+num-short        lax+serde_jcs-0.2         300000    300000       0        0        0      0      0
+num-short        lax+sjc-0.3               300000    300000       0        0        0      0      0
+num-short        lax+sjc-0.4               300000    300000       0        0        0      0      0
+num-short        strict+serde_jcs-0.2      300000    300000       0        0        0      0      0
+num-short        strict+sjc-0.3            300000    300000       0        0        0      0      0
+num-short        strict+sjc-0.4            300000    300000       0        0        0      0      0
+str              lax+serde_jcs-0.2         200000    200000       0        0        0      0      0
+str              lax+sjc-0.3               200000    200000       0        0        0      0      0
+str              lax+sjc-0.4               200000    200000       0        0        0      0      0
+str              strict+serde_jcs-0.2      200000    200000       0        0        0      0      0
+str              strict+sjc-0.3            200000    200000       0        0        0      0      0
+str              strict+sjc-0.4            200000    200000       0        0        0      0      0
+
+
+### serde_json default float parser vs std (no float_roundtrip)
+num-bits   n= 1000000 misrounded=296221 (29.622 %)
+    5.283584960009207e-120 -> serde 5.2835849600092075e-120 std 5.283584960009207e-120 (1 ulp)
+    2.93070316035721e223 -> serde 2.9307031603572104e223 std 2.93070316035721e223 (1 ulp)
+    1.042123887510336e155 -> serde 1.0421238875103361e155 std 1.042123887510336e155 (1 ulp)
+num-dec    n=  294193 misrounded= 87597 (29.775 %)
+    6.665749130859550034024104365249622572e-74 -> serde 6.665749130859549e-74 std 6.66574913085955e-74 (1 ulp)
+    -9900222875963204038198557314384841958e12 -> serde -9.900222875963203e48 std -9.900222875963205e48 (1 ulp)
+    92e91 -> serde 9.200000000000001e92 std 9.2e92 (1 ulp)
+num-edge   n=      21 misrounded=     2 (9.524 %)
+    2.4703282292062328e-324 -> serde 0e0 std 5e-324 (1 ulp)
+    1.7976931348623158e308 -> serde ERR number out of range at line 1 column 22
+num-mid    n=  200000 misrounded=102438 (51.219 %)
+    240888516724535357485600564890264635469554134440584502651437 -> serde 2.408885167245354e208 std 2.4088851672453533e208 (1 ulp)
+    7280523111562496258794517135192906372548468408320e0 -> serde 7.280523111562496e48 std 7.280523111562497e48 (1 ulp)
+    118760167941243431900154844420345297447120019763040526631113 -> serde 1.1876016794124342e223 std 1.1876016794124344e223 (1 ulp)
+num-short  n=  300000 misrounded= 29864 (9.955 %)
+    464733843e30 -> serde 4.6473384300000004e38 std 4.64733843e38 (1 ulp)
+    653628383e-29 -> serde 6.536283830000001e-21 std 6.53628383e-21 (1 ulp)
+    470e-28 -> serde 4.7000000000000005e-26 std 4.7e-26 (1 ulp)
+
+### probes
+serde_json build: Value [1e2,100.0] re-serialises as [100.0,100.0] (arbitrary_precision keeps the spelling)
+
+## AUD-001 'integer of magnitude at most 2^53-1 (no fractions or exponents that denote non-integers)'
+token                                 JCS  audit-vectors accepts
+100                                   100                   true
+1e2                                   100                  false
+1E+2                                  100                  false
+100.0                                 100                  false
+1.00e2                                100                  false
+0                                       0                   true
+-0                                      0                  false
+0.0                                     0                  false
+9007199254740991           9007199254740991                   true
+9.007199254740991e15       9007199254740991                  false
+9007199254740992           9007199254740992                  false
+-9007199254740991          -9007199254740991                   true
+1.5                                   1.5                  false
+1e-400                                  0                  false
+
+## spellings that canonicalise to the same bytes (so the same signature / body_hash)
+["0", "-0", "0.0", "0e9", "1e-400", "-1e-400"] -> ["0", "0", "0", "0", "0", "0"]
+["100", "1e2", "100.000", "1000e-1"] -> ["100", "100", "100", "100"]
+["9007199254740992", "9007199254740993", "9.007199254740993e15"] -> ["9007199254740992", "9007199254740992", "9007199254740992"]
+["0.1", "0.1000000000000000055511151231257827", "0.10000000000000001"] -> ["0.1", "0.1", "0.1"]
+
+## duplicate keys in a signed header
+input           {"v":"webway-envelope/0","to":"wwa:alice","to":"wwa:mallory","id":"x"}
+lax  + sjc-0.4  Ok("{\"id\":\"x\",\"to\":\"wwa:mallory\",\"v\":\"webway-envelope/0\"}")
+strict          Err("duplicate key \"to\" at line 1 column 60")
+
+serde_json build: Value [1e2,100.0] re-serialises as [1e+2,100.0] (arbitrary_precision keeps the spelling)
+
+### RFC 8785 reference data (cyberphone testdata)
+sjc-0.3        6/6 pass []
+sjc-0.4        6/6 pass []
+serde_jcs-0.2  6/6 pass []
