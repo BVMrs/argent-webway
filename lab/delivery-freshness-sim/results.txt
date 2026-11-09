@@ -1,0 +1,70 @@
+Deterministic cases:
+E1 mailbox sends at exp-100ms, response arrives at exp+200 ms: V0 told caller `expired` first: true
+E2 copy delivered at exp+4min: R accepts = true (rule: now_r <= exp + skew)
+E3 step back 10 min after prune, replay at true exp+skew+2min: re-accepted (double) = true
+
+N = 200000 trials per cell; rates per million trials. skew = 5 min, ack/response loss 5 %,
+receiver up ~Exp(2 h) / down ~Exp(30 min), ttl log-uniform (5 min..24 h unless noted).
+
+| scenario | variant | processed | double | told expired but processed (late confirm / EnvelopeExpired / all lost) | processed, never confirmed | response refused | spurious reject |
+|---|---|---|---|---|---|---|---|
+| A0 exact clocks | V0 as written | 951940 | 0 | 355 (5.0 / 0 / 350) | 350 | 0 | 0 |
+| A0 exact clocks | V1 report@exp+2skew | 951940 | 0 | 350 (0 / 0 / 350) | 350 | 0 | 0 |
+| A0 exact clocks | V2 prune watermark | 951940 | 0 | 355 (5.0 / 0 / 350) | 350 | 0 | 0 |
+| A0 exact clocks | V3 both | 951940 | 0 | 350 (0 / 0 / 350) | 350 | 0 | 0 |
+| A0 exact clocks | V4 V3 + dedupe first | 951940 | 0 | 350 (0 / 0 / 350) | 350 | 0 | 0 |
+| A  offsets ±skew/2 | V0 as written | 951970 | 0 | 1670 (1300 / 0 / 370) | 370 | 0 | 0 |
+| A  offsets ±skew/2 | V1 report@exp+2skew | 951970 | 0 | 370 (0 / 0 / 370) | 370 | 0 | 0 |
+| A  offsets ±skew/2 | V2 prune watermark | 951970 | 0 | 1670 (1300 / 0 / 370) | 370 | 0 | 0 |
+| A  offsets ±skew/2 | V3 both | 951970 | 0 | 370 (0 / 0 / 370) | 370 | 0 | 0 |
+| A  offsets ±skew/2 | V4 V3 + dedupe first | 951970 | 0 | 370 (0 / 0 / 370) | 370 | 0 | 0 |
+| A' short ttl 1-10min | V0 as written | 826935 | 0 | 4985 (4445 / 0 / 540) | 540 | 0 | 0 |
+| A' short ttl 1-10min | V1 report@exp+2skew | 826935 | 0 | 540 (0 / 0 / 540) | 540 | 0 | 0 |
+| A' short ttl 1-10min | V2 prune watermark | 826935 | 0 | 4985 (4445 / 0 / 540) | 540 | 0 | 0 |
+| A' short ttl 1-10min | V3 both | 826935 | 0 | 540 (0 / 0 / 540) | 540 | 0 | 0 |
+| A' short ttl 1-10min | V4 V3 + dedupe first | 826935 | 0 | 540 (0 / 0 / 540) | 540 | 0 | 0 |
+| B  offsets ±skew | V0 as written | 951005 | 0 | 7195 (2155 / 2795 / 2245) | 5040 | 117800 | 1065 |
+| B  offsets ±skew | V1 report@exp+2skew | 951005 | 0 | 5040 (0 / 2795 / 2245) | 5040 | 117800 | 1065 |
+| B  offsets ±skew | V2 prune watermark | 951005 | 0 | 7195 (2155 / 2795 / 2245) | 5040 | 117800 | 1065 |
+| B  offsets ±skew | V3 both | 951005 | 0 | 5040 (0 / 2795 / 2245) | 5040 | 117800 | 1065 |
+| B  offsets ±skew | V4 V3 + dedupe first | 951005 | 0 | 4545 (0 / 2205 / 2340) | 4545 | 117800 | 1065 |
+| B' offsets ±2skew | V0 as written | 922725 | 0 | 32955 (3165 / 22635 / 7155) | 29790 | 256705 | 29360 |
+| B' offsets ±2skew | V1 report@exp+2skew | 922725 | 0 | 29790 (0 / 22635 / 7155) | 29790 | 256705 | 29360 |
+| B' offsets ±2skew | V2 prune watermark | 922725 | 0 | 32955 (3165 / 22635 / 7155) | 29790 | 256705 | 29360 |
+| B' offsets ±2skew | V3 both | 922725 | 0 | 29790 (0 / 22635 / 7155) | 29790 | 256705 | 29360 |
+| B' offsets ±2skew | V4 V3 + dedupe first | 922725 | 0 | 28460 (0 / 20855 / 7605) | 28460 | 256710 | 29360 |
+| R  replays | V0 as written | 953720 | 0 | 3240 (1120 / 0 / 2120) | 2120 | 0 | 0 |
+| R  replays | V1 report@exp+2skew | 953720 | 0 | 2120 (0 / 0 / 2120) | 2120 | 0 | 0 |
+| R  replays | V2 prune watermark | 953720 | 0 | 3240 (1120 / 0 / 2120) | 2120 | 0 | 0 |
+| R  replays | V3 both | 953720 | 0 | 2120 (0 / 0 / 2120) | 2120 | 0 | 0 |
+| R  replays | V4 V3 + dedupe first | 953720 | 0 | 2120 (0 / 0 / 2120) | 2120 | 0 | 0 |
+| C1 step 1s + replays | V0 as written | 953390 | 0 | 3660 (1525 / 0 / 2135) | 2135 | 0 | 0 |
+| C1 step 1s + replays | V1 report@exp+2skew | 953390 | 0 | 2135 (0 / 0 / 2135) | 2135 | 0 | 0 |
+| C1 step 1s + replays | V2 prune watermark | 953390 | 0 | 3660 (1525 / 0 / 2135) | 2135 | 0 | 0 |
+| C1 step 1s + replays | V3 both | 953390 | 0 | 2135 (0 / 0 / 2135) | 2135 | 0 | 0 |
+| C1 step 1s + replays | V4 V3 + dedupe first | 953390 | 0 | 2135 (0 / 0 / 2135) | 2135 | 0 | 0 |
+| C2 step 1min + replays | V0 as written | 953715 | 200 | 3330 (1310 / 5.0 / 2015) | 2020 | 18315 | 0 |
+| C2 step 1min + replays | V1 report@exp+2skew | 953715 | 200 | 2020 (0 / 5.0 / 2015) | 2020 | 18315 | 0 |
+| C2 step 1min + replays | V2 prune watermark | 953715 | 0 | 3330 (1310 / 5.0 / 2015) | 2020 | 18315 | 0 |
+| C2 step 1min + replays | V3 both | 953715 | 0 | 2020 (0 / 5.0 / 2015) | 2020 | 18315 | 0 |
+| C2 step 1min + replays | V4 V3 + dedupe first | 953715 | 0 | 2015 (0 / 0 / 2015) | 2015 | 18315 | 0 |
+| C3 step 10min + replays | V0 as written | 932005 | 31315 | 106365 (775 / 81495 / 24095) | 105590 | 901840 | 20950 |
+| C3 step 10min + replays | V1 report@exp+2skew | 932005 | 31315 | 105610 (20.0 / 81495 / 24095) | 105590 | 901840 | 20950 |
+| C3 step 10min + replays | V2 prune watermark | 927520 | 0 | 106430 (525 / 82275 / 23630) | 105905 | 901840 | 24795 |
+| C3 step 10min + replays | V3 both | 927520 | 0 | 105905 (0 / 82275 / 23630) | 105905 | 901840 | 24795 |
+| C3 step 10min + replays | V4 V3 + dedupe first | 927520 | 0 | 101630 (0 / 75840 / 25790) | 101630 | 901865 | 24795 |
+| C4 step 1h + replays | V0 as written | 652930 | 48570 | 164415 (795 / 156480 / 7140) | 163620 | 554140 | 298630 |
+| C4 step 1h + replays | V1 report@exp+2skew | 652930 | 48570 | 163710 (90.0 / 156480 / 7140) | 163620 | 554140 | 298630 |
+| C4 step 1h + replays | V2 prune watermark | 565710 | 0 | 97575 (55.0 / 90990 / 6530) | 97520 | 554140 | 384805 |
+| C4 step 1h + replays | V3 both | 565710 | 0 | 97520 (0 / 90990 / 6530) | 97520 | 554140 | 384805 |
+| C4 step 1h + replays | V4 V3 + dedupe first | 565710 | 0 | 97120 (0 / 90480 / 6640) | 97120 | 554145 | 384805 |
+| C5 step 10min, honest | V0 as written | 925800 | 4250 | 102095 (920 / 77835 / 23340) | 101175 | 899650 | 24455 |
+| C5 step 10min, honest | V1 report@exp+2skew | 925800 | 4250 | 101180 (5.0 / 77835 / 23340) | 101175 | 899650 | 24455 |
+| C5 step 10min, honest | V2 prune watermark | 925005 | 0 | 105920 (695 / 81920 / 23305) | 105225 | 899650 | 25040 |
+| C5 step 10min, honest | V3 both | 925005 | 0 | 105225 (0 / 81920 / 23305) | 105225 | 899650 | 25040 |
+| C5 step 10min, honest | V4 V3 + dedupe first | 925005 | 0 | 100865 (0 / 75155 / 25710) | 100865 | 899670 | 25040 |
+| C6 step 1h, honest | V0 as written | 579185 | 8650 | 90365 (745 / 82825 / 6795) | 89620 | 555410 | 371985 |
+| C6 step 1h, honest | V1 report@exp+2skew | 579185 | 8650 | 89660 (40.0 / 82825 / 6795) | 89620 | 555410 | 371985 |
+| C6 step 1h, honest | V2 prune watermark | 567085 | 0 | 98050 (30.0 / 91395 / 6625) | 98020 | 555410 | 383420 |
+| C6 step 1h, honest | V3 both | 567085 | 0 | 98020 (0 / 91395 / 6625) | 98020 | 555410 | 383420 |
+| C6 step 1h, honest | V4 V3 + dedupe first | 567085 | 0 | 97675 (0 / 90950 / 6725) | 97675 | 555430 | 383420 |

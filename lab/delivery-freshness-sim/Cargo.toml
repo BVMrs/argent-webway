@@ -1,0 +1,10 @@
+[package]
+name = "delivery-freshness-sim"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: Monte Carlo model of envelope/v0 freshness, dedupe and mailbox delivery under clock skew"
+
+[dependencies]
+
+[workspace]
