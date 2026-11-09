@@ -1,0 +1,14 @@
+[package]
+name = "merkle-proof-adversarial"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: independent RFC 9162 model + adversarial tests of the audit/v0 Merkle verifiers"
+
+[dependencies]
+blake3 = { version = "1.8", features = ["traits-preview"] }
+ct-merkle = "0.3"
+serde_json = { version = "1", features = ["preserve_order"] }
+hex = "0.4"
+
+[workspace]
