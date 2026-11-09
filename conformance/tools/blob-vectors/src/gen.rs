@@ -5,21 +5,63 @@
 
 use crate::model::{self, hash_str, EXT, MAX_SAFE};
 use crate::tree;
+use serde::Serialize;
 use serde_json::{json, Value};
 
+/// A vector file in the `webway-vectors/v0` format (conformance/vectors/README.md). The fields are
+/// those of `vector.schema.json`, in its order, so files serialise exactly as the schema describes.
+#[derive(Serialize)]
+pub struct VectorFile {
+    #[serde(rename = "$schema")]
+    pub schema: &'static str,
+    pub format: &'static str,
+    pub kind: &'static str,
+    pub description: &'static str,
+    pub spec: &'static str,
+    pub cases: Vec<Case>,
+}
+
+/// One case. `input` stays an untyped JSON value: its shape depends on the kind, and many cases
+/// feed deliberately malformed input (a string where a number belongs, a missing member), which a
+/// typed struct could not even represent.
+#[derive(Serialize)]
+pub struct Case {
+    pub id: String,
+    pub description: String,
+    pub requirements: Vec<String>,
+    pub input: Value,
+    pub expect: Expectation,
+}
+
+/// `expect` of a case: `{"result": "accept", "output": …}` or `{"result": "reject", "error": …}`.
+#[derive(Serialize)]
+#[serde(tag = "result", rename_all = "lowercase")]
+pub enum Expectation {
+    Accept { output: Value },
+    Reject { error: &'static str },
+}
+
+/// The verdict a case states by hand. The generator checks the model against it.
 enum Expect {
+    /// Accepted; the output is taken from the model.
     Accept,
+    /// Accepted with exactly this output.
     AcceptWith(Value),
+    /// Rejected with this error.
     Reject(&'static str),
 }
 use Expect::*;
 
+/// A vector file being built.
 struct File {
+    /// File name under conformance/vectors/blob/.
     name: &'static str,
+    /// The vector kind (`blob/hash`, `blob/fetch`, …): it fixes the shape of input and output, and
+    /// selects the model function that checks every case (`model::run`).
     kind: &'static str,
     description: &'static str,
     spec: &'static str,
-    cases: Vec<Value>,
+    cases: Vec<Case>,
 }
 
 impl File {
@@ -28,41 +70,41 @@ impl File {
     }
 
     fn case(&mut self, id: &str, description: &str, reqs: &[&str], input: Value, expect: Expect) {
-        let got = model::run(self.kind, &input).expect("kind");
+        let got = model::run(self.kind, &input).unwrap_or_else(|| panic!("no model for vector kind {}", self.kind));
         let expect = match (expect, got) {
-            (Accept, Ok(out)) => json!({ "result": "accept", "output": out }),
-            (AcceptWith(want), Ok(out)) => {
-                assert_eq!(want, out, "{}#{id}: model output differs from the hand-written one", self.name);
-                json!({ "result": "accept", "output": out })
+            (Accept, Ok(output)) => Expectation::Accept { output },
+            (AcceptWith(want), Ok(output)) => {
+                assert_eq!(want, output, "{}#{id}: model output differs from the hand-written one", self.name);
+                Expectation::Accept { output }
             }
-            (Reject(want), Err(e)) => {
-                assert_eq!(want, e, "{}#{id}: model rejects with another error", self.name);
-                json!({ "result": "reject", "error": e })
+            (Reject(want), Err(error)) => {
+                assert_eq!(want, error, "{}#{id}: model rejects with another error", self.name);
+                Expectation::Reject { error }
             }
             (Reject(want), Ok(out)) => panic!("{}#{id}: model accepts ({out}), case says {want}", self.name),
             (_, Err(e)) => panic!("{}#{id}: model rejects with {e}, case says accept", self.name),
         };
-        assert!(
-            !self.cases.iter().any(|c| c["id"] == id),
-            "{}: duplicate case id {id}",
-            self.name
-        );
-        self.cases.push(json!({
-            "id": id, "description": description, "requirements": reqs, "input": input, "expect": expect
-        }));
+        assert!(!self.cases.iter().any(|c| c.id == id), "{}: duplicate case id {id}", self.name);
+        self.cases.push(Case {
+            id: id.to_string(),
+            description: description.to_string(),
+            requirements: reqs.iter().map(|r| r.to_string()).collect(),
+            input,
+            expect,
+        });
     }
 
-    fn render(self) -> (&'static str, Value) {
+    fn render(self) -> (&'static str, VectorFile) {
         (
             self.name,
-            json!({
-                "$schema": "../vector.schema.json",
-                "format": "webway-vectors/v0",
-                "kind": self.kind,
-                "description": self.description,
-                "spec": self.spec,
-                "cases": self.cases,
-            }),
+            VectorFile {
+                schema: "../vector.schema.json",
+                format: "webway-vectors/v0",
+                kind: self.kind,
+                description: self.description,
+                spec: self.spec,
+                cases: self.cases,
+            },
         )
     }
 }
@@ -279,8 +321,9 @@ fn encode_file() -> File {
         "ext/blob.md#52-encoding",
         "Encode the effective ranges of a blob. Input {\"data\": {\"pattern\": n} | {\"hex\"}, \"ranges\"}. Output \
          {\"hash\", \"ranges\" (effective), \"length\", \"encodingHash\" (BLAKE3 of the encoding, blake3:<hex>), \"hex\" \
-         (the encoding itself, only when it is at most 512 bytes)}. Generated by the reference model and checked \
-         against bao-tree 0.17 with 16 KiB chunk groups.",
+         (the encoding itself, only when it is at most 512 bytes)}. The encoding is bao, BLAKE3's verified-streaming \
+         format (spec §5.2), with 16 KiB blocks as in iroh-blobs. Generated by the reference model and checked \
+         against the bao-tree 0.17 crate.",
     );
     let r = &["BLOB-020"];
     let cases: &[(&str, &str, u64, Value)] = &[
@@ -676,7 +719,7 @@ fn providers_file() -> File {
     f
 }
 
-pub fn all() -> Vec<(&'static str, Value)> {
+pub fn all() -> Vec<(&'static str, VectorFile)> {
     let _ = EXT;
     vec![
         hash_file().render(),

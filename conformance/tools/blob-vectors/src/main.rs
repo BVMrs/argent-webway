@@ -1,8 +1,8 @@
 //! Reference model, vector generator and stdio adapter for `blob/v0` (spec/ext/blob.md).
 //!
-//!   cargo run -- generate   # rewrite conformance/vectors/blob/*.json
-//!   cargo run -- check      # fail if the files on disk differ from what the generator produces
-//!   cargo run -- adapter    # serve the model over the stdio adapter protocol
+//!   cargo run -- generate [DIR]   # rewrite the vector files (default: conformance/vectors/blob)
+//!   cargo run -- check [DIR]      # fail if the files differ from what the generator produces
+//!   cargo run -- adapter          # serve the model over the stdio adapter protocol
 //!
 //! `cargo test` runs `check`, checks that every `MUST` requirement of the spec is covered by a
 //! vector or marked pending, and compares the tree model with bao-tree (tests/bao_compat.rs).
@@ -14,16 +14,20 @@ mod tree;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;
 
-fn vectors_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../vectors/blob")
+/// Where `generate` and `check` read and write vector files: the directory given on the command
+/// line, else `conformance/vectors/blob` of the checkout this tool was built from. The default is
+/// for `cargo run` inside the repository; a binary used elsewhere is given the directory. The
+/// adapter reads no files, so it works wherever it is installed.
+fn vectors_dir(arg: Option<String>) -> PathBuf {
+    arg.map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../vectors/blob"))
 }
 
-fn render(v: &serde_json::Value) -> String {
-    serde_json::to_string_pretty(v).unwrap() + "\n"
+fn render(file: &gen::VectorFile) -> String {
+    serde_json::to_string_pretty(file).unwrap() + "\n"
 }
 
-fn check() -> Result<(), String> {
-    let dir = vectors_dir();
+fn check(dir: &std::path::Path) -> Result<(), String> {
     let mut stale = vec![];
     for (name, content) in gen::all() {
         let on_disk = std::fs::read_to_string(dir.join(name)).unwrap_or_default();
@@ -38,7 +42,11 @@ fn check() -> Result<(), String> {
     }
 }
 
-/// The stdio adapter protocol of conformance/vectors/README.md (CONV-006).
+/// The stdio adapter protocol of conformance/vectors/README.md (CONV-006): the harness writes one
+/// request line, waits for the answer line, then sends the next. The exchange is strictly
+/// sequential and one-to-one, so a blocking loop is the whole implementation. Each answer is
+/// flushed at once so the harness never waits on a buffer. Logs, if any, go to stderr and never
+/// mix with answers on stdout.
 fn adapter() {
     let stdin = std::io::stdin();
     let mut out = std::io::stdout().lock();
@@ -60,17 +68,18 @@ fn adapter() {
 }
 
 fn main() {
-    match std::env::args().nth(1).as_deref() {
+    let mut args = std::env::args().skip(1);
+    let cmd = args.next();
+    let dir = vectors_dir(args.next());
+    match cmd.as_deref() {
         Some("generate") => {
-            let dir = vectors_dir();
             std::fs::create_dir_all(&dir).unwrap();
-            for (name, content) in gen::all() {
-                let n = content["cases"].as_array().map_or(0, |c| c.len());
-                std::fs::write(dir.join(name), render(&content)).unwrap();
-                println!("wrote {name} ({n} cases)");
+            for (name, file) in gen::all() {
+                std::fs::write(dir.join(name), render(&file)).unwrap();
+                println!("wrote {name} ({} cases)", file.cases.len());
             }
         }
-        Some("check") => match check() {
+        Some("check") => match check(&dir) {
             Ok(()) => println!("vectors up to date"),
             Err(e) => {
                 eprintln!("{e}");
@@ -79,7 +88,7 @@ fn main() {
         },
         Some("adapter") => adapter(),
         _ => {
-            eprintln!("usage: blob-vectors generate|check|adapter");
+            eprintln!("usage: blob-vectors generate [DIR] | check [DIR] | adapter");
             std::process::exit(2);
         }
     }
@@ -91,7 +100,7 @@ mod tests {
 
     #[test]
     fn vectors_are_current() {
-        super::check().unwrap();
+        super::check(&super::vectors_dir(None)).unwrap();
     }
 
     /// Requirement blocks of spec/ext/blob.md: (id, is MUST, is pending).
@@ -163,11 +172,10 @@ mod tests {
         }
         let mut covered = BTreeSet::new();
         for (_, file) in super::gen::all() {
-            for c in file["cases"].as_array().unwrap() {
-                for r in c["requirements"].as_array().unwrap() {
-                    let r = r.as_str().unwrap().to_string();
-                    assert!(ids.contains(&r), "vector references undefined {r}");
-                    covered.insert(r);
+            for c in &file.cases {
+                for r in &c.requirements {
+                    assert!(ids.contains(r), "vector references undefined {r}");
+                    covered.insert(r.clone());
                 }
             }
         }

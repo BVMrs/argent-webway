@@ -7,6 +7,7 @@ description = "Reference model, vector generator and stdio adapter for blob/v0 (
 
 [dependencies]
 blake3 = "1.8"
+serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 
 [dev-dependencies]

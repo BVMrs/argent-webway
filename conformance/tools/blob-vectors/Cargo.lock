@@ -51,6 +51,7 @@ version = "0.1.0"
 dependencies = [
  "bao-tree",
  "blake3",
+ "serde",
  "serde_json",
 ]
 
