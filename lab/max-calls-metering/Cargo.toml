@@ -1,0 +1,13 @@
+[package]
+name = "max-calls-metering"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: model of stateful max_calls caveat metering (due diligence §4.7.2, M1 step 1)"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
