@@ -1,0 +1,13 @@
+[package]
+name = "taint-laundering-model"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: exhaustive bounded model of provenance/v0 taint propagation (due diligence §4.7.4)"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
