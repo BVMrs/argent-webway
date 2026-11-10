@@ -1,0 +1,13 @@
+buffer	cc	blobs	prio	rwnd_kB	sep	base_p50	startup_p50	startup_p99	steady_p50	steady_p95	steady_p99	steady_max	lost_rpcs	goodput_mbps	down_drops	down_maxq_kB
+router-1bdp	Cubic	1	true	300	false	63.8	125.9	528.2	120.2	299.0	489.3	571.5	0	18.26	7	149
+router-1bdp	Cubic	4	true	300	false	63.8	259.6	848.5	249.8	838.3	1232.3	1482.9	0	18.45	7	149
+router-1bdp	Bbr	1	true	300	false	63.6	103.5	172.6	96.0	241.2	388.3	596.4	0	15.55	4079	150
+router-1bdp	Bbr	4	true	300	false	63.6	414.1	1348.7	345.5	1152.5	1617.2	2398.5	0	16.90	1148	150
+relay-1MB	Cubic	1	true	300	false	64.1	118.2	163.8	121.6	201.5	354.7	455.9	0	18.54	0	159
+relay-1MB	Cubic	4	true	300	false	63.8	356.5	883.1	275.4	924.4	1397.4	1694.6	0	18.54	0	160
+relay-1MB	Bbr	1	true	300	false	63.6	120.2	156.9	122.3	160.5	374.8	523.3	0	18.55	0	161
+relay-1MB	Bbr	4	true	300	false	63.6	291.7	1090.8	297.0	889.7	1270.7	1599.1	0	18.51	0	160
+relay-4MB	Cubic	1	true	300	false	63.5	123.4	215.4	122.3	353.3	450.9	618.6	0	18.54	0	160
+relay-4MB	Cubic	4	true	300	false	63.7	313.6	1440.4	299.7	937.4	1299.0	1679.2	0	18.53	0	160
+relay-4MB	Bbr	1	true	300	false	63.5	123.3	289.1	123.5	157.3	201.2	224.5	0	18.57	0	160
+relay-4MB	Bbr	4	true	300	false	63.8	275.5	1022.9	273.0	844.0	990.9	1590.3	0	18.51	0	160
