@@ -1,0 +1,14 @@
+
+== E4: single-thread throughput on 128 MiB (best of 3), release build
+plain blake3::hash: 3364 MiB/s
+| chunk group | create outboard MiB/s | encode (validated) MiB/s | verify+decode MiB/s | decoder leaf items |
+|---|---|---|---|---|
+| 1 KiB | 719 | 555 | 692 | 131072 |
+| 4 KiB | 1989 | 1177 | 1898 | 32768 |
+| 16 KiB | 2963 | 1538 | 2904 | 8192 |
+| 64 KiB | 3302 | 1650 | 3172 | 2048 |
+| 256 KiB | 3323 | 1630 | 3184 | 512 |
+
+real	0m4.237s
+user	0m3.564s
+sys	0m0.672s

@@ -1,0 +1,36 @@
+
+== E2: mutation fuzz of honest responses (200000 mutants per block size)
+| block | mutation | mutants | rejected | accepted, identical | accepted, trailing bytes unread | accepted, other | unsound deliveries | mean bytes read-not-delivered on reject (incl. parents) | max | mean bytes read past last delivered leaf | max |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 KiB | append-garbage | 28579 | 0 | 0 | 28579 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 KiB | bitflip | 28509 | 28509 | 0 | 0 | 0 | 0 | 3583 | 37440 | 967 | 1664 |
+| 1 KiB | delete-byte | 29137 | 29137 | 0 | 0 | 0 | 0 | 3643 | 37632 | 966 | 1664 |
+| 1 KiB | insert-byte | 28459 | 28434 | 0 | 25 | 0 | 0 | 3610 | 37376 | 969 | 1664 |
+| 1 KiB | overwrite-64B-window | 28456 | 28456 | 0 | 0 | 0 | 0 | 3645 | 37120 | 967 | 1664 |
+| 1 KiB | swap-leaf-groups | 28359 | 28359 | 0 | 0 | 0 | 0 | 2985 | 35136 | 1080 | 1664 |
+| 1 KiB | truncate | 28501 | 28501 | 0 | 0 | 0 | 0 | 3199 | 36596 | 522 | 1661 |
+| 4 KiB | append-garbage | 28736 | 0 | 0 | 28736 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 4 KiB | bitflip | 28313 | 28313 | 0 | 0 | 0 | 0 | 3725 | 13376 | 2913 | 4608 |
+| 4 KiB | delete-byte | 28614 | 28614 | 0 | 0 | 0 | 0 | 3734 | 13376 | 2919 | 4608 |
+| 4 KiB | insert-byte | 28496 | 28473 | 0 | 23 | 0 | 0 | 3709 | 13312 | 2912 | 4608 |
+| 4 KiB | overwrite-64B-window | 28578 | 28578 | 0 | 0 | 0 | 0 | 3715 | 13312 | 2915 | 4608 |
+| 4 KiB | swap-leaf-groups | 28478 | 28478 | 0 | 0 | 0 | 0 | 2991 | 12672 | 2371 | 4608 |
+| 4 KiB | truncate | 28785 | 28785 | 0 | 0 | 0 | 0 | 2297 | 12842 | 1498 | 4541 |
+| 16 KiB | append-garbage | 28663 | 0 | 0 | 28663 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 16 KiB | bitflip | 28633 | 28633 | 0 | 0 | 0 | 0 | 8527 | 18688 | 8188 | 16768 |
+| 16 KiB | delete-byte | 28755 | 28755 | 0 | 0 | 0 | 0 | 8564 | 18688 | 8225 | 16768 |
+| 16 KiB | insert-byte | 28311 | 28295 | 0 | 16 | 0 | 0 | 8525 | 18688 | 8186 | 16768 |
+| 16 KiB | overwrite-64B-window | 28478 | 28478 | 0 | 0 | 0 | 0 | 8579 | 18816 | 8240 | 16768 |
+| 16 KiB | swap-leaf-groups | 28582 | 28582 | 0 | 0 | 0 | 0 | 5732 | 18752 | 5388 | 16768 |
+| 16 KiB | truncate | 28578 | 28578 | 0 | 0 | 0 | 0 | 4518 | 18383 | 4174 | 16650 |
+| 64 KiB | append-garbage | 28750 | 0 | 0 | 28750 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 64 KiB | bitflip | 28475 | 28475 | 0 | 0 | 0 | 0 | 21498 | 66816 | 21270 | 65792 |
+| 64 KiB | delete-byte | 28645 | 28645 | 0 | 0 | 0 | 0 | 20924 | 66816 | 20697 | 65792 |
+| 64 KiB | insert-byte | 28484 | 28456 | 0 | 28 | 0 | 0 | 21256 | 66752 | 21026 | 65792 |
+| 64 KiB | overwrite-64B-window | 28413 | 28413 | 0 | 0 | 0 | 0 | 20954 | 66816 | 20727 | 65792 |
+| 64 KiB | swap-leaf-groups | 28533 | 28533 | 0 | 0 | 0 | 0 | 14504 | 66688 | 14206 | 65792 |
+| 64 KiB | truncate | 28700 | 28700 | 0 | 0 | 0 | 0 | 10740 | 66125 | 10510 | 65712 |
+
+real	0m52.876s
+user	0m51.947s
+sys	0m0.896s

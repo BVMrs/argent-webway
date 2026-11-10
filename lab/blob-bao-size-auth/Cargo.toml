@@ -1,0 +1,17 @@
+[package]
+name = "blob-bao-size-auth"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: blob/v0 on bao-tree 0.17: size authentication, adversarial providers, mutation fuzz, overhead per chunk-group size"
+
+[dependencies]
+bao-tree = { version = "=0.17.0", default-features = false }
+blake3 = "1.8"
+bytes = "1"
+rand = { version = "0.9", features = ["small_rng"] }
+
+[profile.release]
+debug = false
+
+[workspace]

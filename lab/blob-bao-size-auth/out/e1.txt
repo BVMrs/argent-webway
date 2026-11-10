@@ -1,0 +1,33 @@
+== E1: size aliasing (adversarial size header, strongest collision-free provider)
+286 real sizes x 1383 claimed sizes x 5 request kinds x 2 block sizes = 3955380 decodes
+| block | request | cases | true size accepted | wrong size accepted | (smaller / larger) | blobs with >=1 alias | max claimed/real | accepted alias w/ different bytes delivered | unsound | panics |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 KiB | all | 395538 | 286 | 0 | 0 / 0 | 0/286 | 0.000e0 | 0 | 0 | 0 |
+| 1 KiB | first-16KiB | 395538 | 286 | 71682 | 31875 / 39807 | 221/286 | 2.000e0 | 0 | 0 | 0 |
+| 1 KiB | first-chunk | 395538 | 286 | 75702 | 33945 / 41757 | 281/286 | 2.000e0 | 0 | 0 | 0 |
+| 1 KiB | last-chunk | 395538 | 286 | 0 | 0 / 0 | 0/286 | 0.000e0 | 0 | 0 | 0 |
+| 1 KiB | middle-chunk | 395538 | 286 | 74156 | 32417 / 41739 | 277/286 | 2.000e0 | 0 | 0 | 0 |
+| 16 KiB | all | 395538 | 286 | 0 | 0 / 0 | 0/286 | 0.000e0 | 0 | 0 | 0 |
+| 16 KiB | first-16KiB | 395538 | 286 | 71682 | 31875 / 39807 | 221/286 | 2.000e0 | 0 | 0 | 0 |
+| 16 KiB | first-chunk | 395538 | 286 | 75702 | 33945 / 41757 | 281/286 | 2.000e0 | 0 | 0 | 0 |
+| 16 KiB | last-chunk | 395538 | 286 | 0 | 0 / 0 | 0/286 | 0.000e0 | 0 | 0 | 0 |
+| 16 KiB | middle-chunk | 395538 | 286 | 74156 | 32417 / 41739 | 277/286 | 2.000e0 | 0 | 0 | 0 |
+
+E1b: alias window for a first-chunk request (bs=16 KiB), contiguous claimed sizes scanned byte-wise around the edges
+| real size | real chunks | accepted claimed sizes (min..=max) | width | all in window accepted? |
+|---|---|---|---|---|
+| 1 | 1 | 1..=1 | 1 | yes (2000 samples) |
+| 1024 | 1 | 1024..=1024 | 1 | yes (2000 samples) |
+| 1025 | 2 | 1025..=2048 | 1024 | yes (2000 samples) |
+| 2048 | 2 | 1025..=2048 | 1024 | yes (2000 samples) |
+| 5000 | 5 | 4097..=8192 | 4096 | yes (2000 samples) |
+| 16384 | 16 | 8193..=16384 | 8192 | yes (2000 samples) |
+| 16385 | 17 | 16385..=32768 | 16384 | yes (2000 samples) |
+| 66561 | 66 | 65537..=131072 | 65536 | yes (2000 samples) |
+| 100000 | 98 | 65537..=131072 | 65536 | yes (2000 samples) |
+| 1048576 | 1024 | 524289..=1048576 | 524288 | yes (2000 samples) |
+| 1048577 | 1025 | 1048577..=2097152 | 1048576 | yes (2000 samples) |
+
+real	1m59.707s
+user	1m59.684s
+sys	0m0.012s
