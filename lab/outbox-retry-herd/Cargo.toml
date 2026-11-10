@@ -1,0 +1,13 @@
+[package]
+name = "outbox-retry-herd"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: discrete-event model of mailbox/v0 outbox retries against a mailbox host after an outage"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
