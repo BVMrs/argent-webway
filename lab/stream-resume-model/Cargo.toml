@@ -1,0 +1,13 @@
+[package]
+name = "stream-resume-model"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: bounded model of SubscribeToTask fromSeq resume (due diligence §4.5, M1 step 6)"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
