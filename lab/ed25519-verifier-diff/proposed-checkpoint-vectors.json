@@ -1,0 +1,94 @@
+[
+  {
+    "description": "R is the identity point (small order); [S]B = R + [k]A holds",
+    "expected": {
+      "error": "CheckpointInvalid",
+      "result": "reject"
+    },
+    "id": "small-order-r",
+    "input": {
+      "checkpoint": {
+        "epoch": 0,
+        "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "sig": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzerC0qRj1tozBUzlkt5OlUXVM8Yb59TUHz_Jh55U5DQ",
+        "size": 12,
+        "time": "2026-11-07T12:05:00Z",
+        "v": "webway-checkpoint/0"
+      }
+    },
+    "requirements": [
+      "AUD-201",
+      "AUD-900"
+    ]
+  },
+  {
+    "description": "R has an order-8 torsion component; only [8][S]B = [8]R + [8][k]A holds",
+    "expected": {
+      "error": "CheckpointInvalid",
+      "result": "reject"
+    },
+    "id": "mixed-order-r",
+    "input": {
+      "checkpoint": {
+        "epoch": 0,
+        "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "sig": "CVdSAHr1uYbbcDp0MDOswggXDvr2Xqo3qrh8Fo7PMufYNEcxxDneetNeWo52O1LvdlTg6ffBuUcP_IURMbn7DQ",
+        "size": 12,
+        "time": "2026-11-07T12:05:00Z",
+        "v": "webway-checkpoint/0"
+      }
+    },
+    "requirements": [
+      "AUD-201",
+      "AUD-900"
+    ]
+  },
+  {
+    "description": "R is a non-canonical encoding (x = 0 with the sign bit set) of the identity",
+    "expected": {
+      "error": "CheckpointInvalid",
+      "result": "reject"
+    },
+    "id": "non-canonical-r",
+    "input": {
+      "checkpoint": {
+        "epoch": 0,
+        "log": "wwn:hwsnlnxue5qm4hcyfpgc2t74nt54rtfyqdr4qsrzgmumggrzoqga",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "sig": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIByOKtZ2hJBS-Te4I1o4e85DtWL81ACr9IdkIJXh6oXCw",
+        "size": 12,
+        "time": "2026-11-07T12:05:00Z",
+        "v": "webway-checkpoint/0"
+      }
+    },
+    "requirements": [
+      "AUD-201",
+      "AUD-900"
+    ]
+  },
+  {
+    "description": "log is the identity point and [S]B = R + [k]A holds (it holds for every message)",
+    "expected": {
+      "error": "CheckpointInvalid",
+      "result": "reject"
+    },
+    "id": "weak-key-valid-equation",
+    "input": {
+      "checkpoint": {
+        "epoch": 0,
+        "log": "wwn:aeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "root": "blake3:31f14a725dd998350ac2864a834e5f6ce72896d1098ae58d2c9daf4da297f2cc",
+        "sig": "EDX27lBZMRwtl8RlGLmHNOiIqzUtNl8NjOH-gKo6eicxUWMj51IublzxKy4lXAod7nIQtgWMiS2QQWQSi7ctCQ",
+        "size": 12,
+        "time": "2026-11-07T12:05:00Z",
+        "v": "webway-checkpoint/0"
+      }
+    },
+    "requirements": [
+      "AUD-201",
+      "AUD-900"
+    ]
+  }
+]

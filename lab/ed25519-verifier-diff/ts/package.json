@@ -1,0 +1,12 @@
+{
+  "name": "ed25519-verifier-diff-ts",
+  "private": true,
+  "type": "module",
+  "description": "Lab: TS/JS Ed25519 verifiers over the envelope/v0 adversarial corpus",
+  "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@noble/ed25519": "^3.2.0",
+    "libsodium-wrappers": "^0.7.16",
+    "tweetnacl": "^1.0.3"
+  }
+}

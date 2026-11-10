@@ -1,0 +1,8 @@
+out/*
+!out/tables.md
+out/audit/*
+!out/audit/matrix.md
+out/proposed/*
+!out/proposed/matrix.md
+!out/audit/
+!out/proposed/
