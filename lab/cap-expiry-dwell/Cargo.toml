@@ -1,0 +1,15 @@
+[package]
+name = "cap-expiry-dwell"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: which clock evaluates capability/v0 expiry for mailbox-delayed envelopes"
+
+[dependencies]
+biscuit-auth = "6.0.0"
+rand = "0.8"
+
+[profile.release]
+debug = false
+
+[workspace]

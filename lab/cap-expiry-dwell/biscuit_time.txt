@@ -1,0 +1,10 @@
+PASS | B1 node clock injected explicitly, before exp                                  | expect accept | got accept 
+PASS | B2 node clock injected explicitly, 1 d after exp                               | expect reject | got reject FailedLogic(Unauthorized { policy: Allow(0), checks: [Block(FailedBlockCheck { block_id: 0, check_id: 0, rule: "check if time($t), $t <= 2030-03-17T18:46:40Z" })] })
+PASS | B3 no time fact at all (fails closed)                                          | expect reject | got reject FailedLogic(Unauthorized { policy: Allow(0), checks: [Block(FailedBlockCheck { block_id: 0, check_id: 0, rule: "check if time($t), $t <= 2030-03-17T18:46:40Z" })] })
+FAIL | B4 AuthorizerBuilder::time() (wall clock) while fake clock is 1 d past exp     | expect reject | got accept 
+FAIL | B5 two time facts injected: postmark (before exp) and now (after exp)          | expect reject | got accept 
+PASS | B6a control: same token without the forged time() block                        | expect reject | got reject FailedLogic(Unauthorized { policy: Allow(0), checks: [Block(FailedBlockCheck { block_id: 1, check_id: 0, rule: "check if time($t), $t <= 2030-03-17T18:46:40Z trusting authority, ed25519/3d54166291ede23bc08164b2a3056db625fb79c2a4d3ce11254f6fb788a7843b" })] })
+FAIL | B6 delegator TTL check (no authority TTL), `trusting ed25519/<next holder>`; holder asserts old time() | expect reject | got accept 
+PASS | B7 authority TTL check (default scope); third-party block asserts old time()   | expect reject | got reject FailedLogic(Unauthorized { policy: Allow(0), checks: [Block(FailedBlockCheck { block_id: 0, check_id: 0, rule: "check if time($t), $t <= 2030-03-17T18:46:40Z" })] })
+PASS | B8 authority TTL check (default scope); ephemeral block asserts old time()     | expect reject | got reject FailedLogic(Unauthorized { policy: Allow(0), checks: [Block(FailedBlockCheck { block_id: 0, check_id: 0, rule: "check if time($t), $t <= 2030-03-17T18:46:40Z" })] })
+3 of 9 cases differ from the safe expectation
