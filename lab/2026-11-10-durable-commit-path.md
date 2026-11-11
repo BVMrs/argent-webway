@@ -160,7 +160,7 @@ Honest ack latency (p50 / p99 ms), or the fraction of honest acks at all when th
   worth keeping. None of them logs every rejected submission with its full payload, which is what AUD-401 asks
   for.
 - The same entry-rate limit applies to audit open question 6 (batch receipts on streams). A per-entry receipt
-  signature is about 25 of the 52 µs serial committer CPU per entry, so batching receipts would also raise the
+  signature is part of the 52 µs of serial committer CPU per entry (not measured separately), so batching receipts would also raise the
   committer ceiling.
 
 ## What the planner should do next
