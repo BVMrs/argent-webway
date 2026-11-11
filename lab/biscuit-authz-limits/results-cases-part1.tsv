@@ -1,0 +1,69 @@
+case	a	b	limits	token_B	parse_us	authz_ms	result	iters	facts	drss_MiB	gate	gate_us
+none	0	0	default	920	258	0.091	Allow	0	9	0	pass	46
+none	0	0	unbounded	920	271	0.078	Allow	0	9	0	pass	40
+rule_join	10	2	default	1211	381	0.200	Allow	0	19	0	reject:rule in attenuation block	84
+rule_join	10	2	unbounded	1211	358	0.182	Allow	0	19	0	reject:rule in attenuation block	67
+check_join	10	2	default	1206	326	0.126	Allow	0	19	0	reject:fact f	52
+check_join	10	2	unbounded	1206	298	0.127	Allow	0	19	0	reject:fact f	64
+rule_join	10	4	default	1239	323	8.074	Timeout	0	19	0	reject:rule in attenuation block	55
+rule_join	10	4	unbounded	1239	322	8.650	Allow	0	19	0	reject:rule in attenuation block	59
+check_join	10	4	default	1234	321	9.051	Timeout	0	19	0	reject:fact f	54
+check_join	10	4	unbounded	1234	312	8.455	Allow	0	19	0	reject:fact f	57
+rule_join	20	4	default	1349	1012	175.020	Timeout	0	29	0	reject:rule in attenuation block	87
+rule_join	20	4	unbounded	1349	323	186.834	Allow	0	29	0	reject:rule in attenuation block	67
+check_join	20	4	default	1344	324	166.403	Timeout	0	29	0	reject:fact f	66
+check_join	20	4	unbounded	1344	878	188.204	Allow	0	29	0	reject:fact f	152
+rule_join	30	4	default	1459	461	821.689	Timeout	0	39	0	reject:rule in attenuation block	102
+rule_join	30	4	unbounded	1459	708	819.101	Allow	0	39	0	reject:rule in attenuation block	189
+check_join	30	4	default	1454	311	740.433	Timeout	0	39	0	reject:fact f	76
+check_join	30	4	unbounded	1454	324	796.224	Allow	0	39	0	reject:fact f	80
+rule_join	40	4	default	1569	428	2405.238	Timeout	0	49	0	reject:rule in attenuation block	107
+rule_join	40	4	unbounded	1569	349	2064.064	Allow	0	49	0	reject:rule in attenuation block	135
+check_join	40	4	default	1564	319	2081.312	Timeout	0	49	0	reject:fact f	83
+check_join	40	4	unbounded	1564	313	2089.255	Allow	0	49	0	reject:fact f	84
+rule_join	10	6	default	1267	316	1128.472	Timeout	0	19	0	reject:rule in attenuation block	64
+rule_join	10	6	unbounded	1267	740	1090.878	Allow	0	19	0	reject:rule in attenuation block	133
+check_join	10	6	default	1262	390	1104.113	Timeout	0	19	0	reject:fact f	77
+check_join	10	6	unbounded	1262	337	1138.123	Allow	0	19	0	reject:fact f	63
+rule_join	16	6	default	1333	313	18153.136	Timeout	0	25	0	reject:rule in attenuation block	68
+rule_join	16	6	unbounded	1333	393	17955.356	Allow	0	25	0	reject:rule in attenuation block	82
+check_join	16	6	default	1328	300	18572.541	Timeout	0	25	0	reject:fact f	64
+check_join	16	6	unbounded	1328	362	21355.927	Allow	0	25	0	reject:fact f	67
+rule_join	20	6	default	1377	735	70531.027	Timeout	0	29	0	reject:rule in attenuation block	151
+rule_join	20	6	unbounded	1377	300	71768.066	Allow	0	29	0	reject:rule in attenuation block	82
+check_join	20	6	default	1372	351	72932.682	Timeout	0	29	0	reject:fact f	71
+check_join	20	6	unbounded	1372	340	69676.114	Allow	0	29	0	reject:fact f	71
+rule_join	100	3	default	2215	435	572.580	Timeout	0	109	0	reject:rule in attenuation block	177
+rule_join	100	3	unbounded	2215	308	571.612	Allow	0	109	0	reject:rule in attenuation block	153
+check_join	100	3	default	2210	348	570.769	Timeout	0	109	0	reject:fact f	141
+check_join	100	3	unbounded	2210	434	569.294	Allow	0	109	0	reject:fact f	175
+rule_join	200	3	default	3387	320	4612.449	Timeout	0	209	0	reject:rule in attenuation block	213
+rule_join	200	3	unbounded	3387	736	4578.839	Allow	0	209	0	reject:rule in attenuation block	466
+check_join	200	3	default	3382	367	4746.932	Timeout	0	209	0	reject:fact f	246
+check_join	200	3	unbounded	3382	476	4446.004	Allow	0	209	0	reject:fact f	314
+rule_join	300	3	default	4587	325	15374.749	Timeout	0	309	0	reject:rule in attenuation block	312
+rule_join	300	3	unbounded	4587	428	15363.925	Allow	0	309	0	reject:rule in attenuation block	379
+check_join	300	3	default	4582	461	15551.625	Timeout	0	309	0	reject:fact f	546
+check_join	300	3	unbounded	4582	523	15388.412	Allow	0	309	0	reject:fact f	518
+fact_join	10	3	default	1214	747	3.111	TooManyFacts	1	1019	0	reject:rule in attenuation block	112
+fact_join	10	3	unbounded	1214	698	5.688	Allow	1	1019	0	reject:rule in attenuation block	112
+fact_join	20	3	default	1324	677	19.589	TooManyFacts	1	8029	2	reject:rule in attenuation block	135
+fact_join	20	3	unbounded	1324	893	39.388	Allow	1	8029	3	reject:rule in attenuation block	233
+fact_join	10	4	default	1233	296	13.403	TooManyFacts	1	10019	2	reject:rule in attenuation block	55
+fact_join	10	4	unbounded	1233	346	75.752	Allow	1	10019	5	reject:rule in attenuation block	56
+fact_join	30	3	default	1434	330	27.457	TooManyFacts	1	27039	5	reject:rule in attenuation block	75
+fact_join	30	3	unbounded	1434	300	170.269	Allow	1	27039	10	reject:rule in attenuation block	75
+fact_join	20	4	default	1343	300	324.219	TooManyFacts	1	160029	42	reject:rule in attenuation block	69
+fact_join	20	4	unbounded	1343	690	6757.707	Allow	1	160029	77	reject:rule in attenuation block	178
+fact_join	25	4	default	1398	388	723.912	TooManyFacts	1	390659	95	reject:rule in attenuation block	89
+fact_join	25	4	unbounded	1398	315	28326.540	Allow	1	390659	173	reject:rule in attenuation block	72
+fact_join	30	4	default	1453	418	1702.277	TooManyFacts	1	810039	193	reject:rule in attenuation block	95
+fact_join	30	4	unbounded	1453	394	99204.947	Allow	1	810039	354	reject:rule in attenuation block	91
+closure	10	3	default	1285	296	0.535	Allow	0	9	0	reject:closure	60
+closure	10	3	unbounded	1285	438	0.654	Allow	0	9	0	reject:closure	84
+closure	30	3	default	1527	321	10.133	Timeout	0	9	0	reject:closure	70
+closure	30	3	unbounded	1527	317	9.311	Allow	0	9	0	reject:closure	72
+closure	100	3	default	2376	436	337.036	Timeout	0	9	0	reject:closure	148
+closure	100	3	unbounded	2376	381	335.272	Allow	0	9	0	reject:closure	171
+closure	30	4	default	1685	334	340.223	Timeout	0	9	0	reject:closure	85
+closure	30	4	unbounded	1685	325	325.017	Allow	0	9	0	reject:closure	85

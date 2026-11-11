@@ -1,0 +1,18 @@
+[package]
+name = "biscuit-authz-limits"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: cost of adversarial Datalog in capability/v0 tokens vs biscuit-auth RunLimits"
+
+[dependencies]
+biscuit-auth = "6.0.0"
+biscuit-parser = "0.2.0"
+rand = "0.8"
+libc = "0.2"
+regex = { version = "1", default-features = false, features = ["std"] }
+
+[profile.release]
+debug = false
+
+[workspace]

@@ -1,0 +1,57 @@
+case	a	b	limits	token_B	parse_us	authz_ms	result	iters	facts	drss_MiB	gate	gate_us
+none	0	0	default	920	265	0.081	Allow	0	9	0	pass	43
+none	0	0	unbounded	920	300	0.102	Allow	0	9	0	pass	41
+closure	10	3	default	1285	327	0.529	Allow	0	9	0	reject:closure	61
+closure	10	3	unbounded	1285	311	0.458	Allow	0	9	0	reject:closure	59
+closure	30	3	default	1527	342	9.277	Timeout	0	9	0	reject:closure	72
+closure	30	3	unbounded	1527	350	9.445	Allow	0	9	0	reject:closure	104
+closure	100	3	default	2376	349	330.208	Timeout	0	9	0	reject:closure	114
+closure	100	3	unbounded	2376	359	325.705	Allow	0	9	0	reject:closure	136
+closure	30	4	default	1685	675	362.829	Timeout	0	9	0	reject:closure	218
+closure	30	4	unbounded	1685	332	331.614	Allow	0	9	0	reject:closure	94
+closure	60	4	default	2177	342	5104.962	Timeout	0	9	0	reject:closure	134
+closure	60	4	unbounded	2177	327	5063.112	Allow	0	9	0	reject:closure	113
+closure	20	5	default	1643	675	1578.787	Timeout	0	9	0	reject:closure	260
+closure	20	5	unbounded	1643	380	1547.707	Allow	0	9	0	reject:closure	131
+closure	30	5	default	1843	382	11310.132	Timeout	0	9	0	reject:closure	118
+closure	30	5	unbounded	1843	305	11309.906	Allow	0	9	0	reject:closure	95
+regex	1	1	default	1115	306	12.760	Timeout	0	10	14	reject:fact f	46
+regex	1	1	unbounded	1115	411	16.318	Allow	0	10	14	reject:fact f	59
+regex	10	1	default	1215	312	102.088	Timeout	0	19	21	reject:fact f	55
+regex	10	1	unbounded	1215	377	114.267	Allow	0	19	21	reject:fact f	68
+regex	10	2	default	1229	375	942.078	Timeout	0	19	21	reject:fact f	122
+regex	10	2	unbounded	1229	393	945.826	Allow	0	19	21	reject:fact f	71
+regex	20	2	default	1339	300	3856.693	Timeout	0	29	21	reject:fact f	64
+regex	20	2	unbounded	1339	835	3869.331	Allow	0	29	21	reject:fact f	219
+regex	30	2	default	1449	816	8630.162	Timeout	0	39	21	reject:fact f	168
+regex	30	2	unbounded	1449	710	8822.368	Allow	0	39	21	reject:fact f	165
+regex	10	3	default	1243	299	9627.727	Timeout	0	19	21	reject:fact f	55
+regex	10	3	unbounded	1243	424	9324.802	Allow	0	19	21	reject:fact f	75
+regexmed	1	1	default	1125	395	0.576	Allow	0	10	1	reject:fact f	56
+regexmed	1	1	unbounded	1125	387	0.395	Allow	0	10	1	reject:fact f	59
+regexmed	10	1	default	1225	417	1.934	Timeout	0	19	1	reject:fact f	65
+regexmed	10	1	unbounded	1225	438	1.818	Allow	0	19	1	reject:fact f	71
+regexmed	10	2	default	1239	380	14.196	Timeout	0	19	1	reject:fact f	69
+regexmed	10	2	unbounded	1239	371	12.670	Allow	0	19	1	reject:fact f	80
+regexmed	20	2	default	1349	333	43.296	Timeout	0	29	1	reject:fact f	86
+regexmed	20	2	unbounded	1349	299	43.867	Allow	0	29	1	reject:fact f	65
+blocks	10	0	default	2200	790	0.110	Allow	0	9	0	pass	72
+blocks	10	0	unbounded	2200	793	0.102	Allow	0	9	0	pass	69
+blocks	50	0	default	7320	3761	0.306	Allow	0	9	0	reject:53 blocks	4
+blocks	50	0	unbounded	7320	3857	0.283	Allow	0	9	0	reject:53 blocks	1
+blocks	100	0	default	13720	8381	0.568	Allow	0	9	0	reject:13720 bytes	1
+blocks	100	0	unbounded	13720	8863	0.403	Allow	0	9	0	reject:13720 bytes	1
+blocks	200	0	default	26520	10838	0.724	Allow	0	9	0	reject:26520 bytes	4
+blocks	200	0	unbounded	26520	11256	0.699	Allow	0	9	0	reject:26520 bytes	1
+blocks	400	0	default	52120	25925	1.946	Allow	0	9	0	reject:52120 bytes	2
+blocks	400	0	unbounded	52120	21654	1.337	Allow	0	9	0	reject:52120 bytes	1
+gatemax	1	64	default	5930	390	0.227	Allow	0	9	0	pass	338
+gatemax	1	64	unbounded	5930	366	0.228	Allow	0	9	0	pass	366
+gatemax	5	8	default	7690	1340	0.833	Allow	0	9	0	pass	1186
+gatemax	5	8	unbounded	7690	1313	0.854	Allow	0	9	0	pass	1170
+gatemax	12	1	default	11600	2321	1.509	Allow	0	9	0	reject:11600 bytes	1
+gatemax	12	1	unbounded	11600	2379	1.498	Allow	0	9	0	reject:11600 bytes	1
+gatemax	13	1	default	12490	2455	1.623	Allow	0	9	0	reject:12490 bytes	1
+gatemax	13	1	unbounded	12490	2241	1.273	Allow	0	9	0	reject:12490 bytes	1
+gatemax	14	64	default	71060	2746	3.336	Allow	0	9	1	reject:71060 bytes	1
+gatemax	14	64	unbounded	71060	1623	2.287	Allow	0	9	1	reject:71060 bytes	1
