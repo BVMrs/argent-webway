@@ -1,0 +1,13 @@
+[package]
+name = "split-view-gossip"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: does audit/v0 §10.4 counterparty checkpoint exchange detect a node that equivocates (split view)?"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
