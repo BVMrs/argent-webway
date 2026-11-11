@@ -1,0 +1,9 @@
+size_bytes,n,p50_ms,p99_ms
+512,400,0.777,4.715
+4096,400,0.856,3.054
+65536,400,0.971,18.358
+1048576,60,2.778,27.933
+4194304,60,7.851,38.829
+# committer CPU per 1.5 KiB entry (entry+hash+merkle+receipt sign): 51.9 us
+# committer CPU per 1 MiB entry: 1041.6 us
+# ed25519 verify_strict: 85.3 us
