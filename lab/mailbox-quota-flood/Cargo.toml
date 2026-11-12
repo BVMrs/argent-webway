@@ -1,0 +1,13 @@
+[package]
+name = "mailbox-quota-flood"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: mailbox/v0 host storage admission vs flooding senders while the receiver is offline"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
