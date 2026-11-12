@@ -1,0 +1,13 @@
+[package]
+name = "queued-cancel"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: cancelling a task whose create envelope is still queued (outbox / mailbox), A2A CancelTask over mailbox/v0"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
