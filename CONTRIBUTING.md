@@ -4,16 +4,27 @@ This file says how work gets into this repository. Agents and `pr-create` read i
 contains today. Update it in the same PR that changes the facts it states (a new workflow, a new build system,
 a new test layout).
 
-Current state of `master`: a `README.md` and nothing else. There are no build files, CI workflows or tests on
-`master` yet. Specs, the conformance suite and their CI are in open PRs. Sections that depend on them say
-"none yet", and the PR that adds the first workflow, build file or test layout updates those sections.
+Current state of `master` (check with `git ls-files`):
+
+- `README.md`, this file, and `.gitignore`.
+- `docs/due-diligence.md`: the due diligence (position relative to A2A and MCP, architecture, core language).
+- `docs/research/a2a-mcp-interop.md`: research report on A2A 1.0 SDK and MCP interop constraints (not
+  normative).
+- `spec/ext/audit.md`: the `audit/v0` draft, the only spec on `master`. The other spec files that
+  `spec/README.md` lists are still planned.
+- `conformance/vectors/audit/`: the `audit/v0` test vectors (JSON), and `conformance/tools/audit-vectors/`:
+  the Rust crate that generates and checks them. This is the only build file (`Cargo.toml`) on `master`.
+- `crates/README.md` and `ui/README.md`: plans only. There is no core code and no UI yet.
+
+There are no CI workflows (`.github/workflows/`) on `master` yet. Sections that depend on CI say "none yet",
+and the PR that adds the first workflow updates them.
 
 Project rules that apply to every change (owner directives, which take precedence over this file):
 
 - **Protocol first.** A written spec (messages, state machines, error model, versioning) comes before code, and
   a conformance test suite comes with it. Interoperate with A2A and MCP rather than reinventing them.
 - **Languages.** The core (transport, routing, reference node) is Rust or OCaml. The due diligence
-  (`docs/due-diligence.md`, not merged yet) makes that choice. Any UI is React + TypeScript. Python only
+  (`docs/due-diligence.md` §5) recommends Rust, and the only code on `master` so far is Rust. Any UI is React + TypeScript. Python only
   for ML pieces. Nothing else.
 - **Security is part of the design.** Authenticated identities, authorisation per capability, verifiable
   messages, no ambient trust, prompt-injection boundaries and an audit log belong in the spec of each feature
@@ -84,8 +95,22 @@ See the history with `git log --oneline -50 origin/master`.
 
 ## 6. Testing conventions
 
-None yet: `master` has no code and no tests. The rules below come from the owner directives and apply from
-the first PR that adds code or a spec:
+The only tests on `master` are for the `audit/v0` vectors. Run these commands from the repository root,
+because the generator resolves its default output directory, `conformance/vectors/audit`, from the
+current working directory:
+
+```sh
+cargo test --manifest-path conformance/tools/audit-vectors/Cargo.toml              # unit tests (Merkle code against the CT reference roots, encodings)
+cargo run --manifest-path conformance/tools/audit-vectors/Cargo.toml -- --check   # fail if the committed vectors differ from the generator
+cargo run --manifest-path conformance/tools/audit-vectors/Cargo.toml              # regenerate the vectors after changing the generator
+```
+
+To run one unit test, pass its name as a filter, for example
+`cargo test --manifest-path conformance/tools/audit-vectors/Cargo.toml ct_reference_roots`. Never edit the
+vector JSON by hand: change the generator, regenerate, and commit both. A PR that changes `spec/ext/audit.md` or
+the generator runs all three commands and reports their output.
+
+The rules below come from the owner directives and apply to every PR that adds code or a spec:
 
 - **Specs come with conformance tests.** Every normative `MUST` in a spec gets a requirement ID and at least one
   test (a language-neutral test vector or a test in the core language), in the same PR.
@@ -102,8 +127,9 @@ the first PR that adds code or a spec:
 - **Never change a test to make it pass.** A failing test is evidence. Fix the code, or fix the spec and its
   vectors together, and explain the change in the PR.
 
-The PR that adds the first test framework replaces this section with the real layout, naming, and the commands
-for one test and for all tests.
+Vectors use the `webway-vectors/v0` format (see `conformance/vectors/audit/README.md`). A PR that adds a new
+test layout (the conformance harness, the first core crate, the UI) adds its commands for one test and for all
+tests to this section.
 
 ## 7. Review
 
@@ -116,7 +142,7 @@ Every PR gets an automated review before the owner looks at it.
 
 ## 8. Definition of done
 
-- [ ] The change builds, using the commands this file lists (none yet on `master`).
+- [ ] The change builds, using the commands this file lists (section 6).
 - [ ] Tests pass locally and in CI, and every new spec `MUST` has a test.
 - [ ] The change follows the language rules and the security rules at the top of this file.
 - [ ] Docs that the change touches are updated, including this file if a workflow, build file or test layout
