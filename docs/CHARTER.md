@@ -89,6 +89,8 @@ M3 `(proposed)`, sharing and visibility: `shared-doc/v0`, the inspector UI and d
    decision register so that the `(proposed)` marks above can be removed.*
 2. **Is AgentDojo the right demo dataset?** *Recommendation: yes. It is the standard benchmark for the threat our
    provenance and capability design targets, and CaMeL uses it. InjecAgent (arXiv:2403.02691) is the fallback.*
-3. **Which upstream A2A SDK runs the step 9 interop test?** *Recommendation: a2a-js via bun. TypeScript is an allowed
-   language, whereas a Python client would stretch the "Python only for ML" rule. The lab already compared a2a-js
-   with a2a-python.*
+3. **Which upstream A2A SDK runs the step 9 interop test?** *Both options need a test-tooling exception to the
+   language rule: TypeScript is allowed only for UI, and Python only for ML pieces, so neither a2a-js (via bun) nor
+   a2a-python (as a test client) is covered. Recommendation: grant the exception for a2a-js via bun, because the lab
+   already compared it with a2a-python and the repo already has bun for the UI. The exception covers the test client
+   only, never the core.*
