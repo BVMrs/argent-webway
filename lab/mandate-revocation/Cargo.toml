@@ -1,0 +1,13 @@
+[package]
+name = "mandate-revocation"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Lab: how long a revoked S4 mandate stays usable at a cross-owner verifier under capability/v0 §9"
+
+[dependencies]
+
+[profile.release]
+debug = false
+
+[workspace]
