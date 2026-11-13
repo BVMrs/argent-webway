@@ -38,6 +38,8 @@ cargo run -p webway-cli -- devnet demo m1 --nodes 3 --nat --dataset agentdojo   
    `unverified-origin`, and 0 cause an authorisation beyond the presented capability (demo above, 3 seeds).
 3. **Offline and NAT**: with direct dialing forbidden and `beta` down for longer than the skew window, 0 lost and
    0 duplicated tasks and stream events over 100 seeded fault-injection runs (`devnet test m1 --seeds 100`).
+   A task is **lost** if it is neither delivered nor reported `expired` to its sender. A task whose `exp` passes
+   while `beta` is down is expected to expire (DD §6 step 6); it counts as lost only if `planner` is never told.
 4. **Interop**: a vanilla A2A 1.0 client built with the official SDK completes a task through `beta`'s HTTP edge.
    That client's input reaches `alpha` labelled `unverified-origin` (DD §6 step 9).
 5. **Audit**: both nodes' logs, checkpoints and receipts verify offline with the audit/v0 vectors' reference
