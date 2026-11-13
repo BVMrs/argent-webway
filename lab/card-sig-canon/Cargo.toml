@@ -1,0 +1,13 @@
+[package]
+name = "card-sig-canon"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_json = { version = "1", features = ["float_roundtrip"] }
+serde_json_canonicalizer = "0.4"
+ed25519-dalek = "2"
+base64 = "0.22"
+
+[workspace]
