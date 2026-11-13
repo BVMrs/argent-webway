@@ -52,16 +52,25 @@ envelopes, capabilities, provenance labels and the audit log. It needs no public
 later track (T11–T20) builds on the node and the spec it produces.
 
 Acceptance criteria. Command names other than the audit-vectors ones are `(proposed)`:
-1. The v0 spec drafts are merged: `ls spec/profile.md spec/binding-webway-quic.md spec/ext/{envelope,capability,mailbox,blob,audit}.md`.
+1. The v0 spec drafts are merged: `ls spec/profile.md spec/binding-webway-quic.md spec/ext/{envelope,capability,mailbox,blob,audit,provenance}.md`.
+   `provenance.md` is the minimal `provenance/v0` (taint labels and the trust function of DD §4.7.4, which
+   `spec/ext/envelope.md` delegates to it). MCP-facade rules and richer propagation are not in the M1 subset.
 2. The vectors regenerate byte for byte from the generators. Today:
    `cargo run --manifest-path conformance/tools/audit-vectors/Cargo.toml -- --check`. M1 adds one such check per module.
 3. No untested `MUST`: `cargo run -p webway-conformance -- report --fail-on-untested` exits 0.
 4. Scenario steps 1–8 pass against the reference node on loopback with `--nat`:
    `cargo run -p webway-cli -- devnet test m1 --nodes 3 --nat` exits 0.
-5. Step 9 passes against an upstream A2A SDK: `cargo run -p webway-conformance -- interop a2a-sdk` exits 0.
+5. Step 9 passes against an upstream A2A SDK through a **JSON-RPC-only HTTP edge on `beta`** (the subset of T11 that
+   step 9 needs: `SendMessage`/`GetTask` shapes, `unverified-origin` labelling, audit entry; no REST, gRPC or
+   streaming over HTTP): `cargo run -p webway-conformance -- interop a2a-sdk` exits 0.
 6. The workspace builds and its tests pass: `cargo test --workspace`, plus CI green on the PR.
 
-**Next**: M2 `(proposed)`, edges and boundaries: the A2A HTTP edge, the MCP facade and `provenance/v0` (T11–T13).
+**M1 scope note**: DD §6 steps 7 (provenance) and 9 (HTTP edge) are in M1, so the minimal parts of T13 (`provenance/v0`
+spec, the trust function and its vectors, no MCP rules) and T11 (JSON-RPC edge only) are pulled into M1. The owner may
+instead move steps 7 and 9 out of M1; see open question 4.
+
+**Next**: M2 `(proposed)`, edges and boundaries: the rest of the A2A HTTP edge (REST, gRPC, streaming), the MCP facade
+and the full `provenance/v0` (MCP rules, richer propagation) (T11–T13).
 M3 `(proposed)`, sharing and visibility: `shared-doc/v0`, the inspector UI and discovery (T14, T16, T17).
 
 ## 5. Non-goals
@@ -96,3 +105,6 @@ M3 `(proposed)`, sharing and visibility: `shared-doc/v0`, the inspector UI and d
    a2a-python (as a test client) is covered. Recommendation: grant the exception for a2a-js via bun, because the lab
    already compared it with a2a-python and the repo already has bun for the UI. The exception covers the test client
    only, never the core.*
+4. **Keep steps 7 and 9 in M1?** The charter now pulls the minimal `provenance/v0` and a JSON-RPC-only HTTP edge into
+   M1, because M1 acceptance requires both. *Recommendation: yes, since success criteria 2 and 4 depend on them. The
+   alternative is to move steps 7 and 9 and criteria 2 and 4 to M2.*
