@@ -22,8 +22,10 @@ cargo run -p webway-cli -- devnet demo m1 --nodes 3 --nat --dataset agentdojo   
 - **Dataset**: the AgentDojo prompt-injection suite (Debenedetti et al., *AgentDojo: A Dynamic Environment to
   Evaluate Prompt Injection Attacks and Defenses for LLM Agents*, NeurIPS 2024 Datasets & Benchmarks,
   arXiv:2406.13352, MIT licence; 97 user tasks, 629 security cases). CaMeL (arXiv:2503.18813, DD §2.5) uses it.
-  A script fetches it at a pinned commit and checksum. The demo does not run an LLM. `beta` returns the injection
-  payloads as artefact and message content, which is exactly the untrusted cross-owner content of DD scenario S2.
+  Its payloads come from Python attack templates, so they are rendered once (named attack, pinned commit) into
+  committed JSON vectors with a SHA-256 checksum and the recorded generation command; nodes, the harness and CI never
+  run Python (see `conformance/README.md`, "Prompt-injection payloads"). The demo does not run an LLM. `beta`
+  returns the injection payloads as artefact and message content, which is exactly the untrusted cross-owner content of DD scenario S2.
 - **What the owner sees**: a table with one row per M1 step (DD §6, steps 1–9) and PASS/FAIL. Under it are counts:
   tasks sent, delivered exactly once, lost, duplicated; forged, expired, replayed and out-of-capability envelopes
   rejected; payloads labelled `foreign` or `unverified-origin` (target 100 %); injected requests that got a
@@ -92,3 +94,8 @@ M3 `(proposed)`, sharing and visibility: `shared-doc/v0`, the inspector UI and d
 3. **Which upstream A2A SDK runs the step 9 interop test?** *Recommendation: a2a-js via bun. TypeScript is an allowed
    language, whereas a Python client would stretch the "Python only for ML" rule. The lab already compared a2a-js
    with a2a-python.*
+4. **How may the AgentDojo payloads be generated, given "Python only for ML"?** Options: (a) a one-off Python
+   script in `conformance/tools/`, run by hand when bumping the pinned commit, never built or run by CI; (b) a Rust
+   re-implementation of the templates, diffed against AgentDojo output (more work, can drift from upstream);
+   (c) hand-written payloads, dropping AgentDojo as a source. *Recommendation: (a). Only the committed JSON and its
+   checksum are used at test time. Until decided, no generated vectors are committed.*
