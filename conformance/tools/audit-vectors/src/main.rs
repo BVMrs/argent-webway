@@ -48,7 +48,7 @@ fn main() -> ExitCode {
         .iter()
         .find(|a| !a.starts_with("--"))
         .cloned()
-        .unwrap_or("conformance/vectors/audit".into());
+        .unwrap_or_else(|| concat!(env!("CARGO_MANIFEST_DIR"), "/../../vectors/audit").into());
     if args.iter().any(|a| a == "--keys") {
         for n in scenario::KEY_NAMES {
             let k = scenario::key(n);
